@@ -30,8 +30,15 @@ async def run():
         def __init__(self, path):
             self.path = path
             self.filename = path.name
-        async def read(self):
-            return self.path.read_bytes()
+            self._content = path.read_bytes()
+            self._offset = 0
+        async def read(self, size: int = -1):
+            if size is None or size < 0:
+                size = len(self._content) - self._offset
+            start = self._offset
+            end = min(start + size, len(self._content))
+            self._offset = end
+            return self._content[start:end]
 
     upload_file = MockUploadFile(zip_path)
     account_name = f"TestCorp_{uuid.uuid4().hex[:8]}"
@@ -70,7 +77,7 @@ async def run():
             assert 'line_start' in c
             assert 'document_name' in c
 
-    print("\n✅ PHASE 2 TESTS PASSED")
+    print("\nPHASE 2 TESTS PASSED")
 
 if __name__ == "__main__":
     asyncio.run(run())

@@ -23,7 +23,12 @@ async def parse_data_pack(zip_path: Path) -> DataPackContents:
     
     def extract_zip(zip_file: Path, extract_dir: Path):
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(extract_dir)
+            base_dir = extract_dir.resolve()
+            for member in zip_ref.infolist():
+                target_path = (base_dir / member.filename).resolve()
+                if base_dir not in target_path.parents and target_path != base_dir:
+                    raise ValueError(f"Unsafe path in zip archive: {member.filename}")
+                zip_ref.extract(member, base_dir)
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)

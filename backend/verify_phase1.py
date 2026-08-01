@@ -84,13 +84,12 @@ def run():
         from app.db import chunk_model  # noqa: register table
         await create_tables(engine)
         
-        # Verify tables exist
-        from sqlalchemy import text
+        # Verify tables exist across supported SQLAlchemy dialects.
+        from sqlalchemy import inspect
         async with engine.begin() as conn:
-            result = await conn.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = await conn.run_sync(
+                lambda sync_conn: inspect(sync_conn).get_table_names()
             )
-            tables = [r[0] for r in result.fetchall()]
         
         print("Tables: %s" % tables)
         assert "accounts" in tables

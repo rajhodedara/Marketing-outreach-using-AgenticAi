@@ -13,7 +13,7 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-def _mock_critic(state: PipelineState) -> dict[str, Any]:
+def _passing_mock_critic(state: PipelineState) -> dict[str, Any]:
     return {
         "critic_verdict": CriticVerdict(
             overall_pass=True,
@@ -33,6 +33,27 @@ def _mock_critic(state: PipelineState) -> dict[str, Any]:
         "critic_retry_count": state.get("critic_retry_count", 0) + 1
     }
 
+def _fail_closed_critic(state: PipelineState, reason: str) -> dict[str, Any]:
+    retry_count = state.get("critic_retry_count", 0) + 1
+    return {
+        "critic_verdict": CriticVerdict(
+            overall_pass=False,
+            claims_checked=1,
+            claims_supported=0,
+            claims_unsupported=1,
+            verdicts=[
+                ClaimVerdict(
+                    claim_text="Generated account plan and outreach content",
+                    supported=False,
+                    supporting_citation=None,
+                    reason=reason,
+                )
+            ],
+            retry_count=retry_count,
+        ),
+        "critic_retry_count": retry_count,
+    }
+
 async def critic_node(state: PipelineState) -> dict[str, Any]:
     """
     Critic Agent / Guardrail.
@@ -40,11 +61,14 @@ async def critic_node(state: PipelineState) -> dict[str, Any]:
     """
     retry_count = state.get("critic_retry_count", 0)
     
-    if settings.use_mock_llm:
-        return _mock_critic(state)
-        
     chunks = state.get("retrieved_chunks", [])
-    chunks_text = "\n\n".join(chunks) if chunks else "No source chunks available."
+    if not chunks:
+        return _fail_closed_critic(state, "No retrieved source chunks were available for grounding.")
+
+    chunks_text = "\n\n".join(dict.fromkeys(chunks))
+
+    if settings.use_mock_llm:
+        return _passing_mock_critic(state)
     
     # Extract text from AccountPlan and drafts for evaluation
     claims_source_text = ""
@@ -58,7 +82,7 @@ async def critic_node(state: PipelineState) -> dict[str, Any]:
     
     llm = get_openrouter_llm(temperature=0.0)
     if not llm:
-        return _mock_critic(state)
+        return _fail_closed_critic(state, "Critic LLM is not configured, so claims could not be verified.")
         
     llm = llm.with_structured_output(CriticVerdict)
     
@@ -87,8 +111,7 @@ async def critic_node(state: PipelineState) -> dict[str, Any]:
         }
     except Exception as e:
         logger.error(f"Error in critic node LLM call: {e}")
-        # On error, pass through to avoid blocking the pipeline
-        return _mock_critic(state)
+        return _fail_closed_critic(state, "Critic LLM failed, so claims could not be verified.")
 
 class StrippedContent(BaseModel):
     account_plan: AccountPlan
@@ -107,12 +130,10 @@ async def strip_unsupported_claims_node(state: PipelineState) -> dict[str, Any]:
     if not unsupported_claims:
         return {}
         
-    if settings.use_mock_llm:
-        return {}
-        
     llm = get_openrouter_llm(temperature=0.0)
     if not llm:
-        return {}
+        logger.error("Cannot strip unsupported claims because the editor LLM is not configured.")
+        return {"account_plan": None, "outreach_drafts": []}
         
     llm = llm.with_structured_output(StrippedContent)
     
@@ -138,6 +159,7 @@ async def strip_unsupported_claims_node(state: PipelineState) -> dict[str, Any]:
             "account_plan": stripped.account_plan,
             "outreach_drafts": stripped.outreach_drafts
         }
-    except Exception:
-        return {}
+    except Exception as e:
+        logger.error(f"Error stripping unsupported claims: {e}", exc_info=True)
+        return {"account_plan": None, "outreach_drafts": []}
 

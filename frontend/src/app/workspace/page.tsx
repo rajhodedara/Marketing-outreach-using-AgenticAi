@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Account = {
   id: string;
-  domain: string;
+  domain: string | null;
   company_name: string | null;
   created_at: string;
   status: string;
+  intent_score?: number | string;
+  stakeholders_count?: number;
 };
 
 export default function AccountsPage() {
@@ -16,11 +18,7 @@ export default function AccountsPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
-
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     try {
       const res = await fetch("/api/accounts");
       if (res.ok) {
@@ -32,7 +30,12 @@ export default function AccountsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   const getStatusDisplay = (status: string) => {
     const lowerStatus = (status || "").toLowerCase();
@@ -67,9 +70,17 @@ export default function AccountsPage() {
     }
   };
 
-  const getIntentScore = (id: string, index: number) => {
-    const scores = [78, 92, 64, 85, 42, 91, 55, 88];
-    const score = scores[index % scores.length];
+  const getIntentScore = (scoreValue?: number | string) => {
+    if (scoreValue === undefined || scoreValue === null || scoreValue === "--") {
+      return (
+        <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-muted text-muted-foreground font-mono text-[13px] border border-border">
+          --
+          <span className="material-symbols-outlined text-[14px] ml-1">remove</span>
+        </div>
+      );
+    }
+
+    const score = typeof scoreValue === "number" ? scoreValue : Number(scoreValue);
     
     if (score >= 80) {
       return (
@@ -166,9 +177,9 @@ export default function AccountsPage() {
                   </td>
                 </tr>
               ) : (
-                accounts.map((account, index) => {
-                  const initial = (account.company_name || account.domain).charAt(0).toUpperCase();
-                  const name = account.company_name || account.domain;
+                accounts.map((account) => {
+                  const initial = (account.company_name || account.domain || "?").charAt(0).toUpperCase();
+                  const name = account.company_name || account.domain || "Unknown account";
                   
                   return (
                     <tr 
@@ -188,13 +199,13 @@ export default function AccountsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {getIntentScore(account.id, index)}
+                        {getIntentScore(account.intent_score)}
                       </td>
                       <td className="px-6 py-4">
                         {getStatusDisplay(account.status)}
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-[13px] text-muted-foreground">
-                        {Math.floor(Math.random() * 15) + 1}
+                        {account.stakeholders_count ?? 0}
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-[13px] text-muted-foreground">
                         {new Date(account.created_at).toLocaleDateString()}

@@ -10,6 +10,19 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+def _format_retrieved_chunk(doc: dict, idx: int) -> str:
+    chunk_id = doc.get("chunk_id", f"doc_{idx}")
+    document_name = doc.get("document_name", "unknown")
+    line_start = doc.get("line_start", 0)
+    line_end = doc.get("line_end", 0)
+    snippet = doc.get("snippet", "")
+    return (
+        f"Source ID: {chunk_id}\n"
+        f"Document: {document_name}\n"
+        f"Lines: {line_start}-{line_end}\n"
+        f"Snippet: {snippet}"
+    )
+
 async def intent_node(state: PipelineState) -> dict:
     """
     Intent Analysis Agent Node.
@@ -26,10 +39,8 @@ async def intent_node(state: PipelineState) -> dict:
     query = f"Buying signals, technology stack changes, competitor mentions, and strategic initiatives for {company_name}"
     retrieved_docs = await qdrant_retrieve(account_id, query, limit=5)
     
-    context = ""
-    for idx, doc in enumerate(retrieved_docs):
-        snippet = doc.get('snippet', '')
-        context += f"Snippet: {snippet}\n\n"
+    retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
+    context = "\n\n".join(retrieved_chunks)
         
     if settings.use_mock_llm:
         logger.info("Using mock LLM for intent node")
@@ -43,7 +54,7 @@ async def intent_node(state: PipelineState) -> dict:
             ],
             overall_intent_score=85
         )
-        return {"intent": mock_intent}
+        return {"intent": mock_intent, "retrieved_chunks": retrieved_chunks}
         
     llm = get_cerebras_llm(temperature=0.0)
     if not llm:
@@ -61,7 +72,7 @@ async def intent_node(state: PipelineState) -> dict:
     
     try:
         result = await chain.ainvoke({"company_name": company_name, "context": context})
-        return {"intent": result}
+        return {"intent": result, "retrieved_chunks": retrieved_chunks}
     except Exception as e:
         logger.error(f"Error in intent node LLM call: {e}")
-        return {"intent": IntentSignals(signals=[], overall_intent_score=0)}
+        return {"intent": IntentSignals(signals=[], overall_intent_score=0), "retrieved_chunks": retrieved_chunks}
