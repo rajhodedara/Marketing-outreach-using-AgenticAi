@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ExecutionGraph, ExecutionStep } from '@/components/julian/ExecutionGraph';
 import { CallBrief, CallBriefData } from '@/components/julian/CallBrief';
 import { ConversationFeed, ChatMessage } from '@/components/julian/ConversationFeed';
+import VideoCallOverlay from '@/components/julian/VideoCallOverlay';
 import {
   startJulianCall,
   stopCall,
@@ -43,8 +44,10 @@ export default function JulianWorkspace() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [flaggedItems, setFlaggedItems] = useState<string[]>([]);
   const [meetingBooked, setMeetingBooked] = useState(false);
+  const [meetingLink, setMeetingLink] = useState<string | undefined>(undefined);
   const [callSummary, setCallSummary] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
+  const [callViewOpen, setCallViewOpen] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -124,14 +127,25 @@ export default function JulianWorkspace() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === 'transcript' && data.text) {
+        if (data.type === 'call_ended') {
+          if (data.data?.summary) setCallSummary(data.data.summary);
+        } else if (data.type === 'meeting_booked') {
+          setMeetingBooked(true);
+          setMeetingLink(data.link);
           addMessage({
-            role: data.role === 'assistant' ? 'julian' : 'prospect',
-            content: data.text,
+            role: 'system',
+            content: `📅 Meeting Scheduled: ${data.summary || 'Google Calendar Event'}`,
+            link: data.link,
+            linkText: 'Open in Google Calendar',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           });
-        } else if (data.type === 'call_ended') {
-          if (data.data?.summary) setCallSummary(data.data.summary);
+        } else if (data.type === 'escalation') {
+          setFlaggedItems(prev => [...prev, data.question]);
+          addMessage({
+            role: 'system',
+            content: `🚩 Escalated to Nova: "${data.question}"`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          });
         }
       } catch {}
     };
@@ -144,7 +158,48 @@ export default function JulianWorkspace() {
   };
 
   const addMessage = (msg: Omit<ChatMessage, 'id'>) => {
-    setMessages(prev => [...prev, { ...msg, id: Math.random().toString(36).slice(2) }]);
+    setMessages(prev => {
+      if (prev.length > 0) {
+        const lastMsg = prev[prev.length - 1];
+        if (lastMsg.role === msg.role && msg.role !== 'system') {
+          if (msg.isStreaming) {
+            return [
+              ...prev.slice(0, -1),
+              {
+                ...lastMsg,
+                partialContent: msg.content,
+                isStreaming: true,
+                timestamp: msg.timestamp
+              }
+            ];
+          } else {
+            // Avoid duplicate text if Vapi re-sent the same transcript snippet
+            if (lastMsg.content.endsWith(msg.content)) {
+              return [
+                ...prev.slice(0, -1),
+                { ...lastMsg, partialContent: '', isStreaming: false, timestamp: msg.timestamp }
+              ];
+            }
+            return [
+              ...prev.slice(0, -1),
+              {
+                ...lastMsg,
+                content: lastMsg.content ? `${lastMsg.content} ${msg.content}` : msg.content,
+                partialContent: '',
+                isStreaming: false,
+                timestamp: msg.timestamp
+              }
+            ];
+          }
+        }
+      }
+      return [...prev, { 
+        ...msg, 
+        id: Math.random().toString(36).slice(2),
+        content: msg.isStreaming ? '' : msg.content,
+        partialContent: msg.isStreaming ? msg.content : '',
+      }];
+    });
   };
 
   // ─── Start Call ──────────────────────────────────────────────────────────
@@ -157,7 +212,9 @@ export default function JulianWorkspace() {
     setMessages([]);
     setFlaggedItems([]);
     setMeetingBooked(false);
+    setMeetingLink(undefined);
     setCallSummary('');
+    setCallViewOpen(true); // open full-screen call view immediately
 
     updateStep('1', 'active');
     addMessage({ role: 'system', content: 'Loading verified call brief...', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
@@ -178,6 +235,7 @@ export default function JulianWorkspace() {
       addMessage({
         role: msg.role === 'assistant' ? 'julian' : 'prospect',
         content: msg.text,
+        isStreaming: !msg.isFinal,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       });
     });
@@ -238,6 +296,7 @@ export default function JulianWorkspace() {
   const isConnecting = callStatus === 'connecting';
 
   return (
+    <>
     <div className="h-full flex flex-col lg:flex-row overflow-hidden max-w-[1600px] mx-auto bg-background">
       {/* LEFT PANEL */}
       <div className="w-full lg:w-[60%] h-full flex flex-col border-r border-border p-6 bg-card/30">
@@ -295,10 +354,10 @@ export default function JulianWorkspace() {
           {!isActive && !isConnecting ? (
             <button
               onClick={handleStartCall}
-              disabled={!selectedAccountId || !assistantId || !briefText || callStatus === 'connecting'}
+              disabled={!selectedAccountId || !assistantId || !briefText || isConnecting}
               className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-xl font-semibold text-[15px] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
-              <span className="material-symbols-outlined text-[20px]">call</span>
+              <span className="material-symbols-outlined text-[20px]">video_call</span>
               {assistantId ? `Call ${briefData?.targetPersona?.split(' ')[0] || 'Prospect'}` : 'Loading Julian...'}
             </button>
           ) : (
@@ -310,13 +369,21 @@ export default function JulianWorkspace() {
                 </div>
               )}
               {isActive && (
-                <button
-                  onClick={handleStopCall}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-destructive text-destructive-foreground rounded-xl font-semibold text-[15px] hover:bg-destructive/90 transition-all active:scale-95"
-                >
-                  <span className="material-symbols-outlined text-[20px]">call_end</span>
-                  End Call
-                </button>
+                <>
+                  <button
+                    onClick={() => setCallViewOpen(true)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-indigo-600 text-white rounded-xl font-semibold text-[15px] hover:bg-indigo-500 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">open_in_full</span>
+                    View Call
+                  </button>
+                  <button
+                    onClick={handleStopCall}
+                    className="flex items-center justify-center gap-2 py-3 px-5 bg-destructive text-destructive-foreground rounded-xl font-semibold text-[15px] hover:bg-destructive/90 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">call_end</span>
+                  </button>
+                </>
               )}
             </>
           )}
@@ -403,5 +470,19 @@ export default function JulianWorkspace() {
         </div>
       </div>
     </div>
-  );
+
+    {/* ── Full-screen video call overlay ── */}
+    <VideoCallOverlay
+      isOpen={callViewOpen}
+      callStatus={callStatus}
+      messages={messages}
+      briefData={briefData}
+      meetingBooked={meetingBooked}
+      meetingLink={meetingLink}
+      flaggedItems={flaggedItems}
+      callSummary={callSummary}
+      onEndCall={() => { handleStopCall(); }}
+      onClose={() => setCallViewOpen(false)}
+    />
+  </>);
 }

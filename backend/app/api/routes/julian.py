@@ -144,8 +144,9 @@ async def handle_tool_call(request: Request):
     """Vapi calls this endpoint when Julian invokes a function tool during the call."""
     body = await request.json()
 
-    # Vapi sends: { message: { type: "tool-calls", toolCallList: [...] } }
+    # Vapi sends: { message: { type: "tool-calls", toolCallList: [...], call: { id: "..." } } }
     tool_calls = body.get("message", {}).get("toolCallList", [])
+    call_id = body.get("message", {}).get("call", {}).get("id", "unknown")
     results = []
 
     for tool_call in tool_calls:
@@ -165,7 +166,14 @@ async def handle_tool_call(request: Request):
                 duration=fn_args.get("duration", 30),
             )
             if booking.get("success"):
-                result_text = f"Meeting booked successfully! Calendar link: {booking.get('link', 'N/A')}"
+                link = booking.get('link', 'N/A')
+                result_text = f"Meeting booked successfully! Calendar link: {link}"
+                # Broadcast the link to the frontend
+                await broadcast_to_call(call_id, json.dumps({
+                    "type": "meeting_booked",
+                    "link": link,
+                    "summary": booking.get("summary")
+                }))
             else:
                 result_text = booking.get("fallback", "Meeting noted, calendar booking failed.")
             results.append({"toolCallId": tool_call_id, "result": result_text})
@@ -183,6 +191,12 @@ async def handle_tool_call(request: Request):
                     )
             except Exception as e:
                 logger.warning(f"Could not reach Nova backend for escalation: {e}")
+
+            # Broadcast escalation to frontend
+            await broadcast_to_call(call_id, json.dumps({
+                "type": "escalation",
+                "question": question
+            }))
 
             result_text = "Noted. I'll confirm that with our research team and follow up with you today."
             results.append({"toolCallId": tool_call_id, "result": result_text})

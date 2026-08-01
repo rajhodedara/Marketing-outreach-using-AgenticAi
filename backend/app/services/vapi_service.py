@@ -58,7 +58,6 @@ async def get_or_create_assistant() -> str:
             "model": {
                 "provider": "groq",
                 "model": "llama-3.3-70b-versatile",
-                "apiKey": settings.llm_api_key or settings.groq_api_key,
                 "messages": [
                     {"role": "system", "content": JULIAN_SYSTEM_PROMPT}
                 ],

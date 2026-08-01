@@ -23,6 +23,7 @@ export type CallStatus = "idle" | "connecting" | "active" | "ended" | "error";
 export interface TranscriptMessage {
   role: "user" | "assistant";
   text: string;
+  isFinal: boolean;
 }
 
 /**
@@ -35,12 +36,11 @@ export async function startJulianCall(
   assistantId: string,
   briefText: string
 ): Promise<string> {
+  console.log("Starting Julian Call with Assistant ID:", assistantId);
   const vapi = getVapi();
   const call = await vapi.start(assistantId, {
-    assistantOverrides: {
-      variableValues: {
-        verified_brief: briefText,
-      },
+    variableValues: {
+      verified_brief: briefText,
     },
   });
   return call?.id ?? "";
@@ -61,8 +61,12 @@ export function onCallEnd(cb: () => void): void {
 
 export function onTranscript(cb: (msg: TranscriptMessage) => void): void {
   getVapi().on("message", (message: any) => {
-    if (message?.type === "transcript" && message?.transcriptType === "final") {
-      cb({ role: message.role, text: message.transcript });
+    if (message?.type === "transcript") {
+      cb({ 
+        role: message.role, 
+        text: message.transcript,
+        isFinal: message.transcriptType === "final"
+      });
     }
   });
 }

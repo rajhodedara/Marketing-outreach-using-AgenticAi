@@ -8,8 +8,12 @@ export interface ChatMessage {
   id: string;
   role: MessageRole;
   content: string;
+  partialContent?: string;
+  isStreaming?: boolean;
   timestamp: string;
   citations?: string[];
+  link?: string;
+  linkText?: string;
 }
 
 export function ConversationFeed({ messages }: { messages: ChatMessage[] }) {
@@ -40,10 +44,15 @@ export function ConversationFeed({ messages }: { messages: ChatMessage[] }) {
       {messages.map((msg) => {
         if (msg.role === 'system') {
           return (
-            <div key={msg.id} className="flex justify-center my-4">
-              <div className="px-3 py-1 bg-muted rounded-full border border-border text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
+            <div key={msg.id} className="flex justify-center my-4 flex-col items-center gap-2">
+              <div className="px-3 py-1 bg-muted rounded-full border border-border text-[11px] font-mono text-muted-foreground uppercase tracking-widest text-center">
                 {msg.content}
               </div>
+              {msg.link && (
+                <a href={msg.link} target="_blank" rel="noreferrer" className="text-[12px] text-primary underline hover:text-primary/80">
+                  {msg.linkText || 'View Link'}
+                </a>
+              )}
             </div>
           );
         }
@@ -70,6 +79,13 @@ export function ConversationFeed({ messages }: { messages: ChatMessage[] }) {
               
               <div className={`p-3 rounded-2xl text-[14px] leading-[22px] ${isJulian ? 'bg-muted border border-border rounded-tl-sm text-foreground' : 'bg-primary text-primary-foreground rounded-tr-sm'}`}>
                 {msg.content}
+                {msg.content && msg.partialContent && " "}
+                {msg.partialContent && (
+                  <span className="opacity-70">{msg.partialContent}</span>
+                )}
+                {msg.isStreaming && (
+                  <span className="inline-block w-1.5 h-3 ml-1 bg-current opacity-50 animate-pulse" />
+                )}
                 
                 {msg.citations && msg.citations.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-border/50 flex gap-2 flex-wrap">

@@ -57,7 +57,17 @@ async def google_callback(code: str):
         scopes=SCOPES,
     )
     flow.redirect_uri = REDIRECT_URI
-    flow.fetch_token(code=code)
+    try:
+        flow.fetch_token(code=code)
+    except Exception as e:
+        logger.error(f"OAuth fetch_token failed: {e}")
+        return HTMLResponse(
+            f"<h2>❌ Google OAuth Error</h2>"
+            f"<p>Failed to exchange code for token: <b>{e}</b></p>"
+            f"<p>This usually happens if you wait too long, reuse an old link, or if the redirect URI hasn't fully propagated in Google Cloud.</p>"
+            f"<p>Please try again: <a href='/api/google/auth'>/api/google/auth</a></p>",
+            status_code=400,
+        )
 
     refresh_token = flow.credentials.refresh_token
     if not refresh_token:
