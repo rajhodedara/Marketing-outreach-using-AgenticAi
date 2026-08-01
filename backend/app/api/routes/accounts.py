@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from typing import Optional
+from pydantic import BaseModel
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -11,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.db.models import Account, AnalysisSession
 from app.core.llm import get_openrouter_llm
+from app.config import settings
 from langchain_core.messages import SystemMessage, HumanMessage
 
 logger = logging.getLogger(__name__)
@@ -147,3 +153,41 @@ async def regenerate_draft(
     await db.commit()
     
     return {"status": "success", "draft": draft}
+
+class SendEmailRequest(BaseModel):
+    to_email: str
+    subject: str
+    content: str
+
+@router.post("/accounts/{account_id}/drafts/{draft_index}/send")
+async def send_draft_email(
+    account_id: str, 
+    draft_index: int, 
+    req: SendEmailRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Send the outreach draft via SMTP."""
+    smtp_user = settings.smtp_user
+    smtp_pass = settings.smtp_password
+    smtp_host = settings.smtp_host
+    smtp_port = settings.smtp_port
+    
+    if not smtp_user or not smtp_pass:
+        raise HTTPException(status_code=500, detail="SMTP credentials not configured in backend .env")
+        
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = smtp_user
+        msg['To'] = req.to_email
+        msg['Subject'] = req.subject
+        msg.attach(MIMEText(req.content, 'plain'))
+        
+        server = smtplib.SMTP(smtp_host, smtp_port)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+        server.quit()
+        return {"status": "success"}
+    except Exception as e:
+        logger.error(f"Failed to send email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

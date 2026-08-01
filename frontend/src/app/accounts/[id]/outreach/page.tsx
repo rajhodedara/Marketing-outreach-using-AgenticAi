@@ -12,6 +12,22 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
   const [showCitation, setShowCitation] = useState(false);
   const [drafts, setDrafts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Controlled fields for email sending
+  const [toEmail, setToEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  
+  const activeDraft = drafts[activeStep - 1] || null;
+
+  useEffect(() => {
+    if (activeDraft) {
+      // Create a fake email for the persona or let user edit it
+      const nameOnly = activeDraft.target_persona.split('(')[0].trim();
+      const fakeEmail = nameOnly.toLowerCase().replace(/[^a-z0-9]/g, '.') + "@example.com";
+      setToEmail(fakeEmail);
+      setSubject("Addressing your core priorities");
+    }
+  }, [activeDraft, activeStep]);
 
   useEffect(() => {
     fetchAccountData();
@@ -54,7 +70,30 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
       toast.error("Failed to regenerate draft.", { id: toastId });
     }
   };
-  const activeDraft = drafts[activeStep - 1] || null;
+
+  const handleSendEmail = async () => {
+    if (!accountId || !activeDraft) return;
+    const toastId = toast.loading("Sending email...", { description: "Dispatching via SMTP relay..." });
+    try {
+      const res = await fetch(`/api/accounts/${accountId}/drafts/${activeStep - 1}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to_email: toEmail,
+          subject: subject,
+          content: activeDraft.content
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to send");
+      }
+      toast.success("Email sent successfully!", { id: toastId });
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Send failed: ${e.message}`, { id: toastId });
+    }
+  };
 
   return (
     <div className="flex-1 flex overflow-hidden bg-background h-[calc(100vh-4rem)]">
@@ -103,13 +142,19 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
           </div>
           <div className="flex gap-2">
             <button 
+              suppressHydrationWarning
               className="bg-card text-foreground border border-border text-[12px] leading-[16px] px-4 py-2 rounded hover:bg-muted transition-colors flex items-center gap-1 disabled:opacity-50"
               onClick={regenerateDraft}
               disabled={loading || drafts.length === 0}
             >
               <span className="material-symbols-outlined text-[16px]">magic_button</span> Re-generate
             </button>
-            <button className="bg-primary text-primary-foreground text-[12px] leading-[16px] px-4 py-2 rounded hover:bg-primary/90 transition-colors flex items-center gap-1">
+            <button 
+              suppressHydrationWarning
+              onClick={handleSendEmail}
+              disabled={loading || drafts.length === 0}
+              className="bg-primary text-primary-foreground text-[12px] leading-[16px] px-4 py-2 rounded hover:bg-primary/90 transition-colors flex items-center gap-1 disabled:opacity-50"
+            >
               <span className="material-symbols-outlined text-[16px]">send</span> Approve & Schedule
             </button>
           </div>
@@ -121,13 +166,20 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
             <div className="bg-muted border border-border rounded p-3 space-y-2">
               <div className="flex items-center gap-3">
                 <span className="w-16 text-right text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground">To:</span>
-                <div className="text-[16px] leading-[24px] text-foreground bg-card border border-border px-2 py-1 rounded-sm w-full">{activeDraft ? activeDraft.target_persona : 'Loading...'}</div>
+                <input 
+                  className="text-[16px] leading-[24px] text-foreground bg-card border border-border px-2 py-1 rounded-sm w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-transparent" 
+                  value={toEmail}
+                  onChange={(e) => setToEmail(e.target.value)}
+                  placeholder="recipient@example.com"
+                />
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-16 text-right text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground">Subject:</span>
                 <input 
                   className="text-[16px] leading-[24px] text-foreground bg-card border border-border px-2 py-1 rounded-sm w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-transparent" 
-                  defaultValue="Addressing latency in your East Coast clinics"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Email Subject"
                 />
               </div>
             </div>

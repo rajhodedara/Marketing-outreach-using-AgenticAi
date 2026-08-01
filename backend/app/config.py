@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     log_level: str = "INFO"
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
