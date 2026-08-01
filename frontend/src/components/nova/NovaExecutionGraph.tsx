@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export type NovaStepStatus = 'pending' | 'active' | 'completed' | 'flagged';
 
@@ -18,7 +19,8 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
       {/* Vertical Connecting Line */}
       <div className="absolute left-9 top-10 bottom-10 w-px bg-border/50 z-0"></div>
 
-      {steps.map((step) => {
+      <AnimatePresence>
+      {steps.map((step, index) => {
         let dotColor = 'bg-card border-border';
         let textColor = 'text-muted-foreground';
         let titleColor = 'text-foreground';
@@ -48,7 +50,13 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
         }
 
         return (
-          <div key={step.id} className="relative flex items-start gap-4 z-10">
+          <motion.div 
+            key={step.id} 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            className="relative flex items-start gap-4 z-10"
+          >
             <div className="flex items-center justify-center w-10 h-10 shrink-0 mt-1">
                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${dotColor} ${pulse ? 'animate-pulse' : ''}`}>
                  {icon}
@@ -75,9 +83,10 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }

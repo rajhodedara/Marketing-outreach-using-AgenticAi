@@ -45,6 +45,31 @@ class AnalysisSession(Base):
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+
+class Integration(Base):
+    __tablename__ = "integrations"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    provider: Mapped[str] = mapped_column(String, index=True)  # google_calendar, gmail, linkedin, salesforce, hubspot, slack, gong, calendly
+    status: Mapped[str] = mapped_column(String, default="disconnected")  # connected/disconnected
+    credentials_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # encrypted API key/token
+    config_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # provider-specific config
+    last_synced: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class OutreachSequence(Base):
+    __tablename__ = "outreach_sequences"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
+    name: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="draft")  # draft/active/paused/completed
+    steps_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of sequence steps
+    target_persona: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+
 async def create_tables(engine) -> None:
     """Create all tables in the database."""
     async with engine.begin() as conn:

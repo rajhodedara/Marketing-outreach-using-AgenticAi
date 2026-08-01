@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface FeedEvent {
   id: string;
@@ -35,6 +36,7 @@ export function AgentFeed({ events }: { events: FeedEvent[] }) {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4 border-t border-border mt-6 font-mono text-[13px]" ref={scrollRef}>
+      <AnimatePresence>
       {events.map((event) => {
         let icon = 'info';
         let iconColor = 'text-muted-foreground';
@@ -63,7 +65,13 @@ export function AgentFeed({ events }: { events: FeedEvent[] }) {
         }
 
         return (
-          <div key={event.id} className={`flex gap-3 p-3 rounded-lg border ${bgStyle} ${borderStyle}`}>
+          <motion.div 
+            key={event.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`flex gap-3 p-3 rounded-lg border ${bgStyle} ${borderStyle}`}
+          >
             <span className={`material-symbols-outlined text-[16px] mt-0.5 ${iconColor}`}>{icon}</span>
             <div className="flex-1 flex flex-col gap-1">
               <div className="flex justify-between items-start">
@@ -77,9 +85,10 @@ export function AgentFeed({ events }: { events: FeedEvent[] }) {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }
