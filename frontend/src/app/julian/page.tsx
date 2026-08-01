@@ -392,7 +392,7 @@ export default function JulianWorkspace() {
         {/* Google Calendar OAuth notice */}
         {!isActive && callStatus === 'idle' && (
           <p className="mt-3 text-[11px] text-muted-foreground text-center">
-            📅 First time? <a href="http://localhost:8000/api/google/auth" target="_blank" rel="noreferrer" className="underline hover:text-foreground">Connect Google Calendar</a> so Julian can book meetings.
+            📅 First time? <a href="/api/google/auth" target="_blank" rel="noreferrer" className="underline hover:text-foreground">Connect Google Calendar</a> so Julian can book meetings.
           </p>
         )}
       </div>
@@ -430,6 +430,11 @@ export default function JulianWorkspace() {
                 <div>
                   <div className="text-[14px] font-semibold text-primary">Meeting Booked</div>
                   <div className="text-[12px] text-muted-foreground mt-0.5">Via Google Calendar</div>
+                  {meetingLink && (
+                    <a href={meetingLink} target="_blank" rel="noreferrer" className="text-[12px] text-indigo-400 underline hover:text-indigo-300 inline-block mt-1">
+                      Open Calendar Link →
+                    </a>
+                  )}
                 </div>
               </div>
             )}
@@ -459,7 +464,7 @@ export default function JulianWorkspace() {
           </div>
           <div className="flex justify-between">
             <span>Google Calendar</span>
-            <a href="http://localhost:8000/api/google/auth" target="_blank" rel="noreferrer" className="text-amber-500 underline">Connect →</a>
+            <a href="/api/google/auth" target="_blank" rel="noreferrer" className="text-amber-500 underline">Connect →</a>
           </div>
           {currentCallId && (
             <div className="flex justify-between">
