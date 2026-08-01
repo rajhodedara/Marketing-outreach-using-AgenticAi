@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowsClockwise, ClockCounterClockwise, CalendarBlank, EnvelopeSimple, Users, LinkedinLogo, Bell, Phone, X } from "@phosphor-icons/react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,18 @@ interface Integration {
   last_synced?: string;
   icon: string;
 }
+
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case "Scheduling": return CalendarBlank;
+    case "Email": return EnvelopeSimple;
+    case "CRM": return Users;
+    case "Social Selling": return LinkedinLogo;
+    case "Notifications": return Bell;
+    case "Call Intelligence": return Phone;
+    default: return EnvelopeSimple;
+  }
+};
 
 export function NovaIntegrations() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
@@ -86,7 +99,7 @@ export function NovaIntegrations() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <span className="material-symbols-outlined animate-spin text-emerald-500 text-4xl">sync</span>
+        <ArrowsClockwise className="animate-spin text-emerald-500" size={32} weight="duotone" />
       </div>
     );
   }
@@ -133,7 +146,10 @@ export function NovaIntegrations() {
                   <div className="p-6 flex flex-row items-start justify-between space-y-0 relative z-10">
                     <div className="flex items-center space-x-4">
                       <div className="w-14 h-14 rounded-[1.25rem] bg-white/5 border border-white/10 flex items-center justify-center text-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                        <span className="material-symbols-outlined text-[28px] font-light">{integration.icon}</span>
+                        {(() => {
+                          const IconComponent = getCategoryIcon(integration.category);
+                          return <IconComponent weight="light" size={28} />;
+                        })()}
                       </div>
                       <div>
                         <h3 className="text-lg text-white font-medium tracking-tight">{integration.name}</h3>
@@ -153,7 +169,7 @@ export function NovaIntegrations() {
                     
                     {integration.status === 'connected' && integration.last_synced && (
                       <div className="mt-6 flex items-center text-[11px] uppercase tracking-widest text-white/30">
-                        <span className="material-symbols-outlined text-[14px] mr-2">history</span>
+                        <ClockCounterClockwise weight="duotone" size={14} className="mr-2" />
                         Synced: {new Date(integration.last_synced).toLocaleDateString()}
                       </div>
                     )}
@@ -183,11 +199,11 @@ export function NovaIntegrations() {
                             />
                             <div className="flex gap-2">
                               <button 
-                                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black h-10 text-xs font-semibold uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black h-10 text-xs font-semibold uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]"
                                 onClick={() => handleConnect(integration.provider, integration.auth_type)}
                                 disabled={isSubmitting}
                               >
-                                {isSubmitting ? <span className="material-symbols-outlined animate-spin text-[16px]">sync</span> : 'Save'}
+                                {isSubmitting ? <ArrowsClockwise weight="duotone" className="animate-spin" size={16} /> : 'Save'}
                               </button>
                               <button 
                                 className="w-full border border-white/10 text-white/70 hover:text-white hover:bg-white/5 h-10 text-xs font-semibold uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-[0.98]"

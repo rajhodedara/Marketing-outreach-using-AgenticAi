@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowsClockwise, Plus, X, GitMerge, EnvelopeSimple, LinkedinLogo, Phone, Hash, User, Trash, Target } from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,18 +138,18 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
-      case "email": return "mail";
-      case "linkedin": return "work";
-      case "phone": return "call";
-      case "slack": return "tag";
-      default: return "send";
+      case "email": return <EnvelopeSimple weight="duotone" size={16} />;
+      case "linkedin": return <LinkedinLogo weight="duotone" size={16} />;
+      case "phone": return <Phone weight="duotone" size={16} />;
+      case "slack": return <Hash weight="duotone" size={16} />;
+      default: return <EnvelopeSimple weight="duotone" size={16} />;
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <span className="material-symbols-outlined animate-spin text-emerald-500 text-4xl">sync</span>
+        <ArrowsClockwise className="animate-spin text-emerald-500" size={32} weight="duotone" />
       </div>
     );
   }
@@ -167,7 +168,7 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
           >
             New Sequence
             <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center transition-transform duration-500 group-hover:scale-105 group-hover:rotate-90">
-              <span className="material-symbols-outlined text-[18px]">add</span>
+              <Plus weight="bold" size={14} />
             </div>
           </button>
         )}
@@ -186,13 +187,13 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
             <div className="bg-[#0a0a0a] rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden p-8">
               <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/5">
                 <h3 className="text-lg font-medium text-white flex items-center gap-3 tracking-tight">
-                  <div className="w-10 h-10 rounded-[1rem] bg-white/5 flex items-center justify-center border border-white/10 shadow-inner">
-                    <span className="material-symbols-outlined text-emerald-400">route</span>
+                  <div className="w-10 h-10 rounded-[1rem] bg-white/5 flex items-center justify-center border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                    <GitMerge weight="duotone" className="text-emerald-400" size={20} />
                   </div>
                   Sequence Builder
                 </h3>
-                <button onClick={() => setShowBuilder(false)} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center active:scale-95">
-                  <span className="material-symbols-outlined text-[20px]">close</span>
+                <button onClick={() => setShowBuilder(false)} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center active:scale-95 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                  <X weight="bold" size={16} />
                 </button>
               </div>
               
@@ -244,7 +245,7 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
                               <option value="slack" className="bg-black">Slack</option>
                             </select>
                             <button onClick={() => handleRemoveStep(idx)} className="ml-auto w-10 h-10 rounded-xl border border-transparent text-white/20 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all flex items-center justify-center">
-                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                              <Trash weight="duotone" size={16} />
                             </button>
                           </div>
                           <AnimatePresence>
@@ -273,15 +274,15 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
                 </AnimatePresence>
                 <div className="pl-[4.5rem] pt-4">
                   <button onClick={handleAddStep} className="h-10 px-6 rounded-xl border border-dashed border-white/20 text-white/40 hover:text-emerald-400 hover:border-emerald-500/50 transition-colors text-xs font-semibold uppercase tracking-widest flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px]">add</span> Add Step
+                    <Plus weight="bold" size={14} /> Add Step
                   </button>
                 </div>
               </div>
 
               <div className="flex justify-end gap-4 pt-8 border-t border-white/5">
                 <button onClick={() => setShowBuilder(false)} className="h-12 px-8 rounded-full border border-white/10 text-white/60 hover:text-white hover:bg-white/5 text-xs font-semibold uppercase tracking-widest transition-all">Cancel</button>
-                <button onClick={handleCreateSequence} disabled={isSubmitting || bSteps.length === 0} className="h-12 px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold uppercase tracking-widest transition-all active:scale-[0.98] flex items-center gap-2">
-                  {isSubmitting ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span> : 'Create Sequence'}
+                <button onClick={handleCreateSequence} disabled={isSubmitting || bSteps.length === 0} className="h-12 px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] min-w-[180px]">
+                  {isSubmitting ? <ArrowsClockwise weight="duotone" className="animate-spin" size={16} /> : 'Create Sequence'}
                 </button>
               </div>
             </div>
@@ -290,7 +291,7 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
           <motion.div key="list" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }} className="space-y-8">
             {sequences.length === 0 ? (
               <div className="text-center py-20 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
-                <span className="material-symbols-outlined text-white/20 text-5xl mb-4 font-light">route</span>
+                <GitMerge weight="light" size={48} className="text-white/20 mx-auto mb-4" />
                 <p className="text-white/40 font-medium tracking-wide">No sequences found for this account.</p>
               </div>
             ) : (
@@ -302,7 +303,7 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
                       <div>
                         <h4 className="text-lg font-medium text-white tracking-tight">{seq.name}</h4>
                         <div className="text-[10px] uppercase tracking-widest text-white/40 flex items-center gap-3 mt-2 font-semibold">
-                          <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[14px]">person</span> {seq.persona || "Any Persona"}</span>
+                          <span className="flex items-center gap-1.5"><User weight="duotone" size={14} /> {seq.persona || "Any Persona"}</span>
                           <span className="w-1 h-1 rounded-full bg-white/20" />
                           <span>{seq.steps.length} steps</span>
                         </div>
@@ -335,8 +336,8 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
                             )}
                             <div className="flex justify-between items-center mb-4">
                               <div className="bg-[#050505] border border-white/10 text-white/60 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-inner">Day {step.day}</div>
-                              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/40">
-                                <span className="material-symbols-outlined text-[16px]">{getChannelIcon(step.channel)}</span>
+                              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                                {getChannelIcon(step.channel)}
                               </div>
                             </div>
                             <div className="text-sm text-white/50 line-clamp-3 leading-relaxed">

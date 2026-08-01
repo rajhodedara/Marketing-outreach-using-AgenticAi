@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { EnvelopeSimple, LinkedinLogo, Hash, Sparkle, Copy, PaperPlaneRight, Info, Eye } from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,9 +69,9 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
                           channel === c ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white hover:bg-white/5"
                         }`}
                       >
-                        <span className="material-symbols-outlined text-[16px]">
-                          {c === "email" ? "mail" : c === "linkedin" ? "work" : "tag"}
-                        </span>
+                        <div className="mr-2">
+                          {c === "email" ? <EnvelopeSimple size={16} weight="duotone" /> : c === "linkedin" ? <LinkedinLogo size={16} weight="duotone" /> : <Hash size={16} weight="duotone" />}
+                        </div>
                         <span>{c}</span>
                       </button>
                     ))}
@@ -132,9 +133,9 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
                 >
                   {isGenerating ? "Generating..." : "Generate with AI"}
                   <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center transition-transform duration-500 group-hover:scale-105 group-hover:translate-x-1">
-                    <span className={`material-symbols-outlined text-[16px] ${isGenerating ? 'animate-spin' : ''}`}>
-                      {isGenerating ? 'sync' : 'auto_awesome'}
-                    </span>
+                    <div className={isGenerating ? 'animate-spin' : ''}>
+                      <Sparkle weight="duotone" size={16} />
+                    </div>
                   </div>
                 </button>
 
@@ -142,14 +143,14 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
                   <button onClick={handleCopy} disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-white/10 text-white/70 hover:text-white hover:bg-white/5 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
                     Copy
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center transition-transform duration-500 group-hover:bg-white/10 group-hover:scale-105">
-                      <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                      <Copy weight="duotone" size={14} />
                     </div>
                   </button>
                   {channel === "email" && (
                     <button disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
                       Send
                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center transition-transform duration-500 group-hover:bg-emerald-500/30 group-hover:scale-105 group-hover:translate-x-1">
-                        <span className="material-symbols-outlined text-[14px]">send</span>
+                        <PaperPlaneRight weight="duotone" size={14} />
                       </div>
                     </button>
                   )}
@@ -166,7 +167,7 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
                 className="flex items-center gap-2 flex-wrap px-4 py-2"
               >
                 <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium flex items-center">
-                  <span className="material-symbols-outlined text-[14px] mr-1">info</span> Sources:
+                  <Info weight="duotone" size={14} className="mr-1" /> Sources:
                 </span>
                 {citations.map((cite, idx) => (
                   <Badge key={idx} variant="outline" className="bg-white/5 border-white/10 text-white/60 text-[10px] rounded-full px-3 py-1">
@@ -182,7 +183,7 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
         <div className="flex-1">
           <div className="sticky top-6">
             <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] mb-4 ml-2 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">visibility</span>
+              <Eye weight="duotone" size={16} />
               Live Preview
             </h3>
             <div className="bg-white/5 border border-white/10 p-1.5 rounded-[2rem] shadow-2xl overflow-hidden">
@@ -211,8 +212,10 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
                     </div>
                   ) : (
                     <div className="flex gap-4">
-                      <div className="w-12 h-12 rounded-full bg-white/5 flex-shrink-0 flex items-center justify-center text-white/40 border border-white/10">
-                        <span className="material-symbols-outlined text-[20px]">person</span>
+                      <div className="w-12 h-12 rounded-full bg-white/5 flex-shrink-0 flex items-center justify-center text-white/40 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                        <span className="text-[20px] font-medium text-white/40">
+                          {channel === "linkedin" ? <LinkedinLogo weight="duotone" /> : <Hash weight="duotone" />}
+                        </span>
                       </div>
                       <div className="bg-white/5 border border-white/10 rounded-3xl rounded-tl-none p-6 w-full text-[15px] text-white/80 whitespace-pre-wrap leading-relaxed shadow-sm">
                         {body || <span className="text-white/20 italic">Your message will appear here...</span>}

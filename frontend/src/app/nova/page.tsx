@@ -12,6 +12,7 @@ import { NovaIntegrations } from '@/components/nova/NovaIntegrations';
 import { NovaComposer } from '@/components/nova/NovaComposer';
 import { NovaSequences } from '@/components/nova/NovaSequences';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Brain, Database, TreeStructure } from '@phosphor-icons/react';
 
 type Account = {
   id: string;
@@ -219,7 +220,7 @@ export default function NovaWorkspace() {
       >
         <div className="flex items-center gap-4">
           <h1 className="text-[28px] font-bold text-white flex items-center gap-2 tracking-tighter">
-              <span className="material-symbols-outlined text-white/80 text-[32px] font-light">neurology</span>
+              <Brain weight="light" className="text-white/80 w-8 h-8" />
               Nova
           </h1>
           <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
@@ -257,25 +258,25 @@ export default function NovaWorkspace() {
           transition={{ duration: 0.8, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
           className="w-full flex justify-center mb-8 shrink-0 relative z-50"
         >
-          <TabsList className="flex h-auto p-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl gap-1">
-            <TabsTrigger value="command" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+          <TabsList className="flex h-auto p-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] gap-1">
+            <TabsTrigger value="command" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
               Command Center
             </TabsTrigger>
-            <TabsTrigger value="compose" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+            <TabsTrigger value="compose" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
               Compose
             </TabsTrigger>
-            <TabsTrigger value="sequences" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+            <TabsTrigger value="sequences" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
               Sequences
             </TabsTrigger>
-            <TabsTrigger value="integrations" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+            <TabsTrigger value="integrations" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
               Integrations
             </TabsTrigger>
           </TabsList>
         </motion.div>
 
         {/* DOUBLE-BEZEL OUTER SHELL FOR TAB CONTENT */}
-        <div className="flex-1 min-h-0 bg-white/5 border border-white/10 p-1.5 rounded-[2rem] shadow-2xl relative overflow-hidden">
-          <div className="w-full h-full bg-[#0a0a0a] rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden">
+        <div className="flex-1 min-h-0 bg-white/5 border border-white/10 p-1.5 rounded-[2rem] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="w-full h-full bg-[#0a0a0a] rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden">
             
             <TabsContent value="command" className="h-full m-0 p-0 border-none outline-none">
               <div className="h-full flex flex-col lg:flex-row overflow-hidden">
@@ -291,7 +292,7 @@ export default function NovaWorkspace() {
                     {sourceData.length > 0 ? (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                         <div className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                           <span className="material-symbols-outlined text-[14px]">database</span>
+                           <Database weight="duotone" className="w-4 h-4" />
                            Ingested Intelligence
                         </div>
                         <SourceDataView sources={sourceData} />
@@ -329,7 +330,7 @@ export default function NovaWorkspace() {
                 >
                   <div className="p-8 pb-4 sticky top-0 z-20 flex justify-between items-center">
                     <h2 className="text-[12px] font-semibold text-white/50 uppercase tracking-[0.2em] flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[16px] text-white/40">account_tree</span>
+                      <TreeStructure weight="duotone" className="w-4 h-4 text-white/40" />
                       Pipeline State
                     </h2>
                   </div>
