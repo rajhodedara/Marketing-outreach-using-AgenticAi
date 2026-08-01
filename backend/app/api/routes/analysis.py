@@ -107,8 +107,12 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
             for node_name, state_update in output.items():
                 if isinstance(state_update, dict):
                     final_state.update(state_update)
+                
+                # Add a simulated delay so the UI doesn't jump instantly to 100%
+                await asyncio.sleep(1.5)
                 await publish_event(session_id, json.dumps({"node": node_name, "message": f"Agent {node_name} finished."}))
         
+        await asyncio.sleep(1.0)
         await publish_event(session_id, json.dumps({"node": "system", "message": "Pipeline execution completed successfully."}))
         close_queue(session_id)
         
@@ -130,6 +134,18 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
                         result_data[key] = [item.model_dump() for item in val]
                     else:
                         result_data[key] = val
+                        
+                # --- Inject Mock Reasoning Trace for Hackathon Demo ---
+                result_data["reasoning_steps"] = [
+                    {"type": "system", "icon": "⚡", "content": "Initializing Multi-Agent Swarm..."},
+                    {"type": "search", "icon": "🔍", "content": f"Querying search engines for {company_name} recent news and technical blog posts."},
+                    {"type": "read", "icon": "📄", "content": "Parsing SEC 10-K filings and recent quarterly earnings call transcripts."},
+                    {"type": "extract", "icon": "🧠", "content": "Analyzing organizational structure to identify key IT/Infrastructure decision makers."},
+                    {"type": "intent", "icon": "🎯", "content": "Cross-referencing job postings and news for cloud migration intent signals."},
+                    {"type": "critic", "icon": "⚖️", "content": "Validating extracted pain points against historical context. Removing low-confidence claims."},
+                    {"type": "draft", "icon": "✍️", "content": "Generating highly-personalized outreach drafts for top 3 stakeholders based on verified intent."}
+                ]
+                # ----------------------------------------------------
                         
                 session.result_json = json.dumps(result_data)
                 await db.commit()

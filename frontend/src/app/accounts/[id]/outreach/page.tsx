@@ -11,6 +11,7 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
   const [activeStep, setActiveStep] = useState(1);
   const [showCitation, setShowCitation] = useState(false);
   const [drafts, setDrafts] = useState<any[]>([]);
+  const [account, setAccount] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
   // Controlled fields for email sending
@@ -39,6 +40,7 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
       const res = await fetch(`/api/accounts/${accountId}`);
       if (res.ok) {
         const data = await res.json();
+        setAccount(data);
         if (data.latest_analysis?.result?.outreach_drafts) {
           setDrafts(data.latest_analysis.result.outreach_drafts);
         }
@@ -100,8 +102,10 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
       {/* Left Pane: Sequence Stepper */}
       <aside className="w-72 border-r border-border bg-card flex flex-col shrink-0">
         <div className="p-6 border-b border-border bg-muted/50">
-          <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground">Campaign: Q4 Meridian Push</h2>
-          <p className="text-[12px] leading-[16px] text-muted-foreground mt-1">Targeting VPs of IT Infrastructure</p>
+          <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground">
+            Campaign: Q4 {account ? account.company_name : '...'} Push
+          </h2>
+          <p className="text-[12px] leading-[16px] text-muted-foreground mt-1">Targeting Strategic Buyers</p>
         </div>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -127,7 +131,10 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
             <div className="text-[12px] text-muted-foreground">{loading ? 'Loading drafts...' : 'No drafts available for this account.'}</div>
           )}
           
-          <button className="mt-6 w-full py-2 border border-dashed border-border rounded text-muted-foreground text-[12px] leading-[16px] hover:bg-muted/50 transition-colors flex items-center justify-center gap-1">
+          <button 
+            onClick={() => toast.info("Adding manual steps is coming soon!")}
+            className="mt-6 w-full py-2 border border-dashed border-border rounded text-muted-foreground text-[12px] leading-[16px] hover:bg-muted/50 transition-colors flex items-center justify-center gap-1"
+          >
             <span className="material-symbols-outlined text-[16px]">add</span> Add Step
           </button>
         </div>
@@ -137,7 +144,9 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
       <section className="flex-1 flex flex-col min-w-0 bg-card relative">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <div>
-            <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">Editing Draft • Meridian Health</div>
+            <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">
+              Editing Draft • {account ? account.company_name : 'Loading...'}
+            </div>
             <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground">Initial Outreach Email</h2>
           </div>
           <div className="flex gap-2">
