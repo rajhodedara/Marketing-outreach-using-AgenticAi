@@ -22,11 +22,16 @@ async def retrieve(account_id: str, query: str, limit: int = 5) -> List[Dict[str
     
     # 2. Search in Qdrant (query_points replaces deprecated .search())
     from qdrant_client import models
-    search_result = await app.main.qdrant_client.query_points(
-        collection_name=collection_name,
-        query=query_vector,
-        limit=limit,
-    )
+    try:
+        search_result = await app.main.qdrant_client.query_points(
+            collection_name=collection_name,
+            query=query_vector,
+            limit=limit,
+        )
+    except ValueError as e:
+        if "not found" in str(e):
+            return []
+        raise
     
     # 3. Format citations
     citations = []

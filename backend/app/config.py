@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     log_level: str = "INFO"
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
 
     # Vapi
     vapi_public_key: str = ""

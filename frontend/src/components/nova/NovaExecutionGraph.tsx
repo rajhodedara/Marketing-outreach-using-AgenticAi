@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, MagnifyingGlass } from '@phosphor-icons/react';
 
 export type NovaStepStatus = 'pending' | 'active' | 'completed' | 'flagged';
 
@@ -18,7 +20,8 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
       {/* Vertical Connecting Line */}
       <div className="absolute left-9 top-10 bottom-10 w-px bg-border/50 z-0"></div>
 
-      {steps.map((step) => {
+      <AnimatePresence>
+      {steps.map((step, index) => {
         let dotColor = 'bg-card border-border';
         let textColor = 'text-muted-foreground';
         let titleColor = 'text-foreground';
@@ -31,7 +34,7 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
           titleColor = 'text-foreground';
           textColor = 'text-muted-foreground';
           cardStyle = 'bg-card border-border opacity-75';
-          icon = <span className="material-symbols-outlined text-[12px] text-primary-foreground font-bold">check</span>;
+          icon = <Check weight="bold" size={14} className="text-primary-foreground" />;
         } else if (step.status === 'active') {
           dotColor = 'bg-primary border-primary shadow-[0_0_10px_rgba(16,185,129,0.4)]';
           titleColor = 'text-primary';
@@ -43,12 +46,18 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
           dotColor = 'bg-amber-500 border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]';
           titleColor = 'text-amber-500';
           textColor = 'text-foreground';
-          cardStyle = 'bg-amber-500/5 border-amber-500/20 shadow-sm';
-          icon = <span className="material-symbols-outlined text-[12px] text-white font-bold">search</span>; // Different icon for Nova's flag
+          cardStyle = 'bg-amber-500/5 border-amber-500/20 shadow-[inset_0_1px_0_rgba(245,158,11,0.1)]';
+          icon = <MagnifyingGlass weight="bold" size={14} className="text-white" />; // Different icon for Nova's flag
         }
 
         return (
-          <div key={step.id} className="relative flex items-start gap-4 z-10">
+          <motion.div 
+            key={step.id} 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20, delay: index * 0.1 }}
+            className="relative flex items-start gap-4 z-10"
+          >
             <div className="flex items-center justify-center w-10 h-10 shrink-0 mt-1">
                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${dotColor} ${pulse ? 'animate-pulse' : ''}`}>
                  {icon}
@@ -75,9 +84,10 @@ export function NovaExecutionGraph({ steps }: { steps: NovaExecutionStep[] }) {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }

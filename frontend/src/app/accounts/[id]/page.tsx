@@ -2,11 +2,14 @@
 
 import { useEffect, useState, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import StakeholderMap from "./StakeholderMap";
 
+// ---------------------------------------------------------------------------
 // Types
+// ---------------------------------------------------------------------------
+
 type CitationRef = {
   id: string;
   source_doc_name: string;
@@ -15,12 +18,37 @@ type CitationRef = {
   end_line?: number;
 };
 
-type AccountPlan = {
+type IntentSignal = {
+  signal_type: string;
+  description: string;
+  urgency: string;
+};
+
+type IntentSignals = {
+  signals: IntentSignal[];
+  overall_intent_score: number;
+};
+
+type StakeholderProfile = {
+  name: string;
+  role: string;
+  influence_level: string;
+  key_concerns: string[];
+};
+
+type ResearchFinding = {
+  topic: string;
   summary: string;
-  key_initiatives: string[];
-  recent_news: string[];
-  challenges: string[];
-  citations: CitationRef[];
+};
+
+type ResearchFindings = {
+  findings: ResearchFinding[];
+};
+
+type AccountPlan = {
+  account_id: string;
+  strategy_summary: string;
+  key_steps: string[];
 };
 
 type CriticFeedback = {
@@ -37,11 +65,21 @@ type OutreachDraft = {
   critic_feedback?: CriticFeedback;
 };
 
+type ReasoningStep = {
+  type: string;
+  icon: string;
+  content: string;
+};
+
 type AnalysisResult = {
   account_id: string;
   status: string;
   plan: AccountPlan | null;
   drafts: OutreachDraft[];
+  intent: IntentSignals | null;
+  stakeholders: StakeholderProfile[];
+  research: ResearchFindings | null;
+  reasoning_steps?: ReasoningStep[];
   error?: string;
 };
 
@@ -49,20 +87,170 @@ type Account = {
   id: string;
   domain: string;
   company_name: string | null;
+  industry?: string | null;
   created_at: string;
   status: string;
 };
 
-export default function AccountDetailView({ params }: { params: Promise<{ id: string }> }) {
+// ---------------------------------------------------------------------------
+// Animation Variants
+// ---------------------------------------------------------------------------
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.15 },
+  },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+function IntentRing({ score }: { score: number | undefined }) {
+  const value = score ?? 0;
+  const dashArray = `${value}, 100`;
+  const color =
+    value >= 80
+      ? "text-primary"
+      : value >= 60
+      ? "text-sky-400"
+      : "text-muted-foreground";
+
+  return (
+    <div className="relative w-[72px] h-[72px] flex items-center justify-center shrink-0">
+      <svg
+        className="absolute inset-0 w-full h-full -rotate-90"
+        viewBox="0 0 36 36"
+      >
+        <circle
+          cx="18"
+          cy="18"
+          r="15.9155"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          className="text-border"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15.9155"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          strokeDasharray={dashArray}
+          strokeLinecap="round"
+          className={color}
+        />
+      </svg>
+      <span className="text-[22px] font-semibold text-foreground font-mono relative z-10">
+        {score ?? "--"}
+      </span>
+    </div>
+  );
+}
+
+function UrgencyDot({ urgency }: { urgency: string }) {
+  const u = (urgency || "").toLowerCase();
+  if (u === "high" || u === "critical")
+    return <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />;
+  if (u === "medium")
+    return <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />;
+  return <span className="w-2 h-2 rounded-full bg-muted-foreground shrink-0" />;
+}
+
+function SectionLabel({
+  icon,
+  label,
+  count,
+}: {
+  icon: string;
+  label: string;
+  count?: number;
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <span className="material-symbols-outlined text-[18px] text-muted-foreground">
+        {icon}
+      </span>
+      <h3 className="text-[13px] tracking-[0.04em] font-semibold uppercase text-muted-foreground">
+        {label}
+      </h3>
+      {count !== undefined && count > 0 && (
+        <span className="ml-1 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono text-muted-foreground">
+          {count}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Skeleton Loader
+// ---------------------------------------------------------------------------
+
+function PageSkeleton() {
+  return (
+    <div className="max-w-[1400px] mx-auto space-y-8 px-6 py-6 animate-pulse">
+      {/* Hero skeleton */}
+      <div className="flex justify-between items-start">
+        <div className="space-y-3">
+          <div className="h-8 w-64 bg-muted rounded-lg" />
+          <div className="h-4 w-40 bg-muted/60 rounded" />
+        </div>
+        <div className="w-[72px] h-[72px] rounded-full bg-muted" />
+      </div>
+      <div className="h-px bg-border" />
+      {/* Grid skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-3 space-y-6">
+          <div className="h-[280px] bg-muted rounded-xl" />
+          <div className="space-y-3">
+            <div className="h-4 w-32 bg-muted rounded" />
+            <div className="h-20 bg-muted/40 rounded" />
+            <div className="h-20 bg-muted/40 rounded" />
+          </div>
+        </div>
+        <div className="lg:col-span-2 space-y-6">
+          <div className="h-32 bg-muted/40 rounded" />
+          <div className="h-32 bg-muted/40 rounded" />
+          <div className="h-32 bg-muted/40 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Page
+// ---------------------------------------------------------------------------
+
+export default function AccountDetailView({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const resolvedParams = use(params);
   const accountId = resolvedParams.id;
   const router = useRouter();
-  
+
   const [account, setAccount] = useState<Account | null>(null);
-  const [session, setSession] = useState<{ id: string; status: string } | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
-  
+  const [reasoningOpen, setReasoningOpen] = useState(false);
+
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -79,17 +267,25 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
           id: data.id,
           domain: data.domain,
           company_name: data.company_name,
+          industry: data.industry || null,
           created_at: data.created_at,
-          status: data.latest_analysis ? data.latest_analysis.status : 'pending',
+          status: data.latest_analysis
+            ? data.latest_analysis.status
+            : "pending",
         });
-        
+
         if (data.latest_analysis && data.latest_analysis.result) {
-           setResult({
-             account_id: accountId,
-             status: data.latest_analysis.status,
-             plan: data.latest_analysis.result.account_plan || null,
-             drafts: data.latest_analysis.result.outreach_drafts || [],
-           });
+          setResult({
+            account_id: accountId,
+            status: data.latest_analysis.status,
+            plan: data.latest_analysis.result.account_plan || null,
+            drafts: data.latest_analysis.result.outreach_drafts || [],
+            intent: data.latest_analysis.result.intent || null,
+            stakeholders: data.latest_analysis.result.stakeholders || [],
+            research: data.latest_analysis.result.research || null,
+            reasoning_steps:
+              data.latest_analysis.result.reasoning_steps || [],
+          });
         }
       }
     } catch (e) {
@@ -99,244 +295,432 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
     }
   };
 
-  const startAnalysis = async () => {
-    setLoading(true);
-    // Actually, in the UI roadmap, clicking "Analyze Account" goes to the AI Processing Screen.
-    // So here we should navigate to `/accounts/[id]/processing` or handle it in the same page.
+  const startAnalysis = () => {
     router.push(`/accounts/${accountId}/processing`);
   };
 
-  if (loading) {
-    return (
-      <div className="flex-1 p-8 flex justify-center items-center h-[calc(100vh-4rem)]">
-        <span className="material-symbols-outlined text-4xl spin-slow text-primary">sync</span>
-      </div>
-    );
-  }
+  // --- Loading state ---
+  if (loading) return <PageSkeleton />;
 
-  // If no result is loaded, and status is pending, show the pre-analysis state
-  if (!result && account?.status === 'pending') {
+  // --- Pre-analysis empty state ---
+  if (!result && account?.status === "pending") {
     return (
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-6 py-6 px-6 lg:px-8">
-        <div className="bg-card border border-border rounded-lg p-12 flex flex-col items-center justify-center text-center shadow-sm">
-          <span className="material-symbols-outlined text-[64px] text-muted mb-4">corporate_fare</span>
-          <h2 className="text-[24px] leading-[32px] font-semibold text-foreground mb-2">Ready to Analyze {account.company_name || account.domain}</h2>
-          <p className="text-[16px] leading-[24px] text-muted-foreground max-w-lg mb-8">
-            Click below to extract signals, identify pain points, map stakeholders, and draft orchestrated outreach.
+      <div className="max-w-[1400px] mx-auto flex flex-col gap-6 py-12 px-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="border border-border rounded-xl p-16 flex flex-col items-center justify-center text-center"
+        >
+          <span className="material-symbols-outlined text-[56px] text-muted-foreground/30 mb-6">
+            corporate_fare
+          </span>
+          <h2 className="text-[24px] leading-[32px] font-semibold text-foreground mb-2">
+            Ready to Analyze{" "}
+            {account.company_name || account.domain}
+          </h2>
+          <p className="text-[15px] leading-[24px] text-muted-foreground max-w-md mb-8">
+            Extract signals, identify pain points, map stakeholders, and draft
+            orchestrated outreach.
           </p>
-          <button 
+          <button
             onClick={startAnalysis}
-            className="h-10 px-6 rounded bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+            className="h-10 px-6 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 active:scale-[0.98] transition-transform"
           >
-            <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+            <span className="material-symbols-outlined text-[18px]">
+              auto_awesome
+            </span>
             Run AI Analysis
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
-  // Extrapolate stakeholders from drafts (target_persona)
-  const rawStakeholders = result?.drafts?.length 
-    ? result.drafts.map(d => d.target_persona).filter((v, i, a) => a.indexOf(v) === i)
-    : ["Dana Whitfield (VP Clinical Ops)", "Marcus Iyer (Director IT)", "Priya Chandrasekaran (CFO)"]; // Fallbacks while pending
+  // --- Derived data ---
+  const stakeholders = result?.stakeholders?.length
+    ? result.stakeholders.map((s) => ({ ...s, history: [] }))
+    : [];
 
-  const stakeholders = rawStakeholders.map((s, i) => {
-    const name = typeof s === 'string' ? s.split('(')[0].trim() || s : s;
-    const roleMatch = typeof s === 'string' ? s.match(/\((.*?)\)/) : null;
-    const role = roleMatch ? roleMatch[1] : (i === 0 ? "VP Operations" : i === 1 ? "Director IT" : "CFO");
-    return {
-      name,
-      role,
-      key_concerns: ["Evaluating solutions for operational efficiency"],
-      history: []
-    };
-  });
+  const painPoints =
+    result?.stakeholders?.flatMap((s) => s.key_concerns).filter(Boolean) || [];
 
-  const painPoints = result?.plan?.challenges || [
-    "High Nursing Turnover - Mentioned \"critical shortage\" in last two QBRs.",
-    "Integration Delays - Current API limitations causing 24hr lag."
-  ];
-
-  const buyingSignals = result?.plan?.key_initiatives || [
-    "Budget Allocation Confirmed - Earmarked funds in the Q1 budget specifically for operational efficiency.",
-    "Competitor Contract Expiring - Contract up for renewal in October."
-  ];
+  const buyingSignals = result?.intent?.signals || [];
+  const researchFindings = result?.research?.findings || [];
+  const keySteps = result?.plan?.key_steps || [];
+  const reasoningSteps = result?.reasoning_steps || [];
+  const companyName = account?.company_name || account?.domain || "Account";
 
   return (
-    <div className="max-w-[1200px] mx-auto flex flex-col gap-6 py-6 px-6 lg:px-8">
-      {/* 1. Header Summary Bar */}
-      <div className="bg-card border border-border rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-[32px] leading-[40px] tracking-[-0.02em] font-semibold text-foreground">{account?.company_name || 'Meridian Health'}</h1>
-            <span className="bg-muted text-foreground px-2 py-0.5 rounded text-[12px] font-medium border border-border">Enterprise</span>
-          </div>
-          <div className="flex items-center gap-4 text-muted-foreground text-[14px]">
-            <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">domain</span>
-              <span>San Francisco, CA</span>
+    <div className="max-w-[1400px] mx-auto px-6 py-6 space-y-0">
+      {/* ================================================================= */}
+      {/* ZONE 1: Hero Header Strip                                         */}
+      {/* ================================================================= */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="pb-6 border-b border-border"
+      >
+        {/* Accent line */}
+        <div className="h-[2px] w-24 bg-gradient-to-r from-primary to-primary/0 rounded-full mb-6" />
+
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          {/* Left: Company info */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-[28px] leading-[36px] tracking-tight font-semibold text-foreground">
+                {companyName}
+              </h1>
+              {account?.industry && (
+                <span className="px-2 py-0.5 rounded bg-secondary text-secondary-foreground text-[11px] font-medium border border-border">
+                  {account.industry}
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">link</span>
-              <a className="hover:underline" href="#">{account?.domain || 'meridian.com'}</a>
+            <div className="flex items-center gap-5 text-muted-foreground text-[13px]">
+              {account?.domain && (
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px]">
+                    language
+                  </span>
+                  <span className="font-mono">{account.domain}</span>
+                </div>
+              )}
+              {account?.created_at && (
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px]">
+                    schedule
+                  </span>
+                  <span>
+                    Analyzed{" "}
+                    {new Date(account.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={startAnalysis}
+                className="h-8 px-4 rounded-lg bg-secondary text-secondary-foreground text-[12px] font-medium border border-border hover:bg-muted transition-colors flex items-center gap-1.5 active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined text-[15px]">
+                  refresh
+                </span>
+                Refresh
+              </button>
+              <Link
+                href={`/accounts/${accountId}/outreach`}
+                className="h-8 px-4 rounded-lg bg-primary text-primary-foreground text-[12px] font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5 active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined text-[15px]">
+                  mail
+                </span>
+                View Outreach
+              </Link>
+              <Link
+                href={`/accounts/${accountId}/audit`}
+                className="h-8 px-4 rounded-lg bg-secondary text-secondary-foreground text-[12px] font-medium border border-border hover:bg-muted transition-colors flex items-center gap-1.5 active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined text-[15px]">
+                  verified
+                </span>
+                Audit
+              </Link>
+            </div>
+          </div>
+
+          {/* Right: Intent Score ring */}
+          <div className="flex items-center gap-5 shrink-0">
+            <IntentRing score={result?.intent?.overall_intent_score} />
+            <div className="space-y-0.5">
+              <p className="text-[11px] tracking-[0.05em] font-semibold uppercase text-muted-foreground">
+                Intent Score
+              </p>
+              <p className="text-[13px] text-muted-foreground">
+                {(result?.intent?.overall_intent_score ?? 0) >= 80
+                  ? "Strong buying signal"
+                  : (result?.intent?.overall_intent_score ?? 0) >= 60
+                  ? "Moderate interest"
+                  : "Low engagement"}
+              </p>
             </div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-6 bg-background p-4 rounded-lg border border-border">
-          <div className="flex flex-col items-center">
-            <span className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">Intent Score</span>
-            <div className="relative w-16 h-16 flex items-center justify-center rounded-full border-4 border-primary/20">
-              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path 
-                  className="text-primary" 
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeDasharray="78, 100" 
-                  strokeLinecap="round" 
-                  strokeWidth="4" 
-                />
-              </svg>
-              <span className="text-[24px] leading-[32px] font-semibold text-foreground relative z-10">78</span>
-            </div>
-          </div>
-          <div className="h-12 w-px bg-border"></div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] text-muted-foreground">update</span>
-              <span className="font-mono text-[13px] text-muted-foreground">Last Analyzed: Today</span>
-            </div>
-            <button 
-              onClick={startAnalysis}
-              className="bg-primary text-primary-foreground px-4 py-2 rounded text-[14px] font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[18px]">refresh</span>
-              Refresh Analysis
-            </button>
-          </div>
-        </div>
-      </div>
+      </motion.div>
 
-      {/* 2. Stakeholder Map */}
-      <div>
-        <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4">Stakeholder Map</h2>
-        <StakeholderMap stakeholders={stakeholders} accountId={accountId} />
-      </div>
+      {/* ================================================================= */}
+      {/* ZONE 2: Intelligence Grid (3fr / 2fr)                             */}
+      {/* ================================================================= */}
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 lg:grid-cols-5 gap-8 py-8"
+      >
+        {/* ---- Left Column (3/5) ---- */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* Stakeholder Map */}
+          <motion.div variants={fadeUp}>
+            <SectionLabel
+              icon="groups"
+              label="Stakeholder Map"
+              count={stakeholders.length}
+            />
+            {stakeholders.length > 0 ? (
+              <StakeholderMap
+                stakeholders={stakeholders}
+                accountId={accountId}
+              />
+            ) : (
+              <div className="h-[200px] border border-dashed border-border rounded-xl flex items-center justify-center">
+                <p className="text-[13px] text-muted-foreground">
+                  No stakeholders identified yet
+                </p>
+              </div>
+            )}
+          </motion.div>
 
-      {/* 3. Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column */}
-        <div className="flex flex-col gap-6">
-          {/* Pain Points */}
-          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
-            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Identified Pain Points</h3>
-            <ul className="space-y-4">
-              {painPoints.map((point, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-destructive mt-0.5 text-[20px]">warning</span>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium text-foreground">{point.split('-')[0].trim()}</span>
-                      <span className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-[10px] font-mono border border-border">Insight</span>
+          {/* Research Findings */}
+          <motion.div variants={fadeUp}>
+            <SectionLabel
+              icon="science"
+              label="Research Findings"
+              count={researchFindings.length}
+            />
+            {researchFindings.length > 0 ? (
+              <div className="space-y-3">
+                {researchFindings.map((finding, idx) => (
+                  <motion.div
+                    key={idx}
+                    variants={staggerItem}
+                    className="group"
+                  >
+                    <div className="flex items-start gap-3 py-3 border-t border-border/50 first:border-t-0">
+                      <span className="mt-0.5 px-2 py-0.5 rounded bg-secondary text-[10px] font-semibold text-secondary-foreground uppercase tracking-wider shrink-0">
+                        {finding.topic.length > 20
+                          ? finding.topic.slice(0, 18) + "..."
+                          : finding.topic}
+                      </span>
+                      <p className="text-[13px] leading-[20px] text-muted-foreground group-hover:text-foreground transition-colors">
+                        {finding.summary}
+                      </p>
                     </div>
-                    <p className="text-[12px] leading-[16px] text-muted-foreground">
-                      {point.split('-').slice(1).join('-').trim() || point}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[13px] text-muted-foreground py-4">
+                No research findings available.
+              </p>
+            )}
+          </motion.div>
 
+          {/* Strategy Summary */}
+          {result?.plan?.strategy_summary && (
+            <motion.div variants={fadeUp}>
+              <SectionLabel icon="strategy" label="Strategy Summary" />
+              <p className="text-[14px] leading-[22px] text-muted-foreground max-w-[65ch]">
+                {result.plan.strategy_summary}
+              </p>
+            </motion.div>
+          )}
+        </div>
+
+        {/* ---- Right Column (2/5) ---- */}
+        <div className="lg:col-span-2 space-y-8">
           {/* Buying Signals */}
-          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
-            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2 flex items-center justify-between">
-              Buying Signals
-              <span className="material-symbols-outlined text-primary text-[20px]">trending_up</span>
-            </h3>
-            <div className="space-y-3">
-              {buyingSignals.map((signal, idx) => (
-                <div key={idx} className={`${idx === 0 ? 'bg-primary/5 border border-primary/20' : 'bg-background border border-border'} rounded p-3`}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className={`font-medium ${idx === 0 ? 'text-primary' : 'text-foreground'}`}>{signal.split('-')[0].trim()}</span>
-                    <div className="flex gap-1">
-                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted/50'}`}></div>
+          <motion.div variants={fadeUp}>
+            <SectionLabel
+              icon="trending_up"
+              label="Buying Signals"
+              count={buyingSignals.length}
+            />
+            {buyingSignals.length > 0 ? (
+              <div className="space-y-2">
+                {buyingSignals.map((signal, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex items-start gap-3 py-2.5 px-3 rounded-lg transition-colors ${
+                      idx === 0
+                        ? "bg-primary/5 border border-primary/15"
+                        : "hover:bg-muted/50"
+                    }`}
+                  >
+                    <UrgencyDot urgency={signal.urgency} />
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-[13px] leading-[19px] ${
+                          idx === 0
+                            ? "text-foreground font-medium"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {signal.description}
+                      </p>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mt-0.5 inline-block">
+                        {signal.signal_type}
+                      </span>
                     </div>
                   </div>
-                  <p className={`font-mono text-[13px] ${idx === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {signal.split('-').slice(1).join('-').trim() || signal}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[13px] text-muted-foreground py-4">
+                No buying signals detected.
+              </p>
+            )}
+          </motion.div>
 
-        {/* Right Column */}
-        <div className="flex flex-col gap-6">
-          {/* Whitespace Context */}
-          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
-            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Whitespace & Competitive Context</h3>
-            <div className="mb-4">
-              <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-2">Current Stack Presence</div>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-background border border-border rounded text-[14px] text-muted-foreground">Workday (HRIS)</span>
-                <span className="px-2 py-1 bg-background border border-border rounded text-[14px] text-muted-foreground">Salesforce (CRM)</span>
-                <span className="px-2 py-1 bg-destructive/10 text-destructive border border-destructive/20 rounded text-[14px] font-medium">Competitor Inc</span>
-              </div>
-            </div>
-            <div>
-              <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-2">Cross-Sell Opportunities</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="border border-border rounded p-3 flex items-center justify-between">
-                  <span className="text-[14px] font-medium">Analytics Module</span>
-                  <span className="w-2 h-2 rounded-full bg-primary"></span>
-                </div>
-                <div className="border border-border rounded p-3 flex items-center justify-between bg-muted">
-                  <span className="text-[14px] font-medium text-muted-foreground">Integration API</span>
-                  <span className="w-2 h-2 rounded-full bg-border"></span>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Pain Points */}
+          <motion.div variants={fadeUp}>
+            <SectionLabel
+              icon="error_outline"
+              label="Pain Points"
+              count={painPoints.length}
+            />
+            {painPoints.length > 0 ? (
+              <ul className="space-y-0 divide-y divide-border/50">
+                {painPoints.map((point, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start gap-2.5 py-2.5 group"
+                  >
+                    <span className="material-symbols-outlined text-[14px] text-red-400/70 mt-0.5 shrink-0">
+                      arrow_right
+                    </span>
+                    <p className="text-[13px] leading-[19px] text-muted-foreground group-hover:text-foreground transition-colors">
+                      {point}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[13px] text-muted-foreground py-4">
+                No pain points identified.
+              </p>
+            )}
+          </motion.div>
 
           {/* Recommended Actions */}
-          <div className="bg-card border border-primary/30 rounded-lg p-5 relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
-              Recommended Next Actions
-            </h3>
-            <div className="space-y-3 relative z-10">
-              <div className="flex items-start gap-3 p-3 bg-background border border-primary/20 rounded shadow-sm">
-                <div className="mt-0.5 text-primary">
-                  <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground mb-1 text-[14px]">Schedule follow-up with {stakeholders[0]?.name || 'Stakeholder'}</div>
-                  <p className="text-[12px] leading-[16px] text-muted-foreground mb-2">Address budget finalization. Emphasize ROI timeline for operational efficiency tools.</p>
-                  <Link href={`/accounts/${accountId}/outreach`} className="text-primary text-[14px] font-medium hover:underline flex items-center gap-1">
-                    Draft Email <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                  </Link>
-                </div>
+          <motion.div variants={fadeUp}>
+            <SectionLabel
+              icon="auto_awesome"
+              label="Recommended Actions"
+              count={keySteps.length}
+            />
+            {keySteps.length > 0 ? (
+              <div className="space-y-2">
+                {keySteps.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-3 py-2.5 px-3 rounded-lg border border-border/50 bg-card hover:border-primary/20 transition-colors group"
+                  >
+                    <div className="w-5 h-5 rounded-full border border-primary/30 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-primary/10 transition-colors">
+                      <span className="text-[10px] font-mono font-semibold text-primary">
+                        {idx + 1}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] leading-[19px] text-foreground">
+                        {step}
+                      </p>
+                      {idx === 0 && (
+                        <Link
+                          href={`/accounts/${accountId}/outreach`}
+                          className="text-primary text-[12px] font-medium hover:underline flex items-center gap-1 mt-1.5"
+                        >
+                          View Outreach Drafts
+                          <span className="material-symbols-outlined text-[14px]">
+                            arrow_forward
+                          </span>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-start gap-3 p-3 bg-background border border-border rounded">
-                <div className="mt-0.5 text-muted-foreground">
-                  <span className="material-symbols-outlined text-[20px]">description</span>
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground mb-1 text-[14px]">Send Technical Integration Guide</div>
-                  <p className="text-[12px] leading-[16px] text-muted-foreground">Send preemptively address integration concerns.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            ) : (
+              <p className="text-[13px] text-muted-foreground py-4">
+                No recommended actions at this time.
+              </p>
+            )}
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* ================================================================= */}
+      {/* ZONE 3: Agent Reasoning Trace (Collapsible)                       */}
+      {/* ================================================================= */}
+      {reasoningSteps.length > 0 && (
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="border-t border-border pt-6 pb-4"
+        >
+          <button
+            onClick={() => setReasoningOpen(!reasoningOpen)}
+            className="flex items-center gap-2 group mb-4 w-full text-left"
+          >
+            <span className="material-symbols-outlined text-[18px] text-muted-foreground">
+              memory
+            </span>
+            <h3 className="text-[13px] tracking-[0.04em] font-semibold uppercase text-muted-foreground">
+              Agent Reasoning Trace
+            </h3>
+            <span className="ml-1 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono text-muted-foreground">
+              {reasoningSteps.length}
+            </span>
+            <span
+              className={`material-symbols-outlined text-[16px] text-muted-foreground ml-auto transition-transform duration-200 ${
+                reasoningOpen ? "rotate-180" : ""
+              }`}
+            >
+              expand_more
+            </span>
+          </button>
+
+          {reasoningOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-secondary/50 rounded-xl border border-border p-5 overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                {reasoningSteps.map((step, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05, duration: 0.25 }}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-card border border-border/50 hover:border-border transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0">
+                      <span className="text-[14px]">{step.icon}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-0.5">
+                        Step {idx + 1} — {step.type}
+                      </p>
+                      <p className="text-[12px] leading-[17px] text-foreground/80">
+                        {step.content}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 }

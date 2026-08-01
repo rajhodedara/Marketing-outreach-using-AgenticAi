@@ -112,19 +112,24 @@ export default function StakeholderDetailView({ params }: { params: Promise<{ id
             <section>
               <h3 className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-3">Direct Quotes & Insights</h3>
               <div className="space-y-4">
-                {/* Fallback mock quotes since backend schema doesn't have quotes yet */}
-                <div className="p-4 bg-background border border-border rounded-lg relative group shadow-sm">
-                  <div className="absolute -left-3 top-4 bg-card p-1 border border-border rounded-full text-muted-foreground">
-                    <span className="material-symbols-outlined text-[14px]">format_quote</span>
-                  </div>
-                  <p className="font-mono text-[13px] leading-[18px] text-foreground mb-2">
-                    "We need a systemic fix, not a patch."
-                  </p>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <span className="material-symbols-outlined text-[12px]">call</span>
-                    <span className="text-[12px] leading-[16px]">Call — Oct 14</span>
-                  </div>
-                </div>
+                {data.quotes && data.quotes.length > 0 ? (
+                  data.quotes.map((quote: any, i: number) => (
+                    <div key={i} className="p-4 bg-background border border-border rounded-lg relative group shadow-sm">
+                      <div className="absolute -left-3 top-4 bg-card p-1 border border-border rounded-full text-muted-foreground">
+                        <span className="material-symbols-outlined text-[14px]">format_quote</span>
+                      </div>
+                      <p className="font-mono text-[13px] leading-[18px] text-foreground mb-2">
+                        "{quote.text}"
+                      </p>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <span className="material-symbols-outlined text-[12px]">call</span>
+                        <span className="text-[12px] leading-[16px]">{quote.source} — {quote.date}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-[13px] text-muted-foreground italic">No quotes available.</p>
+                )}
               </div>
             </section>
             
