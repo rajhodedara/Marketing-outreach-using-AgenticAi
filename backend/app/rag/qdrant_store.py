@@ -22,8 +22,9 @@ async def init_collection(account_id: str) -> None:
     try:
         # Check if collection exists
         await app.main.qdrant_client.get_collection(collection_name)
-    except UnexpectedResponse as e:
-        if e.status_code == 404:
+    except (UnexpectedResponse, ValueError) as e:
+        # UnexpectedResponse for HTTP, ValueError for Local memory client
+        if isinstance(e, ValueError) and "not found" in str(e).lower() or (hasattr(e, "status_code") and e.status_code == 404):
             # Collection does not exist, create it
             await app.main.qdrant_client.create_collection(
                 collection_name=collection_name,

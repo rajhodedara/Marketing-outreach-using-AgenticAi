@@ -35,17 +35,23 @@ async def parse_data_pack(zip_path: Path) -> DataPackContents:
             if not file_path.is_file():
                 continue
 
+            if file_path.name.startswith('.') or '__MACOSX' in file_path.parts:
+                continue
+
             if file_path.suffix.lower() == '.json':
                 async with aiofiles.open(file_path, mode='r', encoding='utf-8') as f:
-                    content = await f.read()
                     try:
+                        content = await f.read()
                         contents.crm_data = json.loads(content)
-                    except json.JSONDecodeError:
+                    except (UnicodeDecodeError, json.JSONDecodeError):
                         pass
             
             elif file_path.suffix.lower() == '.txt':
                 async with aiofiles.open(file_path, mode='r', encoding='utf-8') as f:
-                    content = await f.read()
+                    try:
+                        content = await f.read()
+                    except UnicodeDecodeError:
+                        continue
                 
                 filename_lower = file_path.name.lower()
                 doc_type = None

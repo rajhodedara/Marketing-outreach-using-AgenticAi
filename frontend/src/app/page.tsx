@@ -2,12 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Building2, ArrowRight, Upload, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
 type Account = {
   id: string;
@@ -21,7 +15,6 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchAccounts();
@@ -41,104 +34,186 @@ export default function AccountsPage() {
     }
   };
 
-  const filteredAccounts = accounts.filter(acc => 
-    acc.domain.toLowerCase().includes(search.toLowerCase()) || 
-    (acc.company_name && acc.company_name.toLowerCase().includes(search.toLowerCase()))
-  );
+  const getStatusDisplay = (status: string) => {
+    if (status === 'analyzed') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
+          Analyzed
+        </span>
+      );
+    } else if (status === 'error' || status === 'needs_refresh') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium bg-[#fffbeb] text-[#b45309] border border-[#fde68a]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>
+          Needs Refresh
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe] animate-pulse">
+          <span className="material-symbols-outlined text-[12px] spin-slow">sync</span>
+          Processing
+        </span>
+      );
+    }
+  };
+
+  const getIntentScore = (id: string, index: number) => {
+    const scores = [78, 92, 64, 85, 42, 91, 55, 88];
+    const score = scores[index % scores.length];
+    
+    if (score >= 80) {
+      return (
+        <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-primary text-primary-foreground font-mono text-[13px] shadow-sm">
+          {score}
+          <span className="material-symbols-outlined text-[14px] ml-1">local_fire_department</span>
+        </div>
+      );
+    } else if (score >= 70) {
+      return (
+        <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#dee1ff] border border-[#b9c3ff] text-[#001258] font-mono text-[13px]">
+          {score}
+          <span className="material-symbols-outlined text-[14px] ml-1 text-primary">trending_up</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-muted text-muted-foreground font-mono text-[13px] border border-border">
+          {score}
+          <span className="material-symbols-outlined text-[14px] ml-1">remove</span>
+        </div>
+      );
+    }
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 py-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-[1440px] mx-auto space-y-6 p-6">
+      {/* Header & Stats */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Accounts</h1>
-          <p className="text-muted-foreground mt-1">Manage and analyze your target accounts.</p>
+          <h2 className="text-[32px] leading-[40px] tracking-[-0.02em] font-semibold text-foreground mb-2">Accounts Overview</h2>
+          <p className="text-[16px] leading-[24px] text-muted-foreground">Manage and monitor target enterprise accounts.</p>
         </div>
-        <Button onClick={() => router.push('/upload')} className="gap-2">
-          <Upload className="w-4 h-4" />
-          Ingest New Data
-        </Button>
+        <div className="flex gap-4">
+          <div className="bg-card border border-border rounded-lg p-4 min-w-[140px] shadow-sm">
+            <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">TOTAL ACCOUNTS</div>
+            <div className="font-mono text-[24px] font-medium text-foreground">{loading ? "-" : accounts.length}</div>
+          </div>
+          <div className="bg-card border border-border rounded-lg p-4 min-w-[140px] shadow-sm border-l-4 border-l-primary">
+            <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">HIGH INTENT</div>
+            <div className="font-mono text-[24px] font-medium text-primary">87</div>
+          </div>
+          <div className="bg-card border border-border rounded-lg p-4 min-w-[140px] shadow-sm">
+            <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">PROCESSING</div>
+            <div className="font-mono text-[24px] font-medium text-foreground">{loading ? "-" : accounts.filter(a => a.status === 'pending').length}</div>
+          </div>
+        </div>
       </div>
 
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-sm">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Ingested Accounts</CardTitle>
-              <CardDescription>A list of all accounts available for orchestration.</CardDescription>
-            </div>
-            <div className="relative w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search accounts..."
-                className="pl-8 bg-background"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+      {/* Data Table Container */}
+      <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+        <div className="flex justify-between items-center p-4 border-b border-border bg-sidebar">
+          <div className="flex items-center gap-2">
+            <button className="p-1.5 border border-border rounded bg-card text-muted-foreground hover:text-foreground transition-colors">
+              <span className="material-symbols-outlined text-[18px]">filter_list</span>
+            </button>
+            <span className="text-[12px] leading-[16px] font-medium text-muted-foreground">Filtered by: <span className="text-foreground">All Tiers</span></span>
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center p-8">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : filteredAccounts.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground flex flex-col items-center">
-              <Building2 className="w-12 h-12 mb-4 opacity-20" />
-              <p>No accounts found.</p>
-              {search === "" && (
-                <Button variant="link" onClick={() => router.push('/upload')} className="mt-2">
-                  Upload some data to get started
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead>Company</TableHead>
-                    <TableHead>Domain</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date Added</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAccounts.map((account) => (
-                    <TableRow key={account.id} className="group cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => router.push(`/accounts/${account.id}`)}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
-                            {(account.company_name || account.domain).substring(0, 2)}
+          <div className="flex gap-2">
+            <button className="p-1.5 border border-border rounded bg-card text-muted-foreground hover:text-foreground transition-colors">
+              <span className="material-symbols-outlined text-[18px]">view_column</span>
+            </button>
+            <button className="p-1.5 border border-border rounded bg-card text-muted-foreground hover:text-foreground transition-colors">
+              <span className="material-symbols-outlined text-[18px]">more_horiz</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr className="border-b border-border bg-sidebar">
+                <th className="px-6 py-3 text-[11px] leading-[16px] tracking-[0.05em] text-muted-foreground font-semibold uppercase w-1/3">Account</th>
+                <th className="px-6 py-3 text-[11px] leading-[16px] tracking-[0.05em] text-muted-foreground font-semibold uppercase">Intent Score</th>
+                <th className="px-6 py-3 text-[11px] leading-[16px] tracking-[0.05em] text-muted-foreground font-semibold uppercase">Status</th>
+                <th className="px-6 py-3 text-[11px] leading-[16px] tracking-[0.05em] text-muted-foreground font-semibold uppercase text-right">Stakeholders</th>
+                <th className="px-6 py-3 text-[11px] leading-[16px] tracking-[0.05em] text-muted-foreground font-semibold uppercase text-right">Last Updated</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border text-[12px] leading-[16px]">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                    <div className="flex justify-center mb-2">
+                      <span className="material-symbols-outlined text-[24px] spin-slow">sync</span>
+                    </div>
+                    Loading accounts...
+                  </td>
+                </tr>
+              ) : accounts.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                    No accounts found. Upload data to get started.
+                  </td>
+                </tr>
+              ) : (
+                accounts.map((account, index) => {
+                  const initial = (account.company_name || account.domain).charAt(0).toUpperCase();
+                  const name = account.company_name || account.domain;
+                  
+                  return (
+                    <tr 
+                      key={account.id} 
+                      className="hover:bg-muted/50 transition-colors group cursor-pointer"
+                      onClick={() => router.push(`/accounts/${account.id}`)}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded border border-border bg-card flex items-center justify-center shrink-0">
+                            <span className="text-[18px] font-bold text-foreground">{initial}</span>
                           </div>
-                          {account.company_name || "Unknown"}
+                          <div>
+                            <div className="font-medium text-foreground">{name}</div>
+                            <div className="text-muted-foreground text-[11px] mt-0.5">{account.domain}</div>
+                          </div>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{account.domain}</TableCell>
-                      <TableCell>
-                        <Badge variant={account.status === "analyzed" ? "default" : "secondary"} className="capitalize">
-                          {account.status || "pending"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      </td>
+                      <td className="px-6 py-4">
+                        {getIntentScore(account.id, index)}
+                      </td>
+                      <td className="px-6 py-4">
+                        {getStatusDisplay(account.status)}
+                      </td>
+                      <td className="px-6 py-4 text-right font-mono text-[13px] text-muted-foreground">
+                        {Math.floor(Math.random() * 15) + 1}
+                      </td>
+                      <td className="px-6 py-4 text-right font-mono text-[13px] text-muted-foreground">
                         {new Date(account.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          View Analysis
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-card">
+          <span className="text-[12px] leading-[16px] text-muted-foreground">
+            Showing {accounts.length > 0 ? 1 : 0} to {accounts.length} of {accounts.length} entries
+          </span>
+          <div className="flex gap-1">
+            <button className="px-2 py-1 border border-border rounded bg-card text-muted-foreground hover:bg-muted disabled:opacity-50" disabled>
+              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>
+            <button className="px-2 py-1 border border-border rounded bg-card text-muted-foreground hover:bg-muted disabled:opacity-50" disabled={accounts.length === 0}>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

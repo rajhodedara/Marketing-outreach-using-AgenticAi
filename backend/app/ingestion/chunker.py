@@ -62,8 +62,7 @@ class DocumentChunker:
                 line_start = get_line_number(stripped_start)
                 line_end = get_line_number(stripped_end - 1 if stripped_end > stripped_start else stripped_start)
                 
-                chunk_id_str = f"{doc_name}_{stripped_start}_{stripped_end}"
-                chunk_id = hashlib.sha256(chunk_id_str.encode()).hexdigest()
+                chunk_id = str(uuid.uuid4())
                 
                 chunks.append(DocumentChunk(
                     chunk_id=chunk_id,
@@ -76,8 +75,9 @@ class DocumentChunker:
                     char_end=stripped_end
                 ))
             
-            start = end - overlap
-            if start <= 0 or start == end - chunk_size:
-                start = end
+            next_start = end - overlap
+            if next_start <= start:
+                next_start = end
+            start = next_start
 
         return chunks

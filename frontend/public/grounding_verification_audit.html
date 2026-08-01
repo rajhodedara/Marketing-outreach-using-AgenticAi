@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Navigator - Guardrail Verification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-bright": "#fbf8ff", "inverse-on-surface": "#f1effa", "surface-container": "#eeedf7", "on-tertiary": "#ffffff", "surface-tint": "#1246f7", outline: "#747688", "tertiary-fixed-dim": "#ffb59f", "primary-fixed": "#dee1ff", "on-secondary": "#ffffff", "on-surface": "#1a1b22", "on-background": "#1a1b22", error: "#ba1a1a", "surface-dim": "#dad9e3", "on-error-container": "#93000a", tertiary: "#942700", "surface-container-lowest": "#ffffff", "secondary-fixed": "#e3e2e4", "on-surface-variant": "#434656", "on-primary-container": "#e2e4ff", "secondary-fixed-dim": "#c7c6c9", "on-primary-fixed-variant": "#0032c3", "secondary-container": "#e0dfe2", "on-secondary-fixed-variant": "#464749", "tertiary-fixed": "#ffdbd1", "primary-fixed-dim": "#b9c3ff", "outline-variant": "#c4c5d9", surface: "#fbf8ff", "primary-container": "#2451ff", "inverse-surface": "#2f3038", "surface-variant": "#e3e1ec", secondary: "#5e5e61", "tertiary-container": "#be3500", primary: "#0038d7", "error-container": "#ffdad6", "on-primary": "#ffffff", "on-tertiary-container": "#ffdfd7", "on-error": "#ffffff", "on-secondary-fixed": "#1b1c1e", "on-secondary-container": "#626265", "on-primary-fixed": "#001258", "surface-container-low": "#f4f2fd", "surface-container-highest": "#e3e1ec", "on-tertiary-fixed-variant": "#862300", "on-tertiary-fixed": "#3a0a00", "surface-container-high": "#e8e7f1", "inverse-primary": "#b9c3ff", background: "#fbf8ff", "border-subtle": "#334155", "text-primary": "#DAE2FD", "surface-card": "#1E293B", "border-elevated": "#475569", "ai-verified": "#06B6D4", "text-muted": "#908FA0", "surface-base": "#0F172A", "intelligence-action": "#6366F1", "surface-hover": "#2D3748", "surface-main": "#0b1326", destructive: "#EF4444", "indigo-intelligence": "#6366F1", warning: "#F59E0B"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {xl: "1.5rem", md: "0.75rem", base: "4px", xs: "0.25rem", lg: "1rem", "container-max": "1440px", gutter: "24px", sm: "0.5rem", "2xl": "2rem", "sidebar-width": "280px", "margin-md": "32px", "margin-sm": "16px", "margin-lg": "48px", unit: "4px"}, fontFamily: {"headline-xl": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["Inter"], "headline-md": ["Inter"], "data-mono": ["JetBrains Mono"], "body-sm": ["Inter"], "headline-lg": ["Inter"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Jetbrains Mono"], "data-tabular": ["JetBrains Mono"], "headline-h2": ["Inter"], "headline-h1": ["Inter"], "headline-h1-mobile": ["Inter"], caption: ["Inter"], "code-snippet": ["JetBrains Mono"], "headline-h3": ["Inter"], "label-sm": ["Inter"], "label-semibold": ["Inter"], code: ["jetbrainsMono"]}, fontSize: {"headline-xl": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "label-caps": ["11px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "headline-md": ["18px", {lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600"}], "data-mono": ["13px", {lineHeight: "18px", fontWeight: "450"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "headline-lg": ["24px", {lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600"}], "data-tabular": ["13px", {lineHeight: "18px", fontWeight: "500"}], "headline-h2": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], display: ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-h1": ["36px", {lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "600"}], "headline-h1-mobile": ["28px", {lineHeight: "34px", fontWeight: "600"}], caption: ["14px", {lineHeight: "20px", fontWeight: "400"}], "code-snippet": ["14px", {lineHeight: "20px", fontWeight: "400"}], "headline-h3": ["24px", {lineHeight: "32px", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "label-semibold": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], body: ["16px", {lineHeight: "24px", fontWeight: "400"}], code: ["14px", {lineHeight: "20px", fontWeight: "400"}]}}}};</script>
+</head>
+<body class="bg-surface-bright text-on-surface h-screen flex overflow-hidden antialiased">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-surface-container-low h-screen w-64 border-r border-outline-variant flex flex-col h-full py-md px-sm">
+<!-- Header -->
+<div class="mb-xl px-sm">
+<div class="flex items-center gap-3 mb-sm">
+<div class="w-8 h-8 rounded bg-primary text-on-primary flex items-center justify-center font-bold">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface truncate">ABM Orchestrator</h1>
+<p class="font-body-sm text-body-sm text-secondary">Enterprise Tier</p>
+</div>
+</div>
+</div>
+<!-- Main Navigation -->
+<div class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-sm py-2 rounded text-secondary dark:text-secondary-fixed hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<!-- Active State (Assuming 'Intelligence' context for verification) -->
+<a class="flex items-center gap-3 px-sm py-2 rounded text-secondary dark:text-secondary-fixed hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="corporate_fare">corporate_fare</span>
+<span class="font-body-md text-body-md">Accounts</span>
+</a>
+<a class="flex items-center gap-3 px-sm py-2 rounded text-secondary dark:text-secondary-fixed hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-body-md text-body-md">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-sm py-2 rounded text-secondary dark:text-secondary-fixed hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+<span class="font-body-md text-body-md">Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-sm py-2 rounded text-primary dark:text-primary-fixed font-bold border-r-2 border-primary dark:border-primary-fixed bg-surface-container-low dark:bg-surface-container-highest cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-body-md text-body-md">Intelligence</span>
+</a>
+</div>
+<!-- Footer Navigation -->
+<div class="mt-auto flex flex-col gap-1 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-sm py-2 rounded text-secondary dark:text-secondary-fixed hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-sm py-2 rounded text-secondary dark:text-secondary-fixed hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+<button class="mt-2 flex items-center justify-center gap-2 px-sm py-2 rounded text-secondary text-body-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm">keyboard_double_arrow_left</span>
+        Collapse View
+      </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-low w-full h-16 border-b border-outline-variant shadow-sm dark:shadow-none flex justify-between items-center px-lg shrink-0">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-black text-on-surface dark:text-on-surface">Account Navigator</span>
+<nav class="hidden md:flex gap-6 h-full items-end pt-4">
+<a class="text-secondary dark:text-secondary-fixed hover:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-sm text-body-sm pb-4" href="#">Overview</a>
+<a class="text-secondary dark:text-secondary-fixed hover:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-sm text-body-sm pb-4" href="#">Stakeholders</a>
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-4 font-body-sm text-body-sm font-medium" href="#">Outreach</a>
+<a class="text-secondary dark:text-secondary-fixed hover:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-sm text-body-sm pb-4" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search (on left of actions) -->
+<div class="relative focus-within:ring-2 focus-within:ring-primary-container rounded">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-secondary text-sm">search</span>
+<input class="pl-8 pr-3 py-1.5 bg-surface-container text-body-sm border-none rounded w-48 focus:outline-none focus:ring-0" placeholder="Search accounts..." type="text"/>
+</div>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface px-3 py-1.5 rounded font-body-sm text-body-sm hover:bg-surface-container transition-colors">Export Data</button>
+<button class="bg-[#0E0F11] text-white px-3 py-1.5 rounded font-body-sm text-body-sm hover:bg-opacity-90 transition-opacity">New Account</button>
+<div class="flex items-center gap-2 border-l border-outline-variant pl-4">
+<button class="text-secondary hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-secondary hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover ml-2" data-alt="A small, professional headshot of a user profile in a minimalist style, well-lit with a neutral background, conveying trust and competence in a corporate setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA8WD8b6yMoFMkHcD6Z86gt3ItMqF_DChBrU_ohLrXBBTiXGdOXzsmi25VKFcK8Gn-Yxdsr5fS5hia2HDJtaVZQq6V-QAsc7L4_Uuwbltjvq75Ni8i6AGjb1ojpdNbqq-7tIMy_elCYXuFXmlcAXGjznVLMYCCyZXsaeZidSbilXT3V6TgTgjp0cePvuaRf9kkRriy9TEhBsB1tEpkhOLvbKcZJ9lwOdWHbVpiZQrlNCIq-lU36Fwm2g"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="flex-1 overflow-y-auto p-lg bg-surface-bright">
+<div class="max-w-4xl mx-auto">
+<!-- Header Section -->
+<div class="mb-xl">
+<div class="flex items-center gap-2 text-primary mb-2">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-primary">QA Audit Log</span>
+</div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-2">Guardrail Verification</h2>
+<p class="font-body-lg text-body-lg text-secondary">Review the AI's self-correction process and claim verification for the generated outreach draft.</p>
+</div>
+<!-- Claims List (Bento-style list) -->
+<div class="flex flex-col gap-sm">
+<!-- Verified Claim 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex gap-4 hover:shadow-sm transition-shadow">
+<div class="pt-1">
+<span class="material-symbols-outlined text-green-700" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Verified</span>
+<span class="font-body-sm text-body-sm text-secondary">Source: Q3 Earnings Call Transcript</span>
+</div>
+<p class="font-data-mono text-data-mono text-on-surface mb-2">"The client achieved a 22% reduction in cloud infrastructure spend during the last fiscal quarter."</p>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[14px]">link</span>
+<a class="font-body-sm text-body-sm underline hover:text-primary transition-colors" href="#">View Source Document</a>
+</div>
+</div>
+</div>
+<!-- Verified Claim 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex gap-4 hover:shadow-sm transition-shadow">
+<div class="pt-1">
+<span class="material-symbols-outlined text-green-700" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Verified</span>
+<span class="font-body-sm text-body-sm text-secondary">Source: Internal CRM Data</span>
+</div>
+<p class="font-data-mono text-data-mono text-on-surface mb-2">"Current contract renewal is scheduled for November 15th, 2024, with a 90-day notice period."</p>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[14px]">link</span>
+<a class="font-body-sm text-body-sm underline hover:text-primary transition-colors" href="#">View Salesforce Record</a>
+</div>
+</div>
+</div>
+<!-- Unverified Claim (Amber) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex gap-4 hover:shadow-sm transition-shadow bg-gradient-to-r from-orange-50/50 to-transparent">
+<div class="pt-1">
+<span class="material-symbols-outlined text-orange-600" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Unverified — Removed</span>
+<span class="font-body-sm text-body-sm text-secondary">Source: Web Scraping (Stale)</span>
+</div>
+<p class="font-data-mono text-data-mono text-secondary mb-2 line-through">"The company is planning a massive expansion into the EMEA market in Q4."</p>
+<div class="bg-white border border-orange-200 rounded p-2 mt-2">
+<p class="font-body-sm text-body-sm text-orange-900 font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                  Source data inconclusive on Q4 expansion.
+                </p>
+<p class="font-body-sm text-body-sm text-secondary mt-1 ml-6">The latest press releases and earnings reports do not confirm EMEA expansion for Q4. Removed from draft to prevent factual errors.</p>
+</div>
+</div>
+</div>
+<!-- Verified Claim 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex gap-4 hover:shadow-sm transition-shadow">
+<div class="pt-1">
+<span class="material-symbols-outlined text-green-700" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Verified</span>
+<span class="font-body-sm text-body-sm text-secondary">Source: LinkedIn Insights</span>
+</div>
+<p class="font-data-mono text-data-mono text-on-surface mb-2">"Sarah Jenkins was recently promoted to VP of Engineering."</p>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[14px]">link</span>
+<a class="font-body-sm text-body-sm underline hover:text-primary transition-colors" href="#">View Stakeholder Profile</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

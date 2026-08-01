@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review &amp; Approval - ABM Orchestrator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-bright": "#fbf8ff", "inverse-on-surface": "#f1effa", "surface-container": "#eeedf7", "on-tertiary": "#ffffff", "surface-tint": "#1246f7", outline: "#747688", "tertiary-fixed-dim": "#ffb59f", "primary-fixed": "#dee1ff", "on-secondary": "#ffffff", "on-surface": "#1a1b22", "on-background": "#1a1b22", error: "#ba1a1a", "surface-dim": "#dad9e3", "on-error-container": "#93000a", tertiary: "#942700", "surface-container-lowest": "#ffffff", "secondary-fixed": "#e3e2e4", "on-surface-variant": "#434656", "on-primary-container": "#e2e4ff", "secondary-fixed-dim": "#c7c6c9", "on-primary-fixed-variant": "#0032c3", "secondary-container": "#e0dfe2", "on-secondary-fixed-variant": "#464749", "tertiary-fixed": "#ffdbd1", "primary-fixed-dim": "#b9c3ff", "outline-variant": "#c4c5d9", surface: "#fbf8ff", "primary-container": "#2451ff", "inverse-surface": "#2f3038", "surface-variant": "#e3e1ec", secondary: "#5e5e61", "tertiary-container": "#be3500", primary: "#0038d7", "error-container": "#ffdad6", "on-primary": "#ffffff", "on-tertiary-container": "#ffdfd7", "on-error": "#ffffff", "on-secondary-fixed": "#1b1c1e", "on-secondary-container": "#626265", "on-primary-fixed": "#001258", "surface-container-low": "#f4f2fd", "surface-container-highest": "#e3e1ec", "on-tertiary-fixed-variant": "#862300", "on-tertiary-fixed": "#3a0a00", "surface-container-high": "#e8e7f1", "inverse-primary": "#b9c3ff", background: "#fbf8ff", "border-subtle": "#334155", "text-primary": "#DAE2FD", "surface-card": "#1E293B", "border-elevated": "#475569", "ai-verified": "#06B6D4", "text-muted": "#908FA0", "surface-base": "#0F172A", "intelligence-action": "#6366F1", "surface-hover": "#2D3748", "surface-main": "#0b1326", destructive: "#EF4444", "indigo-intelligence": "#6366F1", warning: "#F59E0B"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {xl: "1.5rem", md: "0.75rem", base: "4px", xs: "0.25rem", lg: "1rem", "container-max": "1440px", gutter: "24px", sm: "0.5rem", "2xl": "2rem", "sidebar-width": "280px", "margin-md": "32px", "margin-sm": "16px", "margin-lg": "48px", unit: "4px"}, fontFamily: {"headline-xl": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["Inter"], "headline-md": ["Inter"], "data-mono": ["JetBrains Mono"], "body-sm": ["Inter"], "headline-lg": ["Inter"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Jetbrains Mono"], "data-tabular": ["JetBrains Mono"], "headline-h2": ["Inter"], "headline-h1": ["Inter"], "headline-h1-mobile": ["Inter"], caption: ["Inter"], "code-snippet": ["JetBrains Mono"], "headline-h3": ["Inter"], "label-sm": ["Inter"], "label-semibold": ["Inter"], code: ["jetbrainsMono"]}, fontSize: {"headline-xl": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "label-caps": ["11px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "headline-md": ["18px", {lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600"}], "data-mono": ["13px", {lineHeight: "18px", fontWeight: "450"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "headline-lg": ["24px", {lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600"}], "data-tabular": ["13px", {lineHeight: "18px", fontWeight: "500"}], "headline-h2": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], display: ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-h1": ["36px", {lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "600"}], "headline-h1-mobile": ["28px", {lineHeight: "34px", fontWeight: "600"}], caption: ["14px", {lineHeight: "20px", fontWeight: "400"}], "code-snippet": ["14px", {lineHeight: "20px", fontWeight: "400"}], "headline-h3": ["24px", {lineHeight: "32px", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "label-semibold": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], body: ["16px", {lineHeight: "24px", fontWeight: "400"}], code: ["14px", {lineHeight: "20px", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface h-screen overflow-hidden flex font-body-md">
+<!-- Standard SideNavBar -->
+<aside class="h-screen w-64 border-r border-outline-variant bg-surface-container-lowest flex flex-col h-full py-md px-sm hidden md:flex shrink-0">
+<div class="flex items-center gap-3 px-3 mb-8">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">ABM</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">ABM Orchestrator</h1>
+<p class="font-body-sm text-body-sm text-secondary">Enterprise Tier</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="corporate_fare">corporate_fare</span>
+<span class="font-body-md text-body-md">Accounts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-body-md text-body-md">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-primary font-bold border-r-2 border-primary bg-surface-container-low cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+<span class="font-body-md text-body-md">Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-body-md text-body-md">Intelligence</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1 pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+<!-- Standard TopNavBar -->
+<header class="w-full h-16 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center px-lg shadow-sm shrink-0">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-black text-on-surface">Account Navigator</span>
+<nav class="hidden md:flex gap-6">
+<a class="font-body-sm text-body-sm text-secondary hover:text-on-surface-variant transition-colors py-5" href="#">Overview</a>
+<a class="font-body-sm text-body-sm text-secondary hover:text-on-surface-variant transition-colors py-5" href="#">Stakeholders</a>
+<a class="font-body-sm text-body-sm text-primary border-b-2 border-primary pb-4 pt-5" href="#">Outreach</a>
+<a class="font-body-sm text-body-sm text-secondary hover:text-on-surface-variant transition-colors py-5" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-[#0E0F11] text-white px-4 py-2 rounded font-body-sm text-body-sm font-medium hover:bg-opacity-90 transition-colors">New Account</button>
+<button class="bg-white border border-[#E5E5E0] text-[#0E0F11] px-4 py-2 rounded font-body-sm text-body-sm font-medium hover:bg-surface-container-lowest transition-colors">Export Data</button>
+<div class="flex items-center gap-2 border-l border-outline-variant pl-4 ml-2">
+<button class="text-secondary hover:text-primary transition-colors p-1"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="text-secondary hover:text-primary transition-colors p-1"><span class="material-symbols-outlined" data-icon="help">help</span></button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant ml-2 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOKnDrzhdt-Bt3f6zH59XH8eLsRt6BvrEtS17WTFpMl_VC2uTgJZcdSgv9Qm_UwR_9AfwVdfjM55EMI3aGDgsXHBd2s9RsuYamikEXT9lEmW0epHN89PaiULx_4_cfpxZILEBecMGmaDNDKrdwdj7cTglxpwJHwGofQJp782wbCnW5dZ9U2xxv0cpRTC5z2xzEfk_Y8yW1c0zVEi62Gd3uZCNtyn-4-WrR1kZEt5G3oKjoN4CXKE4uRw"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area - Review & Approval -->
+<main class="flex-1 overflow-y-auto bg-surface-bright p-lg">
+<div class="max-w-4xl mx-auto space-y-md pb-xl">
+<!-- Header Section -->
+<div class="flex justify-between items-end border-b border-outline-variant pb-md">
+<div>
+<div class="flex items-center gap-2 mb-2 text-secondary">
+<span class="font-label-caps text-label-caps">CAMPAIGN: Q4 ENTERPRISE EXPANSION</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="font-label-caps text-label-caps">ACME CORP</span>
+</div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Review Outreach Draft</h2>
+<p class="font-body-md text-body-md text-secondary mt-1">Review AI-generated content and citations before finalizing synchronization to CRM.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-surface-container px-2 py-1 rounded font-data-mono text-data-mono text-secondary border border-outline-variant">Draft ID: 89A-24F</span>
+<span class="bg-surface-container px-2 py-1 rounded font-data-mono text-data-mono text-secondary border border-outline-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">auto_awesome</span> AI Generated</span>
+</div>
+</div>
+<!-- Bento Grid Layout for Review Content -->
+<div class="grid grid-cols-12 gap-md">
+<!-- Left Column: The Draft -->
+<div class="col-span-12 lg:col-span-8 space-y-md">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-lg shadow-sm">
+<div class="flex justify-between items-center mb-md pb-sm border-b border-outline-variant">
+<h3 class="font-headline-md text-headline-md">Email Draft</h3>
+<div class="flex gap-2">
+<button class="text-secondary hover:text-primary transition-colors p-1" title="Copy to clipboard"><span class="material-symbols-outlined text-[20px]">content_copy</span></button>
+<button class="text-secondary hover:text-primary transition-colors p-1" title="Edit inline"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+</div>
+</div>
+<div class="space-y-4">
+<div class="grid grid-cols-[100px_1fr] gap-2 items-center">
+<span class="font-label-caps text-label-caps text-secondary text-right">TO:</span>
+<span class="font-body-md text-body-md border border-outline-variant rounded px-2 py-1 bg-surface-bright flex items-center gap-2 w-fit">
+<span class="w-4 h-4 rounded-full bg-surface-variant flex items-center justify-center text-[10px]">S</span>
+                                        Sarah Jenkins <span class="text-secondary font-data-mono text-[11px]">&lt;s.jenkins@acmecorp.com&gt;</span>
+</span>
+</div>
+<div class="grid grid-cols-[100px_1fr] gap-2 items-center">
+<span class="font-label-caps text-label-caps text-secondary text-right">SUBJECT:</span>
+<span class="font-body-md text-body-md border border-outline-variant rounded px-2 py-1 bg-surface-bright w-full font-medium">Acme Corp's recent shift to hybrid cloud infrastructure</span>
+</div>
+<!-- The actual email content -->
+<div class="mt-6 border border-outline-variant rounded p-4 bg-surface-bright font-body-lg text-body-lg text-on-surface whitespace-pre-wrap leading-relaxed relative">
+<span class="absolute top-2 right-2 bg-surface-container-high text-xs px-2 py-1 rounded text-secondary font-data-mono">Tone: Professional, Direct</span>Hi Sarah,
+
+I noticed in Acme Corp's recent Q3 earnings call that optimizing your new hybrid cloud infrastructure is a key priority for the coming year. <sup class="text-primary cursor-pointer hover:underline" title="Citation 1: Q3 Earnings Transcript">[1]</sup>
+
+Given your role as VP of Cloud Architecture, I imagine ensuring seamless data mobility while managing egress costs across environments is top of mind. We recently helped similar enterprise organizations reduce hybrid egress costs by 22% within the first quarter of implementation. <sup class="text-primary cursor-pointer hover:underline" title="Citation 2: Case Study - Cloud Cost Reduction">[2]</sup>
+
+Would you be open to a brief 15-minute conversation next Tuesday to discuss how our orchestration platform aligns with Acme's current infrastructure goals?
+
+Best regards,
+
+Alex Mercer
+Account Executive, ABM Orchestrator
+                                </div>
+</div>
+</div>
+</div>
+<!-- Right Column: Citations & Context -->
+<div class="col-span-12 lg:col-span-4 space-y-md">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md shadow-sm h-full">
+<h3 class="font-headline-md text-headline-md mb-4 flex items-center gap-2 pb-sm border-b border-outline-variant">
+<span class="material-symbols-outlined text-[20px] text-primary">fact_check</span> Citations
+                            </h3>
+<ul class="space-y-4">
+<li class="border border-outline-variant rounded p-3 bg-surface-bright">
+<div class="flex items-start gap-2">
+<span class="bg-primary-container text-on-primary-container font-data-mono text-[10px] px-1.5 py-0.5 rounded mt-0.5">[1]</span>
+<div>
+<h4 class="font-body-sm text-body-sm font-semibold">Q3 Earnings Transcript</h4>
+<p class="font-body-sm text-body-sm text-secondary mt-1">"As we move into 2024, optimizing our new hybrid cloud deployment remains a central strategic objective to manage escalating operational costs."</p>
+<a class="font-label-caps text-label-caps text-primary mt-2 inline-flex items-center gap-1 hover:underline" href="#">View Source <span class="material-symbols-outlined text-[12px]">open_in_new</span></a>
+</div>
+</div>
+</li>
+<li class="border border-outline-variant rounded p-3 bg-surface-bright">
+<div class="flex items-start gap-2">
+<span class="bg-primary-container text-on-primary-container font-data-mono text-[10px] px-1.5 py-0.5 rounded mt-0.5">[2]</span>
+<div>
+<h4 class="font-body-sm text-body-sm font-semibold">Internal Case Study</h4>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Metric derived from TechGlobal Inc. implementation (Q1 2023), approved for external use in enterprise segments.</p>
+</div>
+</div>
+</li>
+</ul>
+<div class="mt-6 pt-4 border-t border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-secondary mb-2">Sync Destination</h4>
+<div class="flex items-center gap-3 p-2 border border-outline-variant rounded bg-surface-bright">
+<img class="w-6 h-6 object-contain" data-alt="A minimalist vector icon representing a generic customer relationship management (CRM) software logo, rendered in flat blue and grey tones on a clean white background, suitable for a professional SaaS interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNxQwJcQt1B9rix7q1ID_1QRg0jYaqBr_Fm-crYqaosdizV2xSAbExzYaUADpcpCSJpVR6Kztjq95tQzrCBch75JsdwNCxTuj6Z2qZHfBv4wez0Amgz_smJRCrTrC4ujU2qK_vc5FNiSIKc5BoYiSR3vybSctfXVxXt2vjepzGKKn1_lIjSgRtgefDHIj2p_YGpcq3NulecXLgA0Fd-AcQByezL2tL74-bGLpLFsr5tCkPE2MhBJz8_g"/>
+<span class="font-body-sm text-body-sm font-medium">Salesforce (Production)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions & Disclaimer -->
+<div class="mt-xl pt-md border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-body-sm text-body-sm text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">info</span>
+                        Drafts are generated for review only and will not be sent automatically.
+                    </p>
+<div class="flex gap-4">
+<button class="bg-white border border-[#E5E5E0] text-[#0E0F11] px-6 py-2.5 rounded font-body-md text-body-md font-medium hover:bg-surface-container-lowest transition-colors shadow-sm">
+                            Request Revisions
+                        </button>
+<button class="bg-[#2451FF] text-white px-6 py-2.5 rounded font-body-md text-body-md font-medium hover:bg-opacity-90 transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+                            Approve &amp; Sync to CRM
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

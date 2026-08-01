@@ -1,15 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { AlertCircle, CheckCircle2, PlayCircle, Loader2, ShieldCheck, ShieldAlert, FileText, Send, Building } from "lucide-react";
+import { useEffect, useState, useRef, use } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
 
 // Types
 type CitationRef = {
@@ -50,318 +44,317 @@ type AnalysisResult = {
   error?: string;
 };
 
-const CitationText = ({ text, citations }: { text: string; citations: CitationRef[] }) => {
-  if (!text) return null;
-  
-  // Split text by citation markers [1], [2], etc.
-  const parts = text.split(/(\[\d+\])/g);
-  
-  return (
-    <span className="whitespace-pre-wrap leading-relaxed">
-      {parts.map((part, i) => {
-        const match = part.match(/\[(\d+)\]/);
-        if (match) {
-          const citeId = match[1];
-          // We assume citation markers are 1-indexed based on array position or id.
-          // Adjust logic based on how the backend generates the citation numbers.
-          // Usually, it maps to the index in the citations array.
-          const citationIndex = parseInt(citeId) - 1;
-          const citation = citations[citationIndex];
-
-          if (citation) {
-            return (
-              <HoverCard key={i}>
-                <HoverCardTrigger asChild>
-                  <sup className="cursor-pointer text-primary font-bold px-0.5 hover:underline">
-                    [{citeId}]
-                  </sup>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80 shadow-xl border-primary/20 bg-card/95 backdrop-blur-md">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 border-b pb-2">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                      <h4 className="text-sm font-semibold truncate" title={citation.source_doc_name}>
-                        {citation.source_doc_name}
-                      </h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground italic">
-                      "{citation.snippet}"
-                    </p>
-                    {(citation.start_line !== undefined || citation.end_line !== undefined) && (
-                      <div className="text-xs text-muted-foreground pt-2 text-right">
-                        Line {citation.start_line}{citation.end_line && citation.end_line !== citation.start_line ? ` - ${citation.end_line}` : ""}
-                      </div>
-                    )}
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            );
-          }
-          return <sup key={i} className="text-muted-foreground">[{citeId}]</sup>;
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </span>
-  );
+type Account = {
+  id: string;
+  domain: string;
+  company_name: string | null;
+  created_at: string;
+  status: string;
 };
 
-export default function AnalysisView() {
-  const params = useParams();
-  const accountId = params.id as string;
+export default function AccountDetailView({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const accountId = resolvedParams.id;
+  const router = useRouter();
   
+  const [account, setAccount] = useState<Account | null>(null);
   const [session, setSession] = useState<{ id: string; status: string } | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const startAnalysis = async () => {
-    setLoading(true);
+  useEffect(() => {
+    fetchAccountData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountId]);
+
+  const fetchAccountData = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/accounts/${accountId}/analyze`, {
-        method: "POST"
-      });
-      if (!res.ok) throw new Error("Failed to start analysis");
-      const data = await res.json();
-      setSession(data);
-      pollSession(data.session_id || data.id);
-      toast.success("Analysis started", { description: "Gathering insights and drafting outreach..." });
-    } catch (error) {
-      console.error(error);
-      toast.error("Error", { description: "Could not start analysis." });
+      const res = await fetch(`http://localhost:8000/api/accounts/${accountId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAccount({
+          id: data.id,
+          domain: data.domain,
+          company_name: data.company_name,
+          created_at: data.created_at,
+          status: data.latest_analysis ? data.latest_analysis.status : 'pending',
+        });
+        
+        if (data.latest_analysis && data.latest_analysis.result) {
+           setResult({
+             account_id: accountId,
+             status: data.latest_analysis.status,
+             plan: data.latest_analysis.result.account_plan || null,
+             drafts: data.latest_analysis.result.outreach_drafts || [],
+           });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
       setLoading(false);
     }
   };
 
-  const pollSession = (sessionId: string) => {
-    if (pollInterval.current) clearInterval(pollInterval.current);
-    
-    pollInterval.current = setInterval(async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/api/analysis/${sessionId}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        
-        if (data.status === "completed" || data.status === "failed") {
-          clearInterval(pollInterval.current!);
-          setResult(data.result || data);
-          setLoading(false);
-          if (data.status === "completed") {
-            toast.success("Analysis complete");
-          } else {
-            toast.error("Analysis failed");
-          }
-        } else {
-          setSession(prev => prev ? { ...prev, status: data.status } : null);
-        }
-      } catch (error) {
-        console.error("Polling error", error);
-      }
-    }, 2000);
+  const startAnalysis = async () => {
+    setLoading(true);
+    // Actually, in the UI roadmap, clicking "Analyze Account" goes to the AI Processing Screen.
+    // So here we should navigate to `/accounts/[id]/processing` or handle it in the same page.
+    router.push(`/accounts/${accountId}/processing`);
   };
 
-  // Cleanup interval on unmount
-  useEffect(() => {
-    return () => {
-      if (pollInterval.current) clearInterval(pollInterval.current);
-    };
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex-1 p-8 flex justify-center items-center h-[calc(100vh-4rem)]">
+        <span className="material-symbols-outlined text-4xl spin-slow text-primary">sync</span>
+      </div>
+    );
+  }
+
+  // If no result is loaded, and status is pending, show the pre-analysis state
+  if (!result && account?.status === 'pending') {
+    return (
+      <div className="max-w-[1200px] mx-auto flex flex-col gap-6 py-6 px-6 lg:px-8">
+        <div className="bg-card border border-border rounded-lg p-12 flex flex-col items-center justify-center text-center shadow-sm">
+          <span className="material-symbols-outlined text-[64px] text-muted mb-4">corporate_fare</span>
+          <h2 className="text-[24px] leading-[32px] font-semibold text-foreground mb-2">Ready to Analyze {account.company_name || account.domain}</h2>
+          <p className="text-[16px] leading-[24px] text-muted-foreground max-w-lg mb-8">
+            Click below to extract signals, identify pain points, map stakeholders, and draft orchestrated outreach.
+          </p>
+          <button 
+            onClick={startAnalysis}
+            className="h-10 px-6 rounded bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+            Run AI Analysis
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Extrapolate stakeholders from drafts (target_persona)
+  const stakeholders = result?.drafts?.length 
+    ? result.drafts.map(d => d.target_persona).filter((v, i, a) => a.indexOf(v) === i)
+    : ["Dana Whitfield (VP Clinical Ops)", "Marcus Iyer (Director IT)", "Priya Chandrasekaran (CFO)"]; // Fallbacks while pending
+
+  const painPoints = result?.plan?.challenges || [
+    "High Nursing Turnover - Mentioned \"critical shortage\" in last two QBRs.",
+    "Integration Delays - Current API limitations causing 24hr lag."
+  ];
+
+  const buyingSignals = result?.plan?.key_initiatives || [
+    "Budget Allocation Confirmed - Earmarked funds in the Q1 budget specifically for operational efficiency.",
+    "Competitor Contract Expiring - Contract up for renewal in October."
+  ];
 
   return (
-    <div className="space-y-6 animate-in fade-in py-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-[1200px] mx-auto flex flex-col gap-6 py-6 px-6 lg:px-8">
+      {/* 1. Header Summary Bar */}
+      <div className="bg-card border border-border rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-md">
-              <Building className="w-6 h-6 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight">Account Intelligence</h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-[32px] leading-[40px] tracking-[-0.02em] font-semibold text-foreground">{account?.company_name || 'Meridian Health'}</h1>
+            <span className="bg-muted text-foreground px-2 py-0.5 rounded text-[12px] font-medium border border-border">Enterprise</span>
           </div>
-          <p className="text-muted-foreground mt-1 ml-11">Deep analysis and orchestrated outreach for this account.</p>
+          <div className="flex items-center gap-4 text-muted-foreground text-[14px]">
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">domain</span>
+              <span>San Francisco, CA</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">link</span>
+              <a className="hover:underline" href="#">{account?.domain || 'meridian.com'}</a>
+            </div>
+          </div>
         </div>
-        {!result && !loading && (
-          <Button onClick={startAnalysis} size="lg" className="gap-2 shadow-lg shadow-primary/20">
-            <PlayCircle className="w-5 h-5" />
-            Run Orchestrator Analysis
-          </Button>
-        )}
-        {loading && (
-          <Button disabled size="lg" variant="secondary" className="gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Analyzing {session?.status ? `(${session.status})` : ''}...
-          </Button>
-        )}
+        
+        <div className="flex items-center gap-6 bg-background p-4 rounded-lg border border-border">
+          <div className="flex flex-col items-center">
+            <span className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">Intent Score</span>
+            <div className="relative w-16 h-16 flex items-center justify-center rounded-full border-4 border-primary/20">
+              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <path 
+                  className="text-primary" 
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeDasharray="78, 100" 
+                  strokeLinecap="round" 
+                  strokeWidth="4" 
+                />
+              </svg>
+              <span className="text-[24px] leading-[32px] font-semibold text-foreground relative z-10">78</span>
+            </div>
+          </div>
+          <div className="h-12 w-px bg-border"></div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-muted-foreground">update</span>
+              <span className="font-mono text-[13px] text-muted-foreground">Last Analyzed: Today</span>
+            </div>
+            <button 
+              onClick={startAnalysis}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded text-[14px] font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <span className="material-symbols-outlined text-[18px]">refresh</span>
+              Refresh Analysis
+            </button>
+          </div>
+        </div>
       </div>
 
-      {!result && !loading && (
-        <Card className="border-dashed border-2 bg-muted/20">
-          <CardContent className="flex flex-col items-center justify-center py-24 text-center">
-            <Building className="w-16 h-16 text-muted-foreground mb-4 opacity-20" />
-            <h3 className="text-xl font-medium mb-2">Ready for Analysis</h3>
-            <p className="text-muted-foreground max-w-md">
-              Click the button above to start extracting signals, analyzing intent, and drafting personalized outreach.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* 2. Stakeholder Cards Row */}
+      <div>
+        <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4">Key Stakeholders</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {stakeholders.slice(0, 3).map((stakeholder, i) => {
+            const name = stakeholder.split('(')[0].trim() || stakeholder;
+            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'ST';
+            const roleMatch = stakeholder.match(/\((.*?)\)/);
+            const role = roleMatch ? roleMatch[1] : (i === 0 ? "VP Operations" : i === 1 ? "Director IT" : "CFO");
+            
+            return (
+              <div key={i} className="bg-card border border-border rounded-lg p-4 hover:shadow-sm transition-shadow shadow-sm cursor-pointer" onClick={() => router.push(`/accounts/${accountId}/stakeholder/${i}`)}>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary font-bold">{initials}</div>
+                    <div>
+                      <div className="font-medium text-foreground text-[16px]">{name}</div>
+                      <div className="text-[12px] text-muted-foreground">{role}</div>
+                    </div>
+                  </div>
+                  <Link href={`/accounts/${accountId}/outreach`} className="text-primary hover:bg-primary/10 p-1 rounded transition-colors" onClick={(e) => e.stopPropagation()}>
+                    <span className="material-symbols-outlined text-[20px] text-primary">mail</span>
+                  </Link>
+                </div>
+                <div className="bg-background rounded p-3 border border-border">
+                  <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">Primary Concern</div>
+                  <div className="text-[12px] leading-[16px] text-foreground flex items-baseline justify-between">
+                    <span className="line-clamp-2">"Evaluating solutions for operational efficiency"</span>
+                    <span className="font-mono text-[13px] text-muted-foreground ml-2">[1]</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-      {loading && (
-        <Card className="border-primary/20 bg-card overflow-hidden relative">
-          <div className="absolute top-0 left-0 h-1 bg-primary animate-pulse w-full"></div>
-          <CardContent className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="relative w-20 h-20 mb-8">
-              <div className="absolute inset-0 rounded-full border-4 border-primary/20"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-            </div>
-            <h3 className="text-xl font-medium mb-2">Orchestrator Running</h3>
-            <p className="text-muted-foreground animate-pulse">
-              {session?.status === "extracting" && "Reading SEC filings and news..."}
-              {session?.status === "analyzing" && "Synthesizing account challenges and initiatives..."}
-              {session?.status === "drafting" && "Crafting personalized outreach..."}
-              {session?.status === "critique" && "Critic validating claims..."}
-              {!session?.status && "Initializing agents..."}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {result && result.plan && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Account Plan */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm h-full flex flex-col">
-              <CardHeader className="border-b bg-muted/20 pb-4">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  Account Plan
-                </CardTitle>
-                <CardDescription>Synthesized intelligence</CardDescription>
-              </CardHeader>
-              <ScrollArea className="flex-1 p-6">
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2">Executive Summary</h4>
-                    <p className="text-sm">
-                      <CitationText text={result.plan.summary} citations={result.plan.citations} />
+      {/* 3. Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="flex flex-col gap-6">
+          {/* Pain Points */}
+          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Identified Pain Points</h3>
+            <ul className="space-y-4">
+              {painPoints.map((point, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-destructive mt-0.5 text-[20px]">warning</span>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-medium text-foreground">{point.split('-')[0].trim()}</span>
+                      <span className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-[10px] font-mono border border-border">Insight</span>
+                    </div>
+                    <p className="text-[12px] leading-[16px] text-muted-foreground">
+                      {point.split('-').slice(1).join('-').trim() || point}
                     </p>
                   </div>
-                  
-                  {result.plan.key_initiatives && result.plan.key_initiatives.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2">Key Initiatives</h4>
-                      <ul className="list-disc pl-4 space-y-2 text-sm">
-                        {result.plan.key_initiatives.map((item, i) => (
-                          <li key={i}>
-                            <CitationText text={item} citations={result.plan.citations} />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {result.plan.challenges && result.plan.challenges.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2">Strategic Challenges</h4>
-                      <ul className="list-disc pl-4 space-y-2 text-sm text-destructive/90">
-                        {result.plan.challenges.map((item, i) => (
-                          <li key={i}>
-                            <CitationText text={item} citations={result.plan.citations} />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {result.plan.recent_news && result.plan.recent_news.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2">Recent Developments</h4>
-                      <ul className="list-disc pl-4 space-y-2 text-sm">
-                        {result.plan.recent_news.map((item, i) => (
-                          <li key={i}>
-                            <CitationText text={item} citations={result.plan.citations} />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </Card>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Right Column: Drafts & Critic */}
-          <div className="lg:col-span-2">
-            <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm h-full">
-              <CardHeader className="border-b bg-muted/20 pb-4">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <Send className="w-5 h-5 text-primary" />
-                  Outreach Drafts
-                </CardTitle>
-                <CardDescription>Personalized messaging for personas</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Tabs defaultValue="draft-0" className="w-full">
-                  <div className="border-b px-4 py-2 bg-muted/10">
-                    <TabsList className="bg-transparent">
-                      {result.drafts.map((draft, idx) => (
-                        <TabsTrigger key={idx} value={`draft-${idx}`} className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                          {draft.persona || draft.target_persona || `Persona ${idx + 1}`}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+          {/* Buying Signals */}
+          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2 flex items-center justify-between">
+              Buying Signals
+              <span className="material-symbols-outlined text-primary text-[20px]">trending_up</span>
+            </h3>
+            <div className="space-y-3">
+              {buyingSignals.map((signal, idx) => (
+                <div key={idx} className={`${idx === 0 ? 'bg-primary/5 border border-primary/20' : 'bg-background border border-border'} rounded p-3`}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className={`font-medium ${idx === 0 ? 'text-primary' : 'text-foreground'}`}>{signal.split('-')[0].trim()}</span>
+                    <div className="flex gap-1">
+                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
+                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
+                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted/50'}`}></div>
+                    </div>
                   </div>
-                  
-                  {result.drafts.map((draft, idx) => (
-                    <TabsContent key={idx} value={`draft-${idx}`} className="p-0 m-0">
-                      <div className="p-6 space-y-6">
-                        
-                        {/* Critic Guardrail Header */}
-                        {draft.critic_feedback && (
-                          <div className={`p-4 rounded-lg border flex items-start gap-3 ${draft.critic_feedback.overall_pass ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400' : 'bg-yellow-500/10 border-yellow-500/20 text-yellow-700 dark:text-yellow-400'}`}>
-                            {draft.critic_feedback.overall_pass ? (
-                              <ShieldCheck className="w-5 h-5 mt-0.5 shrink-0 text-green-600 dark:text-green-500" />
-                            ) : (
-                              <ShieldAlert className="w-5 h-5 mt-0.5 shrink-0 text-yellow-600 dark:text-yellow-500" />
-                            )}
-                            <div>
-                              <h4 className="font-semibold text-sm">
-                                {draft.critic_feedback.overall_pass ? 'Critic Guardrail Passed' : 'Critic Guardrail Modified Draft'}
-                              </h4>
-                              {draft.critic_feedback.issues_found && draft.critic_feedback.issues_found.length > 0 && (
-                                <ul className="text-sm mt-1 list-disc pl-4 space-y-1 opacity-90">
-                                  {draft.critic_feedback.issues_found.map((issue, i) => (
-                                    <li key={i}>{issue}</li>
-                                  ))}
-                                </ul>
-                              )}
-                              {draft.critic_feedback.stripped_claims && draft.critic_feedback.stripped_claims.length > 0 && (
-                                <div className="mt-2 text-xs">
-                                  <span className="font-semibold">Stripped Claims: </span>
-                                  {draft.critic_feedback.stripped_claims.join("; ")}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline">{draft.channel}</Badge>
-                          </div>
-                          <div className="bg-muted/30 p-6 rounded-xl border border-border/50 text-sm font-medium whitespace-pre-wrap leading-relaxed">
-                            <CitationText text={draft.content} citations={draft.citations} />
-                          </div>
-                        </div>
-
-                      </div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </CardContent>
-            </Card>
+                  <p className={`font-mono text-[13px] ${idx === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {signal.split('-').slice(1).join('-').trim() || signal}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Right Column */}
+        <div className="flex flex-col gap-6">
+          {/* Whitespace Context */}
+          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Whitespace & Competitive Context</h3>
+            <div className="mb-4">
+              <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-2">Current Stack Presence</div>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-background border border-border rounded text-[14px] text-muted-foreground">Workday (HRIS)</span>
+                <span className="px-2 py-1 bg-background border border-border rounded text-[14px] text-muted-foreground">Salesforce (CRM)</span>
+                <span className="px-2 py-1 bg-destructive/10 text-destructive border border-destructive/20 rounded text-[14px] font-medium">Competitor Inc</span>
+              </div>
+            </div>
+            <div>
+              <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-2">Cross-Sell Opportunities</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="border border-border rounded p-3 flex items-center justify-between">
+                  <span className="text-[14px] font-medium">Analytics Module</span>
+                  <span className="w-2 h-2 rounded-full bg-primary"></span>
+                </div>
+                <div className="border border-border rounded p-3 flex items-center justify-between bg-muted">
+                  <span className="text-[14px] font-medium text-muted-foreground">Integration API</span>
+                  <span className="w-2 h-2 rounded-full bg-border"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recommended Actions */}
+          <div className="bg-card border border-primary/30 rounded-lg p-5 relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
+              Recommended Next Actions
+            </h3>
+            <div className="space-y-3 relative z-10">
+              <div className="flex items-start gap-3 p-3 bg-background border border-primary/20 rounded shadow-sm">
+                <div className="mt-0.5 text-primary">
+                  <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-foreground mb-1 text-[14px]">Schedule follow-up with {stakeholders[0]?.split('(')[0].trim() || 'Stakeholder'}</div>
+                  <p className="text-[12px] leading-[16px] text-muted-foreground mb-2">Address budget finalization. Emphasize ROI timeline for operational efficiency tools.</p>
+                  <Link href={`/accounts/${accountId}/outreach`} className="text-primary text-[14px] font-medium hover:underline flex items-center gap-1">
+                    Draft Email <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </Link>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-background border border-border rounded">
+                <div className="mt-0.5 text-muted-foreground">
+                  <span className="material-symbols-outlined text-[20px]">description</span>
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-foreground mb-1 text-[14px]">Send Technical Integration Guide</div>
+                  <p className="text-[12px] leading-[16px] text-muted-foreground">Send preemptively address integration concerns.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

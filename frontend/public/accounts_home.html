@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background antialiased" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Navigator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-bright": "#fbf8ff", "surface-container-lowest": "#ffffff", surface: "#fbf8ff", "on-tertiary-container": "#ffdfd7", "secondary-fixed": "#e3e2e4", "outline-variant": "#c4c5d9", "on-error": "#ffffff", outline: "#747688", "error-container": "#ffdad6", "on-error-container": "#93000a", "on-tertiary-fixed-variant": "#862300", "on-secondary-fixed": "#1b1c1e", "surface-tint": "#1246f7", "on-secondary-fixed-variant": "#464749", "tertiary-fixed": "#ffdbd1", tertiary: "#942700", "inverse-surface": "#2f3038", "on-surface-variant": "#434656", secondary: "#5e5e61", "secondary-container": "#e0dfe2", "primary-fixed-dim": "#b9c3ff", "primary-fixed": "#dee1ff", "on-tertiary": "#ffffff", "on-primary-fixed": "#001258", "tertiary-fixed-dim": "#ffb59f", "on-primary-fixed-variant": "#0032c3", "surface-container-low": "#f4f2fd", "on-tertiary-fixed": "#3a0a00", "surface-container-high": "#e8e7f1", "inverse-on-surface": "#f1effa", "primary-container": "#2451ff", "tertiary-container": "#be3500", "surface-dim": "#dad9e3", "on-surface": "#1a1b22", background: "#fbf8ff", "on-secondary": "#ffffff", "secondary-fixed-dim": "#c7c6c9", "on-primary": "#ffffff", "surface-variant": "#e3e1ec", "surface-container-highest": "#e3e1ec", error: "#ba1a1a", primary: "#0038d7", "on-secondary-container": "#626265", "surface-container": "#eeedf7", "inverse-primary": "#b9c3ff", "on-primary-container": "#e2e4ff", "on-background": "#1a1b22", "border-subtle": "#334155", "text-primary": "#DAE2FD", "surface-card": "#1E293B", "border-elevated": "#475569", "ai-verified": "#06B6D4", "text-muted": "#908FA0", "surface-base": "#0F172A", "intelligence-action": "#6366F1", "surface-hover": "#2D3748", "surface-main": "#0b1326", destructive: "#EF4444", "indigo-intelligence": "#6366F1", warning: "#F59E0B"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {gutter: "24px", "container-max": "1440px", base: "4px", lg: "1rem", xl: "1.5rem", md: "0.75rem", sm: "0.5rem", xs: "0.25rem", "2xl": "2rem", "sidebar-width": "280px", "margin-md": "32px", "margin-sm": "16px", "margin-lg": "48px", unit: "4px"}, fontFamily: {"headline-md": ["Inter", "sans-serif"], "body-md": ["Inter"], "headline-xl": ["Inter", "sans-serif"], "label-caps": ["Inter", "sans-serif"], "body-lg": ["Inter"], "body-sm": ["Inter", "sans-serif"], "headline-lg": ["Inter", "sans-serif"], "data-mono": ["JetBrains Mono", "monospace"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Jetbrains Mono"], "data-tabular": ["JetBrains Mono"], "headline-h2": ["Inter"], "headline-h1": ["Inter"], "headline-h1-mobile": ["Inter"], caption: ["Inter"], "code-snippet": ["JetBrains Mono"], "headline-h3": ["Inter"], "label-sm": ["Inter"], "label-semibold": ["Inter"], code: ["jetbrainsMono"]}, fontSize: {"headline-md": ["18px", {lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "headline-xl": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}], "label-caps": ["11px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "headline-lg": ["24px", {lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600"}], "data-mono": ["13px", {lineHeight: "18px", fontWeight: "450"}], "data-tabular": ["13px", {lineHeight: "18px", fontWeight: "500"}], "headline-h2": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], display: ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-h1": ["36px", {lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "600"}], "headline-h1-mobile": ["28px", {lineHeight: "34px", fontWeight: "600"}], caption: ["14px", {lineHeight: "20px", fontWeight: "400"}], "code-snippet": ["14px", {lineHeight: "20px", fontWeight: "400"}], "headline-h3": ["24px", {lineHeight: "32px", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "label-semibold": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], body: ["16px", {lineHeight: "24px", fontWeight: "400"}], code: ["14px", {lineHeight: "20px", fontWeight: "400"}]}}}};</script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+                font-size: 20px;
+                vertical-align: middle;
+            }
+            .material-symbols-outlined.fill {
+                font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            }
+        }
+    </style>
+</head>
+<body class="flex h-full bg-background overflow-hidden font-body-md text-on-surface">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen w-64 border-r border-outline-variant bg-surface-container-lowest dark:bg-surface-container-low py-md px-sm shrink-0">
+<div class="mb-lg px-3">
+<div class="flex items-center gap-3">
+<img alt="Organization Logo" class="w-8 h-8 rounded" data-alt="A sleek, minimalist vector logo featuring intersecting abstract geometric shapes in high contrast black and cobalt blue. Set on a pristine white background with sharp edges and subtle technical grid lines. The aesthetic is extremely modern, crisp, and suitable for a sophisticated enterprise SaaS brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC41X0UfvfA0JWbdywFNYkSnlZxPUuaRoGYf_HXCO6uN2Fo6r-N33VBgno2LeNNAESOwxg_HQi8tMUQiY1Hjfx5t14ezFKU2l6_Rqfrp-VBBrOsP6DKaK2DFoKH8y5M0gODz4p9GDfbpZB5SL0ZrT3rNGFlBQzvV2IgJ51BP7r-sRMI7aXRZ_EPJTlNk7P3foEU5lRPtAs6fPcMe3zeB9FFk_FdbnCshd953vWJl5mLyzL2V7Z-_UbYTA"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">ABM Orchestrator</h1>
+<p class="font-body-sm text-body-sm text-secondary">Enterprise Tier</p>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-low cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined fill text-primary">corporate_fare</span>
+<span class="font-body-md text-body-md">Accounts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-body-md text-body-md">Segments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">rocket_launch</span>
+<span class="font-body-md text-body-md">Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-body-md text-body-md">Intelligence</span>
+</a>
+</div>
+<div class="mt-auto space-y-1 pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+<button class="w-full flex items-center justify-center gap-2 mt-4 px-3 py-2 border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container transition-colors font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">keyboard_double_arrow_left</span>
+                Collapse View
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-lg h-16 bg-surface-container-lowest border-b border-outline-variant shrink-0">
+<div class="flex items-center gap-4">
+<div class="md:hidden">
+<span class="font-headline-md text-headline-md font-black text-on-surface">Account Navigator</span>
+</div>
+<div class="hidden md:flex items-center gap-2 text-secondary font-body-sm text-body-sm">
+<span>Platform</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface font-medium">Accounts</span>
+</div>
+</div>
+<div class="hidden md:flex flex-1 max-w-md mx-6">
+<div class="relative w-full focus-within:ring-2 focus-within:ring-primary-container rounded-lg">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="Search accounts..." type="text"/>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-6 h-full mr-8">
+<a class="h-full flex items-center text-primary border-b-2 border-primary font-body-sm text-body-sm font-medium pt-[2px]" href="#">Overview</a>
+<a class="h-full flex items-center text-secondary hover:text-on-surface-variant transition-colors font-body-sm text-body-sm" href="#">Stakeholders</a>
+<a class="h-full flex items-center text-secondary hover:text-on-surface-variant transition-colors font-body-sm text-body-sm" href="#">Outreach</a>
+<a class="h-full flex items-center text-secondary hover:text-on-surface-variant transition-colors font-body-sm text-body-sm" href="#">History</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="hidden sm:flex items-center gap-2 px-3 py-1.5 border border-outline-variant rounded-lg font-body-sm text-body-sm font-medium text-on-surface hover:bg-surface-container transition-colors">
+                    Export Data
+                </button>
+<button class="flex items-center gap-2 px-4 py-1.5 bg-[#0E0F11] text-white rounded-lg font-body-sm text-body-sm font-medium hover:bg-opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Account
+                </button>
+<div class="h-6 w-[1px] bg-outline-variant mx-1 hidden sm:block"></div>
+<button class="text-secondary hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-secondary hover:text-primary transition-colors p-1 hidden sm:block">
+<span class="material-symbols-outlined">help</span>
+</button>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-outline-variant ml-2 object-cover" data-alt="A professional headshot of a female executive in her late 30s with dark hair, wearing a sharp navy blazer. The lighting is studio-quality, soft, and flat, highlighting her face against a pure, bright white background. The image is cropped in a perfect circle, exuding approachability and extreme competence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATZ0yJyGWPUEunQJfxPE78-CfFey6Drkh2ovTpTkx3QHTY1lyqB5zxjwzQZgJBGWmKYTVMfZ68e68VYpbieI0dvWmy-8LOvmTpS6GLU8m_E_Ub-Ek7QnrHe4KiIla8v8DQQImP5SbSPus_FgmCZ5bFT4jfGV9zua_Bm2-utZpfywfxfL-fh--kbM3MLhMOLetlMW2uUNwTr_cT_Tpg-LKeT9jXltHArblM30aghv0EniBlOmUVqHSTlQ"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 overflow-y-auto bg-[#FAFAF9] p-lg">
+<div class="max-w-container-max mx-auto space-y-lg">
+<!-- Header & Stats -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-xl">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-2">Accounts Overview</h2>
+<p class="font-body-md text-body-md text-secondary">Manage and monitor target enterprise accounts.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 min-w-[140px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+<div class="font-label-caps text-label-caps text-secondary mb-1">TOTAL ACCOUNTS</div>
+<div class="font-data-mono text-data-mono text-2xl font-medium text-on-surface">342</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 min-w-[140px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] border-l-4 border-l-primary-container">
+<div class="font-label-caps text-label-caps text-secondary mb-1">HIGH INTENT</div>
+<div class="font-data-mono text-data-mono text-2xl font-medium text-primary-container">87</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 min-w-[140px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+<div class="font-label-caps text-label-caps text-secondary mb-1">PROCESSING</div>
+<div class="font-data-mono text-data-mono text-2xl font-medium text-on-surface">12</div>
+</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="flex justify-between items-center p-4 border-b border-outline-variant bg-surface-bright">
+<div class="flex items-center gap-2">
+<button class="p-1.5 border border-outline-variant rounded bg-surface-container-lowest text-secondary hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<span class="font-body-sm text-body-sm font-medium text-secondary">Filtered by: <span class="text-on-surface">All Tiers</span></span>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 border border-outline-variant rounded bg-surface-container-lowest text-secondary hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">view_column</span>
+</button>
+<button class="p-1.5 border border-outline-variant rounded bg-surface-container-lowest text-secondary hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-bright">
+<th class="px-6 py-3 font-label-caps text-label-caps text-secondary font-semibold uppercase tracking-wider w-1/3">Account</th>
+<th class="px-6 py-3 font-label-caps text-label-caps text-secondary font-semibold uppercase tracking-wider">Intent Score</th>
+<th class="px-6 py-3 font-label-caps text-label-caps text-secondary font-semibold uppercase tracking-wider">Status</th>
+<th class="px-6 py-3 font-label-caps text-label-caps text-secondary font-semibold uppercase tracking-wider text-right">Stakeholders</th>
+<th class="px-6 py-3 font-label-caps text-label-caps text-secondary font-semibold uppercase tracking-wider text-right">Last Updated</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded border border-outline-variant bg-white flex items-center justify-center shrink-0">
+<span class="font-headline-md text-headline-md font-bold text-primary-container">M</span>
+</div>
+<div>
+<div class="font-medium text-on-surface">Meridian Health</div>
+<div class="text-secondary text-[11px] mt-0.5">Healthcare · Enterprise</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-md bg-primary-fixed border border-primary-fixed-dim text-on-primary-fixed font-data-mono text-data-mono">
+                                            78
+                                            <span class="material-symbols-outlined text-[14px] ml-1 text-primary-container">trending_up</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
+                                            Analyzed
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-data-mono text-data-mono text-on-surface-variant">
+                                        12
+                                    </td>
+<td class="px-6 py-4 text-right font-data-mono text-data-mono text-secondary">
+                                        2h ago
+                                    </td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded border border-outline-variant bg-white flex items-center justify-center shrink-0">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">A</span>
+</div>
+<div>
+<div class="font-medium text-on-surface">Apex Solutions</div>
+<div class="text-secondary text-[11px] mt-0.5">Technology · Mid-Market</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-md bg-primary-container text-white font-data-mono text-data-mono shadow-sm">
+                                            92
+                                            <span class="material-symbols-outlined text-[14px] ml-1">local_fire_department</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium bg-[#fffbeb] text-[#b45309] border border-[#fde68a]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>
+                                            Needs Refresh
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-data-mono text-data-mono text-on-surface-variant">
+                                        5
+                                    </td>
+<td class="px-6 py-4 text-right font-data-mono text-data-mono text-secondary">
+                                        1d ago
+                                    </td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded border border-outline-variant bg-white flex items-center justify-center shrink-0">
+<span class="font-headline-md text-headline-md font-bold text-secondary">C</span>
+</div>
+<div>
+<div class="font-medium text-on-surface">CloudScale Inc</div>
+<div class="text-secondary text-[11px] mt-0.5">Software · Enterprise</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-md bg-surface-variant text-on-surface-variant font-data-mono text-data-mono border border-outline-variant">
+                                            64
+                                            <span class="material-symbols-outlined text-[14px] ml-1">remove</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe] animate-pulse">
+<span class="material-symbols-outlined text-[12px] spin-slow">sync</span>
+                                            Processing
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right font-data-mono text-data-mono text-on-surface-variant">
+                                        8
+                                    </td>
+<td class="px-6 py-4 text-right font-data-mono text-data-mono text-secondary">
+                                        15m ago
+                                    </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-6 py-3 border-t border-outline-variant bg-surface-container-lowest">
+<span class="font-body-sm text-body-sm text-secondary">Showing 1 to 3 of 342 entries</span>
+<div class="flex gap-1">
+<button class="px-2 py-1 border border-outline-variant rounded bg-surface-container-lowest text-secondary hover:bg-surface-container disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="px-2 py-1 border border-outline-variant rounded bg-surface-container-lowest text-secondary hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<style>
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spin-slow {
+            animation: spin-slow 2s linear infinite;
+        }
+    </style>
+</body></html>

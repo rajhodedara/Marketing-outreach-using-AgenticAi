@@ -10,32 +10,67 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.db.models import Account, AnalysisSession
+from app.api.auth import verify_supabase_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 @router.get("/accounts")
-async def list_accounts(db: AsyncSession = Depends(get_db)) -> dict:
+async def list_accounts(
+    db: AsyncSession = Depends(get_db),
+    token: dict = Depends(verify_supabase_token)
+) -> dict:
     """List all accounts."""
     result = await db.execute(select(Account).order_by(Account.created_at.desc()))
     accounts = result.scalars().all()
+    
+    account_list = []
+    for a in accounts:
+        session_result = await db.execute(
+            select(AnalysisSession)
+            .where(AnalysisSession.account_id == a.id)
+            .order_by(AnalysisSession.started_at.desc())
+            .limit(1)
+        )
+        latest_session = session_result.scalar_one_or_none()
+        
+        intent_score = "--"
+        status_label = "Pending"
+        stakeholders_count = 0
+        
+        if latest_session and latest_session.result_json:
+            status_label = "Analyzed"
+            import json
+            try:
+                res_dict = json.loads(latest_session.result_json)
+                intent_score = res_dict.get("intent_signals", {}).get("overall_score", "--")
+                stakeholders_count = len(res_dict.get("stakeholders", []))
+            except Exception:
+                pass
+        
+        account_list.append({
+            "id": a.id,
+            "company_name": a.company_name,
+            "domain": a.domain,
+            "industry": a.industry,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+            "intent_score": intent_score,
+            "status": status_label,
+            "stakeholders_count": stakeholders_count
+        })
+
     return {
-        "accounts": [
-            {
-                "id": a.id,
-                "company_name": a.company_name,
-                "domain": a.domain,
-                "industry": a.industry,
-                "created_at": a.created_at.isoformat() if a.created_at else None,
-            }
-            for a in accounts
-        ]
+        "accounts": account_list
     }
 
 
 @router.get("/accounts/{account_id}")
-async def get_account(account_id: str, db: AsyncSession = Depends(get_db)) -> dict:
+async def get_account(
+    account_id: str, 
+    db: AsyncSession = Depends(get_db),
+    token: dict = Depends(verify_supabase_token)
+) -> dict:
     """Get account details including latest analysis."""
     result = await db.execute(select(Account).where(Account.id == account_id))
     account = result.scalar_one_or_none()

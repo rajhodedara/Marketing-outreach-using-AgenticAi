@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Processing / Agent Pipeline View - ABM Orchestrator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {tertiary: "#942700", error: "#ba1a1a", "on-tertiary": "#ffffff", "on-primary-container": "#e2e4ff", "surface-container-highest": "#e3e1ec", "on-secondary-container": "#626265", background: "#fbf8ff", primary: "#0038d7", "on-tertiary-fixed-variant": "#862300", "inverse-on-surface": "#f1effa", "tertiary-fixed-dim": "#ffb59f", "surface-tint": "#1246f7", "primary-fixed-dim": "#b9c3ff", "on-primary-fixed-variant": "#0032c3", secondary: "#5e5e61", "on-secondary-fixed-variant": "#464749", surface: "#fbf8ff", outline: "#747688", "on-primary": "#ffffff", "on-error": "#ffffff", "surface-variant": "#e3e1ec", "surface-container-high": "#e8e7f1", "secondary-fixed": "#e3e2e4", "on-primary-fixed": "#001258", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#1b1c1e", "on-error-container": "#93000a", "surface-container-low": "#f4f2fd", "surface-container": "#eeedf7", "on-tertiary-fixed": "#3a0a00", "on-background": "#1a1b22", "tertiary-container": "#be3500", "tertiary-fixed": "#ffdbd1", "on-tertiary-container": "#ffdfd7", "inverse-surface": "#2f3038", "primary-fixed": "#dee1ff", "primary-container": "#2451ff", "secondary-fixed-dim": "#c7c6c9", "on-secondary": "#ffffff", "secondary-container": "#e0dfe2", "surface-bright": "#fbf8ff", "inverse-primary": "#b9c3ff", "surface-dim": "#dad9e3", "outline-variant": "#c4c5d9", "on-surface-variant": "#434656", "error-container": "#ffdad6", "on-surface": "#1a1b22", "border-subtle": "#334155", "text-primary": "#DAE2FD", "surface-card": "#1E293B", "border-elevated": "#475569", "ai-verified": "#06B6D4", "text-muted": "#908FA0", "surface-base": "#0F172A", "intelligence-action": "#6366F1", "surface-hover": "#2D3748", "surface-main": "#0b1326", destructive: "#EF4444", "indigo-intelligence": "#6366F1", warning: "#F59E0B"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {xs: "0.25rem", gutter: "24px", xl: "1.5rem", base: "4px", sm: "0.5rem", lg: "1rem", "container-max": "1440px", md: "0.75rem", "2xl": "2rem", "sidebar-width": "280px", "margin-md": "32px", "margin-sm": "16px", "margin-lg": "48px", unit: "4px"}, fontFamily: {"headline-lg": ["Inter"], "headline-md": ["Inter"], "data-mono": ["JetBrains Mono"], "label-caps": ["Inter"], "headline-xl": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Jetbrains Mono"], "data-tabular": ["JetBrains Mono"], "headline-h2": ["Inter"], "headline-h1": ["Inter"], "headline-h1-mobile": ["Inter"], caption: ["Inter"], "code-snippet": ["JetBrains Mono"], "headline-h3": ["Inter"], "label-sm": ["Inter"], "label-semibold": ["Inter"], code: ["jetbrainsMono"]}, fontSize: {"headline-lg": ["24px", {lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600"}], "headline-md": ["18px", {lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600"}], "data-mono": ["13px", {lineHeight: "18px", fontWeight: "450"}], "label-caps": ["11px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "headline-xl": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "data-tabular": ["13px", {lineHeight: "18px", fontWeight: "500"}], "headline-h2": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], display: ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-h1": ["36px", {lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "600"}], "headline-h1-mobile": ["28px", {lineHeight: "34px", fontWeight: "600"}], caption: ["14px", {lineHeight: "20px", fontWeight: "400"}], "code-snippet": ["14px", {lineHeight: "20px", fontWeight: "400"}], "headline-h3": ["24px", {lineHeight: "32px", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "label-semibold": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], body: ["16px", {lineHeight: "24px", fontWeight: "400"}], code: ["14px", {lineHeight: "20px", fontWeight: "400"}]}}}};</script>
+<style>
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            80%, 100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .pulse-dot {
+            animation: pulse-dot 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) -.4s infinite;
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1); }
+            100% { transform: scale(0.8); }
+        }
+        
+        .typewriter::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        .progress-line-active {
+            background: linear-gradient(90deg, #0038d7 0%, #2451ff 50%, #e3e2e4 100%);
+            background-size: 200% 100%;
+            animation: gradient-flow 2s linear infinite;
+        }
+        @keyframes gradient-flow {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-screen w-full overflow-hidden flex font-body-md">
+<!-- SideNavBar (Dimmed/Disabled state) -->
+<aside class="h-screen w-64 border-r border-outline-variant bg-surface-container-lowest opacity-40 pointer-events-none flex flex-col py-md px-sm transition-opacity duration-300">
+<!-- Brand Header -->
+<div class="flex items-center gap-sm px-sm mb-xl">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="corporate_fare" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">ABM Orchestrator</h1>
+<p class="font-body-sm text-body-sm text-secondary">Enterprise Tier</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-secondary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<!-- Active Tab (in context of where analysis was launched) -->
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-primary font-bold border-r-2 border-primary bg-surface-container-low" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="corporate_fare" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+<span class="font-body-md text-body-md">Accounts</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-secondary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="groups">groups</span>
+<span class="font-body-md text-body-md">Segments</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-secondary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="rocket_launch">rocket_launch</span>
+<span class="font-body-md text-body-md">Campaigns</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-secondary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="psychology">psychology</span>
+<span class="font-body-md text-body-md">Intelligence</span>
+</a>
+</nav>
+<!-- Footer Tabs -->
+<div class="mt-auto space-y-1 pt-md border-t border-outline-variant">
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-secondary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 rounded-DEFAULT text-secondary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="help_outline">help_outline</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden bg-background">
+<!-- TopNavBar (Dimmed/Disabled state) -->
+<header class="w-full h-16 border-b border-outline-variant bg-surface-container-lowest opacity-40 pointer-events-none flex justify-between items-center px-lg shadow-sm transition-opacity duration-300">
+<div class="flex items-center gap-lg">
+<span class="font-headline-md text-headline-md font-black text-on-surface">Account Navigator</span>
+<nav class="hidden md:flex items-center gap-lg h-full pt-1">
+<a class="font-body-sm text-body-sm text-secondary h-full flex items-center border-b-2 border-transparent" href="#">Overview</a>
+<a class="font-body-sm text-body-sm text-secondary h-full flex items-center border-b-2 border-transparent" href="#">Stakeholders</a>
+<a class="font-body-sm text-body-sm text-secondary h-full flex items-center border-b-2 border-transparent" href="#">Outreach</a>
+<a class="font-body-sm text-body-sm text-primary border-b-2 border-primary h-full flex items-center" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-secondary">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-secondary">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Professional corporate headshot of a female executive in a well-lit modern office setting, wearing a navy blazer, slight smile, shallow depth of field, natural lighting, high resolution, soft cool tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALoG_Q8m2KdfqVMlYz4phhRx0n2sh7ktV_QhipCDGjTHuAyPhCl6XLS1YbKthoaOhuZGSjYDDlRwx6TNbLsE9SqriYzWOUNFLd-sVB0L4tcp7P1-sAWUlyFOiDLn2cZW2TMLQL-0HfF6IcLyUihkHj2I8QPa_l_6KtsU5LXuJZveyT-8_0meQhSS164eFfVMkQXPsY4lN8NJxFnJjK2ToQ-BBf8y7hZg7L55_vpiRWoAM-5Cujyive-g"/>
+</div>
+</div>
+</header>
+<!-- Pipeline Overlay Canvas -->
+<div class="flex-1 flex flex-col items-center justify-center relative bg-surface-container-lowest/50 backdrop-blur-[2px]">
+<!-- Agent Processing Container -->
+<div class="w-full max-w-3xl px-lg py-xl flex flex-col items-center">
+<div class="text-center mb-xl">
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-sm">AI Agent Processing</h2>
+<p class="font-body-lg text-body-lg text-secondary">Synthesizing account intelligence for Acme Corp.</p>
+</div>
+<!-- Vertical Pipeline -->
+<div class="w-full max-w-md relative">
+<!-- Continuous Line Behind -->
+<div class="absolute left-[1.125rem] top-4 bottom-4 w-[2px] bg-secondary-fixed z-0"></div>
+<!-- Step 1: Complete -->
+<div class="flex items-start gap-md mb-lg relative z-10">
+<div class="w-10 h-10 rounded-full bg-[#E6F4EA] border border-[#CEEAD6] flex flex-shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-[20px] text-[#137333]" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="pt-2">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Researching Company</h3>
+<p class="font-body-sm text-body-sm text-secondary">Aggregated 45 external data points.</p>
+</div>
+</div>
+<!-- Step 2: Complete -->
+<div class="flex items-start gap-md mb-lg relative z-10">
+<div class="w-10 h-10 rounded-full bg-[#E6F4EA] border border-[#CEEAD6] flex flex-shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-[20px] text-[#137333]" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="pt-2">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Mapping Stakeholders</h3>
+<p class="font-body-sm text-body-sm text-secondary">Identified 12 key decision makers.</p>
+</div>
+</div>
+<!-- Step 3: In Progress (Active) -->
+<div class="flex items-start gap-md mb-lg relative z-10">
+<div class="relative w-10 h-10 flex flex-shrink-0 items-center justify-center">
+<div class="absolute inset-0 rounded-full border-2 border-primary pulse-ring"></div>
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center pulse-dot shadow-[0_4px_12px_rgba(36,81,255,0.3)]">
+<span class="material-symbols-outlined text-[20px] text-on-primary" data-icon="rocket_launch">rocket_launch</span>
+</div>
+</div>
+<div class="pt-2 w-full">
+<h3 class="font-headline-md text-headline-md text-primary mb-xs">Identifying Buying Signals</h3>
+<!-- Active Progress Line -->
+<div class="h-1 w-full bg-secondary-fixed rounded-full overflow-hidden mt-2 mb-2">
+<div class="h-full w-full progress-line-active"></div>
+</div>
+<!-- Live Terminal Output -->
+<div class="bg-inverse-surface text-inverse-on-surface p-sm rounded-DEFAULT border border-outline mt-sm font-data-mono text-data-mono h-24 overflow-hidden relative shadow-inner">
+<div class="flex flex-col gap-1 text-[12px] opacity-80 typewriter" id="terminal-output">
+<span class="text-tertiary-fixed-dim">&gt; Connecting to intent data sources... OK</span>
+<span class="text-primary-fixed-dim">&gt; Analyzing recent news articles (n=142)... OK</span>
+<span>&gt; Scanning 14 transcript segments for Q4 budget mentions...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Step 4: Pending -->
+<div class="flex items-start gap-md mb-lg relative z-10 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container border border-outline-variant flex flex-shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-[20px] text-secondary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="pt-2">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Drafting Strategy</h3>
+<p class="font-body-sm text-body-sm text-secondary">Waiting for intelligence signals...</p>
+</div>
+</div>
+<!-- Step 5: Pending -->
+<div class="flex items-start gap-md relative z-10 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container border border-outline-variant flex flex-shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-[20px] text-secondary" data-icon="verified">verified</span>
+</div>
+<div class="pt-2">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Verifying Claims</h3>
+<p class="font-body-sm text-body-sm text-secondary">Final review against guidelines.</p>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="mt-xl pt-lg">
+<button class="px-lg py-2 rounded-DEFAULT bg-surface text-on-surface border border-outline-variant font-label-caps text-label-caps hover:bg-surface-container transition-colors shadow-sm">
+                        Cancel Analysis
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Simple script to simulate terminal typing effect
+        document.addEventListener("DOMContentLoaded", () => {
+            const terminal = document.getElementById('terminal-output');
+            const messages = [
+                "> Found 3 recent funding signals...",
+                "> Cross-referencing executive job changes...",
+                "> Detecting high intent for 'Enterprise Security'...",
+                "> Synthesizing signal clusters..."
+            ];
+            
+            let msgIndex = 0;
+            
+            setInterval(() => {
+                if(msgIndex < messages.length) {
+                    const newSpan = document.createElement('span');
+                    newSpan.textContent = messages[msgIndex];
+                    terminal.appendChild(newSpan);
+                    
+                    // Keep only last 4 messages to avoid overflow
+                    if(terminal.children.length > 4) {
+                        terminal.removeChild(terminal.firstChild);
+                    }
+                    msgIndex++;
+                } else {
+                    // Loop for demo purposes
+                    msgIndex = 0;
+                    terminal.innerHTML = '';
+                    const initSpan = document.createElement('span');
+                    initSpan.textContent = "> Continuing analysis...";
+                    initSpan.className = "text-primary-fixed-dim";
+                    terminal.appendChild(initSpan);
+                }
+            }, 2500);
+        });
+    </script>
+</body></html>

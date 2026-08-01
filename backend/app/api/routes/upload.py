@@ -57,11 +57,14 @@ async def upload_data_pack(
 
         # 3. Create or find Account
         logger.info(f"Querying DB for account: {account_name}")
+        logger.info("Before db.execute")
         result = await db.execute(
             select(Account).where(Account.company_name == account_name)
         )
+        logger.info("After db.execute")
         account = result.scalar_one_or_none()
         if account is None:
+            logger.info("Creating new account record")
             account = Account(
                 id=str(uuid.uuid4()),
                 company_name=account_name,
@@ -69,15 +72,17 @@ async def upload_data_pack(
                 industry=pack.crm_data.get("account", {}).get("industry") if pack.crm_data else None,
             )
             db.add(account)
-            await db.flush()
+            # await db.flush() - Removed because it might cause a hang
 
         account_id = account.id
+        logger.info(f"Account ID: {account_id}")
         files_processed = 0
         total_pii_detections = 0
         total_chunks = 0
 
         # 4. Store CRM data as a JSON upload record
         if pack.crm_data:
+            logger.info("Adding CRM data to DB session")
             crm_upload = Upload(
                 id=str(uuid.uuid4()),
                 account_id=account_id,
@@ -96,7 +101,9 @@ async def upload_data_pack(
 
         for doc in all_docs:
             # PII masking
+            logger.info(f"Masking doc: {doc.filename}")
             masked_text, detections = pii_masker.mask_text(doc.content)
+            logger.info(f"Finished masking doc: {doc.filename}")
             total_pii_detections += len(detections)
 
             upload_id = str(uuid.uuid4())
@@ -113,6 +120,7 @@ async def upload_data_pack(
             files_processed += 1
 
             # 6. Chunk the MASKED text (not raw)
+            logger.info(f"Chunking doc: {doc.filename}")
             chunks = chunker.chunk_document(
                 text=masked_text,
                 doc_name=doc.filename,
@@ -120,6 +128,7 @@ async def upload_data_pack(
                 chunk_size=500,
                 overlap=50,
             )
+            logger.info(f"Finished chunking doc: {doc.filename}, {len(chunks)} chunks")
             for chunk in chunks:
                 chunk_record = DocumentChunkRecord(
                     id=chunk.chunk_id,
@@ -146,7 +155,9 @@ async def upload_data_pack(
             await store_chunks(account_id, all_chunk_records)
             logger.info(f"Stored chunks in Qdrant")
 
+        logger.info("Before db.commit()")
         await db.commit()
+        logger.info("After db.commit()")
 
         logger.info(
             f"Upload complete: account={account_id}, "

@@ -4,6 +4,9 @@ import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 
+import { Sidebar } from "@/components/layout/sidebar";
+import { Topbar } from "@/components/layout/topbar";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -18,22 +21,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-background text-foreground antialiased min-h-screen`}>
-        <TooltipProvider delayDuration={150}>
-          <div className="flex min-h-screen flex-col">
-            <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-              <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
-                <a className="flex items-center gap-2 font-semibold" href="/">
-                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                  <span className="text-lg tracking-tight">ABM Orchestrator</span>
-                </a>
-                <nav className="ml-auto flex gap-4 sm:gap-6">
-                  <a className="text-sm font-medium hover:text-primary transition-colors" href="/">Accounts</a>
-                  <a className="text-sm font-medium hover:text-primary transition-colors" href="/upload">Upload Data</a>
-                </nav>
-              </div>
-            </header>
-            <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+      </head>
+      <body className={`${inter.className} flex h-screen bg-background overflow-hidden text-on-surface antialiased`}>
+        <TooltipProvider delay={150}>
+          <Sidebar />
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <Topbar />
+            <main className="flex-1 overflow-y-auto bg-[#FAFAF9] dark:bg-background">
               {children}
             </main>
           </div>
@@ -43,3 +39,4 @@ export default function RootLayout({
     </html>
   );
 }
+

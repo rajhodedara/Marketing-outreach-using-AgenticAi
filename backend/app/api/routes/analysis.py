@@ -14,6 +14,7 @@ from app.db.session import get_db, async_session_maker
 from app.db.models import Account, AnalysisSession
 from app.agents.graph import graph
 from app.agents.state import PipelineState
+from app.api.auth import verify_supabase_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -24,6 +25,7 @@ async def trigger_analysis(
     account_id: str,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    token: dict = Depends(verify_supabase_token)
 ) -> dict:
     """Trigger the multi-agent analysis pipeline for an account.
 
@@ -105,12 +107,20 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
             if session:
                 session.status = "completed"
                 session.completed_at = datetime.now(timezone.utc)
-                if final_state.get("account_plan"):
-                    # Use model_dump_json for Pydantic models
-                    plan = final_state["account_plan"]
-                    session.result_json = plan.model_dump_json() if hasattr(plan, "model_dump_json") else json.dumps(plan)
-                else:
-                    session.result_json = "{}"
+                # Build complete result payload
+                result_data = {}
+                for key in ["account_plan", "outreach_drafts", "stakeholders", "intent", "research", "critic_verdict"]:
+                    val = final_state.get(key)
+                    if val is None:
+                        continue
+                    if hasattr(val, "model_dump"):
+                        result_data[key] = val.model_dump()
+                    elif isinstance(val, list) and len(val) > 0 and hasattr(val[0], "model_dump"):
+                        result_data[key] = [item.model_dump() for item in val]
+                    else:
+                        result_data[key] = val
+                        
+                session.result_json = json.dumps(result_data)
                 await db.commit()
                 
     except Exception as e:
@@ -128,6 +138,7 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
 async def get_analysis_result(
     session_id: str,
     db: AsyncSession = Depends(get_db),
+    token: dict = Depends(verify_supabase_token)
 ) -> dict:
     """Get the result of an analysis session."""
     result = await db.execute(

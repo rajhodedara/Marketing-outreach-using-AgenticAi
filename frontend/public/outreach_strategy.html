@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ABM Orchestrator - Outreach Strategy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-bright": "#fbf8ff", "inverse-on-surface": "#f1effa", "surface-container": "#eeedf7", "on-tertiary": "#ffffff", "surface-tint": "#1246f7", outline: "#747688", "tertiary-fixed-dim": "#ffb59f", "primary-fixed": "#dee1ff", "on-secondary": "#ffffff", "on-surface": "#1a1b22", "on-background": "#1a1b22", error: "#ba1a1a", "surface-dim": "#dad9e3", "on-error-container": "#93000a", tertiary: "#942700", "surface-container-lowest": "#ffffff", "secondary-fixed": "#e3e2e4", "on-surface-variant": "#434656", "on-primary-container": "#e2e4ff", "secondary-fixed-dim": "#c7c6c9", "on-primary-fixed-variant": "#0032c3", "secondary-container": "#e0dfe2", "on-secondary-fixed-variant": "#464749", "tertiary-fixed": "#ffdbd1", "primary-fixed-dim": "#b9c3ff", "outline-variant": "#c4c5d9", surface: "#fbf8ff", "primary-container": "#2451ff", "inverse-surface": "#2f3038", "surface-variant": "#e3e1ec", secondary: "#5e5e61", "tertiary-container": "#be3500", primary: "#0038d7", "error-container": "#ffdad6", "on-primary": "#ffffff", "on-tertiary-container": "#ffdfd7", "on-error": "#ffffff", "on-secondary-fixed": "#1b1c1e", "on-secondary-container": "#626265", "on-primary-fixed": "#001258", "surface-container-low": "#f4f2fd", "surface-container-highest": "#e3e1ec", "on-tertiary-fixed-variant": "#862300", "on-tertiary-fixed": "#3a0a00", "surface-container-high": "#e8e7f1", "inverse-primary": "#b9c3ff", background: "#fbf8ff", "border-subtle": "#334155", "text-primary": "#DAE2FD", "surface-card": "#1E293B", "border-elevated": "#475569", "ai-verified": "#06B6D4", "text-muted": "#908FA0", "surface-base": "#0F172A", "intelligence-action": "#6366F1", "surface-hover": "#2D3748", "surface-main": "#0b1326", destructive: "#EF4444", "indigo-intelligence": "#6366F1", warning: "#F59E0B"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {xl: "1.5rem", md: "0.75rem", base: "4px", xs: "0.25rem", lg: "1rem", "container-max": "1440px", gutter: "24px", sm: "0.5rem", "2xl": "2rem", "sidebar-width": "280px", "margin-md": "32px", "margin-sm": "16px", "margin-lg": "48px", unit: "4px"}, fontFamily: {"headline-xl": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["Inter"], "headline-md": ["Inter"], "data-mono": ["JetBrains Mono"], "body-sm": ["Inter"], "headline-lg": ["Inter"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Jetbrains Mono"], "data-tabular": ["JetBrains Mono"], "headline-h2": ["Inter"], "headline-h1": ["Inter"], "headline-h1-mobile": ["Inter"], caption: ["Inter"], "code-snippet": ["JetBrains Mono"], "headline-h3": ["Inter"], "label-sm": ["Inter"], "label-semibold": ["Inter"], code: ["jetbrainsMono"]}, fontSize: {"headline-xl": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "label-caps": ["11px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "headline-md": ["18px", {lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600"}], "data-mono": ["13px", {lineHeight: "18px", fontWeight: "450"}], "body-sm": ["12px", {lineHeight: "16px", fontWeight: "400"}], "headline-lg": ["24px", {lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600"}], "data-tabular": ["13px", {lineHeight: "18px", fontWeight: "500"}], "headline-h2": ["30px", {lineHeight: "38px", letterSpacing: "-0.01em", fontWeight: "600"}], display: ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-h1": ["36px", {lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "600"}], "headline-h1-mobile": ["28px", {lineHeight: "34px", fontWeight: "600"}], caption: ["14px", {lineHeight: "20px", fontWeight: "400"}], "code-snippet": ["14px", {lineHeight: "20px", fontWeight: "400"}], "headline-h3": ["24px", {lineHeight: "32px", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "label-semibold": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], body: ["16px", {lineHeight: "24px", fontWeight: "400"}], code: ["14px", {lineHeight: "20px", fontWeight: "400"}]}}}};</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface h-full flex overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-surface-container-low h-screen w-64 border-r border-outline-variant flex flex-col py-md px-sm shrink-0">
+<div class="mb-lg px-sm flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">ABM Orchestrator</h1>
+<p class="font-body-sm text-body-sm text-secondary">Enterprise Tier</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto space-y-xs">
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-primary font-bold border-r-2 border-primary bg-surface-container-low cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+<span class="font-label-caps text-label-caps">Accounts</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-caps text-label-caps">Segments</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">rocket_launch</span>
+<span class="font-label-caps text-label-caps">Campaigns</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-caps text-label-caps">Intelligence</span>
+</a>
+</div>
+<div class="mt-auto border-t border-outline-variant pt-sm space-y-xs">
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary hover:text-on-surface hover:bg-surface-container transition-colors duration-200 cursor-pointer active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-label-caps text-label-caps">Support</span>
+</a>
+<button class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-secondary w-full text-left hover:bg-surface-container transition-colors duration-200">
+<span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+<span class="font-label-caps text-label-caps">Collapse View</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest w-full h-16 border-b border-outline-variant shadow-sm flex justify-between items-center px-lg shrink-0">
+<div class="flex items-center gap-lg h-full">
+<div class="font-headline-md text-headline-md font-black text-on-surface mr-lg">Account Navigator</div>
+<!-- Nav Links -->
+<nav class="flex h-full gap-lg">
+<a class="font-label-caps text-label-caps text-secondary hover:text-on-surface-variant hover:text-primary transition-colors flex items-center h-full" href="#">Overview</a>
+<a class="font-label-caps text-label-caps text-secondary hover:text-on-surface-variant hover:text-primary transition-colors flex items-center h-full" href="#">Stakeholders</a>
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary flex items-center h-full pt-1" href="#">Outreach</a>
+<a class="font-label-caps text-label-caps text-secondary hover:text-on-surface-variant hover:text-primary transition-colors flex items-center h-full" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="bg-primary text-on-primary font-body-sm text-body-sm px-4 py-2 rounded-DEFAULT hover:bg-primary/90 transition-colors">New Account</button>
+<button class="bg-surface-container-lowest text-on-surface border border-outline-variant font-body-sm text-body-sm px-4 py-2 rounded-DEFAULT hover:bg-surface-container transition-colors">Export Data</button>
+<div class="h-6 w-px bg-outline-variant mx-sm"></div>
+<button class="text-secondary hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="text-secondary hover:text-primary transition-colors"><span class="material-symbols-outlined">help</span></button>
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover ml-sm" data-alt="A small, professional headshot of a user profile picture in a high-end enterprise SaaS dashboard context. Bright lighting, clean minimal background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJPokcHs1Rhe38olF6LFYAxxVwrgmBdgxVcZFuFy0AZsYpSHcNVZ3WIhVP6iDkn186TyeBm6VPgB1jmsqH-4IgOQaOE64DkPC_MX1LqGU5pPxxK5jIMD__92QHEEQPW2IGNGjbk3q66Bn5fB54I-_TVJf82ckKXKbJrUw5k0xCQfmtZT_FiZULkZg_bYmQtp_HI4IA7UPGUWy8R8iLCzmkXuwNxk9eu5j9vRXwdyFIxLKfkTzbp53UcA"/>
+</div>
+</header>
+<!-- Workspace Split Pane -->
+<div class="flex-1 flex overflow-hidden bg-surface-bright">
+<!-- Left Pane: Sequence Stepper -->
+<aside class="w-72 border-r border-outline-variant bg-surface-container-lowest flex flex-col shrink-0">
+<div class="p-lg border-b border-outline-variant bg-surface-container-low/50">
+<h2 class="font-headline-md text-headline-md text-on-surface">Campaign: Q4 Meridian Push</h2>
+<p class="font-body-sm text-body-sm text-secondary mt-xs">Targeting VPs of IT Infrastructure</p>
+</div>
+<div class="flex-1 overflow-y-auto p-lg space-y-md">
+<div class="font-label-caps text-label-caps text-secondary mb-md">Sequence Steps</div>
+<!-- Step 1 (Active) -->
+<div class="relative pl-6 pb-lg">
+<div class="absolute left-1.5 top-2 bottom-0 w-px bg-outline-variant"></div>
+<div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-primary-container/30"></div>
+<div class="bg-surface-container-low border border-primary/30 rounded-DEFAULT p-sm shadow-sm cursor-pointer hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between mb-xs">
+<span class="font-label-caps text-label-caps text-primary font-bold">Step 1 • Day 1</span>
+<span class="font-label-caps text-label-caps text-secondary bg-surface-variant px-2 py-0.5 rounded-sm">Email</span>
+</div>
+<div class="font-body-md text-body-md text-on-surface font-medium">Initial Outreach</div>
+<div class="font-body-sm text-body-sm text-secondary mt-xs line-clamp-1">Subject: Optimizing infrastructure...</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative pl-6 pb-lg">
+<div class="absolute left-1.5 top-2 bottom-0 w-px bg-outline-variant"></div>
+<div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-surface-variant border border-outline"></div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-sm hover:border-outline transition-colors cursor-pointer opacity-70">
+<div class="flex items-center justify-between mb-xs">
+<span class="font-label-caps text-label-caps text-secondary">Step 2 • Day 4</span>
+<span class="font-label-caps text-label-caps text-secondary bg-surface-variant px-2 py-0.5 rounded-sm">LinkedIn</span>
+</div>
+<div class="font-body-md text-body-md text-on-surface">Connection Request</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="relative pl-6">
+<div class="absolute left-0 top-1 w-3 h-3 rounded-full bg-surface-variant border border-outline"></div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-sm hover:border-outline transition-colors cursor-pointer opacity-70">
+<div class="flex items-center justify-between mb-xs">
+<span class="font-label-caps text-label-caps text-secondary">Step 3 • Day 7</span>
+<span class="font-label-caps text-label-caps text-secondary bg-surface-variant px-2 py-0.5 rounded-sm">Email</span>
+</div>
+<div class="font-body-md text-body-md text-on-surface">Value Follow-up</div>
+</div>
+</div>
+<button class="mt-lg w-full py-2 border border-dashed border-outline-variant rounded-DEFAULT text-secondary font-body-sm text-body-sm hover:bg-surface-container-low transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">add</span> Add Step
+                    </button>
+</div>
+</aside>
+<!-- Center Pane: Email Editor -->
+<section class="flex-1 flex flex-col min-w-0 bg-surface-container-lowest relative">
+<div class="p-lg border-b border-outline-variant flex items-center justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-secondary mb-xs">Editing Draft • Meridian Health</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Initial Outreach Email</h2>
+</div>
+<div class="flex gap-sm">
+<button class="bg-surface-container-lowest text-on-surface border border-outline-variant font-body-sm text-body-sm px-4 py-2 rounded-DEFAULT hover:bg-surface-container transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">magic_button</span> Re-generate
+                        </button>
+<button class="bg-primary text-on-primary font-body-sm text-body-sm px-4 py-2 rounded-DEFAULT hover:bg-primary/90 transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">send</span> Approve &amp; Schedule
+                        </button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-lg">
+<div class="max-w-2xl mx-auto space-y-md">
+<!-- Email Header -->
+<div class="bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm space-y-2">
+<div class="flex items-center gap-md">
+<span class="w-16 text-right font-label-caps text-label-caps text-secondary">To:</span>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-lowest border border-outline-variant px-2 py-1 rounded-sm w-full">sarah.jenkins@meridianhealth.com</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-16 text-right font-label-caps text-label-caps text-secondary">Subject:</span>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-lowest border border-outline-variant px-2 py-1 rounded-sm w-full focus-within:ring-2 focus-within:ring-primary-container focus-within:border-transparent outline-none" contenteditable="true">Addressing latency in your East Coast clinics</div>
+</div>
+</div>
+<!-- Email Body -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-lg min-h-[400px] shadow-sm font-body-md text-body-md leading-relaxed text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" contenteditable="true">
+                            Hi Sarah,<br/><br/>
+                            I noticed Meridian Health has been rapidly expanding its footprint across the East Coast this past year. <br/><br/>
+                            In our research, we saw that as network complexity grows, <span class="bg-primary/10 text-primary-fixed-variant px-1 rounded cursor-pointer hover:bg-primary/20 transition-colors relative group" id="claim-1">handling the 40% increase in diagnostic imaging data<sup class="font-data-mono text-[10px] ml-0.5 inline-flex items-center justify-center w-3 h-3 bg-primary text-on-primary rounded-full">1</sup></span> has been causing significant strain on clinic-level infrastructure.<br/><br/>
+                            Teams similar to yours at Apex Medical found that our edge-caching solution reduced imaging retrieval times by nearly <span class="bg-primary/10 text-primary-fixed-variant px-1 rounded cursor-pointer hover:bg-primary/20 transition-colors relative group" id="claim-2">60% in remote facilities<sup class="font-data-mono text-[10px] ml-0.5 inline-flex items-center justify-center w-3 h-3 bg-primary text-on-primary rounded-full">2</sup></span>.<br/><br/>
+                            Would you be open to a brief chat next Tuesday to see if this aligns with your Q4 infrastructure goals?<br/><br/>
+                            Best,<br/>
+                            Alex
+                        </div>
+</div>
+</div>
+</section>
+<!-- Right Pane: Citation Inspector -->
+<aside class="w-80 border-l border-outline-variant bg-surface-bright flex flex-col shrink-0 shadow-[-4px_0_12px_rgba(0,0,0,0.02)]">
+<div class="p-md border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-xs text-primary">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span class="font-label-caps text-label-caps font-bold">Citation Inspector</span>
+</div>
+<button class="text-secondary hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">close</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-md">
+<!-- Source Info -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-sm">
+<div class="font-label-caps text-label-caps text-secondary mb-xs">Source Document</div>
+<div class="font-body-sm text-body-sm font-medium flex items-center gap-xs mb-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">description</span> Earnings Call Transcript
+                        </div>
+<div class="font-body-sm text-body-sm text-secondary">Meridian Health Q3 2023 • Oct 14</div>
+</div>
+<!-- Excerpt -->
+<div>
+<div class="font-label-caps text-label-caps text-secondary mb-sm flex items-center gap-xs">
+<span class="inline-flex items-center justify-center w-4 h-4 bg-primary text-on-primary rounded-full text-[10px]">1</span> Excerpt Match
+                        </div>
+<div class="bg-[#1e1e1e] rounded-DEFAULT p-sm border border-outline-variant/30">
+<div class="font-data-mono text-data-mono text-[#d4d4d4] leading-relaxed">
+<span class="text-[#569cd6]">CIO (David Chen):</span> "...yes, our expansion has been aggressive. The challenge we're facing now is network latency. We've seen a <span class="bg-[#ffff00]/30 text-white px-1">40% increase in diagnostic imaging data</span> flowing from these new satellite clinics, and frankly, our current MPLS setup is bottlenecking."
+                            </div>
+</div>
+</div>
+<div class="border-t border-outline-variant pt-md mt-md">
+<div class="font-label-caps text-label-caps text-secondary mb-sm">AI Reasoning</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                            The system highlighted this metric to establish immediate relevance with the prospect's known pain point regarding infrastructure scaling for medical imaging.
+                         </p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</body></html>
