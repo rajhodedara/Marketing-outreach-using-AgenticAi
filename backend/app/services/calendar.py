@@ -84,7 +84,7 @@ async def check_availability(date_range: str) -> list[dict]:
         ]
 
 
-async def book_meeting(contact_name: str, contact_email: str, meeting_datetime: str, duration: int = 30) -> dict:
+async def book_meeting(contact_name: str, meeting_datetime: str, duration: int = 30) -> dict:
     """Create a Google Calendar event and return the event link."""
     try:
         import asyncio
@@ -100,11 +100,8 @@ async def book_meeting(contact_name: str, contact_email: str, meeting_datetime: 
             "end": {"dateTime": end_dt.isoformat(), "timeZone": "UTC"},
         }
         
-        if contact_email:
-            event["attendees"] = [{"email": contact_email}]
-
         result = await asyncio.to_thread(
-            lambda: service.events().insert(calendarId="primary", body=event, sendUpdates="all").execute()
+            lambda: service.events().insert(calendarId="primary", body=event).execute()
         )
 
         return {

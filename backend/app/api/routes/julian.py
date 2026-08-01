@@ -162,7 +162,6 @@ async def handle_tool_call(request: Request):
         elif fn_name == "book_meeting":
             booking = await calendar_service.book_meeting(
                 contact_name=fn_args.get("contact_name", "Prospect"),
-                contact_email=fn_args.get("contact_email", ""),
                 meeting_datetime=fn_args.get("datetime", ""),
                 duration=fn_args.get("duration", 30),
             )
