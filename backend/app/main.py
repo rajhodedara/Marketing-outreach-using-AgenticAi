@@ -13,7 +13,8 @@ from app.config import settings
 from app.db.session import engine
 from app.db.models import create_tables
 from app.db import chunk_model  # noqa: F401 — register table with metadata
-from app.api.routes import upload, accounts, analysis
+from app.api.routes import upload, accounts, analysis, julian, google_auth, ws
+from app.services import vapi_service
 
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
@@ -31,6 +32,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize SQLite tables
     logger.info("Creating database tables if not exist...")
     await create_tables(engine)
+
+    # Bootstrap Julian's Vapi assistant
+    logger.info("Bootstrapping Julian Vapi assistant...")
+    try:
+        assistant_id = await vapi_service.get_assistant_id()
+        if assistant_id:
+            logger.info(f"Julian assistant ready: {assistant_id}")
+        else:
+            logger.warning("Julian assistant not ready — check VAPI_PRIVATE_KEY")
+    except Exception as e:
+        logger.warning(f"Could not bootstrap Julian assistant: {e}")
     
     # Initialize Qdrant Client
     logger.info("Initializing Qdrant client...")
@@ -81,3 +93,6 @@ async def health_check() -> dict[str, str]:
 app.include_router(upload.router, prefix="/api", tags=["Upload"])
 app.include_router(accounts.router, prefix="/api", tags=["Accounts"])
 app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
+app.include_router(julian.router, prefix="/api", tags=["Julian"])
+app.include_router(google_auth.router, prefix="/api", tags=["Google OAuth"])
+app.include_router(ws.router, tags=["WebSocket"])

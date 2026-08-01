@@ -3,6 +3,7 @@ from __future__ import annotations
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    # Existing
     groq_api_key: str = ""
     openrouter_api_key: str = ""
     cerebras_api_key: str = ""
@@ -13,6 +14,24 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     log_level: str = "INFO"
+
+    # Vapi
+    vapi_public_key: str = ""
+    vapi_private_key: str = ""
+
+    # LLM for Vapi (Groq)
+    llm_api_key: str = ""
+
+    # ElevenLabs TTS
+    tts_api_key: str = ""
+
+    # Google Calendar
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_refresh_token: str = ""
+
+    # Nova backend URL (ngrok)
+    nova_backend_url: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

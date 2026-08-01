@@ -1,10 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ExecutionGraph, ExecutionStep } from '@/components/julian/ExecutionGraph';
 import { CallBrief, CallBriefData } from '@/components/julian/CallBrief';
 import { ConversationFeed, ChatMessage } from '@/components/julian/ConversationFeed';
-import { CommandInput } from '@/components/julian/CommandInput';
+import {
+  startJulianCall,
+  stopCall,
+  onCallStart,
+  onCallEnd,
+  onTranscript,
+  onError,
+  offAll,
+  CallStatus,
+} from '@/lib/vapi';
 
 type Account = {
   id: string;
@@ -12,190 +21,227 @@ type Account = {
   company_name: string | null;
 };
 
-// Define initial graph steps
 const INITIAL_STEPS: ExecutionStep[] = [
   { id: '1', label: 'Load Brief', description: 'Ingest verified facts from Nova', status: 'pending' },
-  { id: '2', label: 'Analyze Stakeholder', description: 'Extract persona context and constraints', status: 'pending' },
-  { id: '3', label: 'Prepare Script', description: 'Generate dynamic conversation branches', status: 'pending' },
-  { id: '4', label: 'Dialing', description: 'Connecting to prospect', status: 'pending' },
-  { id: '5', label: 'In Call', description: 'Executing adaptive voice dialogue', status: 'pending' },
+  { id: '2', label: 'Prepare Script', description: 'Configure Julian with verified context', status: 'pending' },
+  { id: '3', label: 'Connecting', description: 'Establishing WebRTC voice session', status: 'pending' },
+  { id: '4', label: 'In Call', description: 'Executing adaptive voice dialogue', status: 'pending' },
 ];
 
 export default function JulianWorkspace() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
-  const [loadingAccounts, setLoadingAccounts] = useState(true);
-  
   const [briefData, setBriefData] = useState<CallBriefData | null>(null);
+  const [briefText, setBriefText] = useState<string>('');
   const [loadingBrief, setLoadingBrief] = useState(false);
+  const [assistantId, setAssistantId] = useState<string>('');
 
-  // Simulation State
-  const [isSimulating, setIsSimulating] = useState(false);
+  // Call state
+  const [callStatus, setCallStatus] = useState<CallStatus>('idle');
+  const [currentCallId, setCurrentCallId] = useState<string>('');
   const [steps, setSteps] = useState<ExecutionStep[]>(INITIAL_STEPS);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [flaggedItems, setFlaggedItems] = useState<string[]>([]);
   const [meetingBooked, setMeetingBooked] = useState(false);
+  const [callSummary, setCallSummary] = useState<string>('');
+  const [retryCount, setRetryCount] = useState(0);
 
-  // 1. Fetch Accounts on mount
+  const wsRef = useRef<WebSocket | null>(null);
+
+  // ─── Data Fetching ───────────────────────────────────────────────────────
+
   useEffect(() => {
     fetch('/api/accounts')
-      .then(res => res.json())
-      .then(data => {
-        setAccounts(data.accounts || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoadingAccounts(false));
+      .then(r => r.json())
+      .then(d => setAccounts(d.accounts || []))
+      .catch(console.error);
+
+    // Pre-fetch Julian assistant ID
+    fetch('/api/julian/assistant-id')
+      .then(r => r.json())
+      .then(d => setAssistantId(d.assistant_id || ''))
+      .catch(console.error);
   }, []);
 
-  // 2. Fetch Brief Data when account changes
   useEffect(() => {
-    if (!selectedAccountId) {
-      setBriefData(null);
-      return;
-    }
-    
+    if (!selectedAccountId) { setBriefData(null); setBriefText(''); return; }
     setLoadingBrief(true);
     fetch(`/api/accounts/${selectedAccountId}`)
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
         const plan = data.latest_analysis?.result?.account_plan;
         const drafts = data.latest_analysis?.result?.outreach_drafts;
-        
-        let persona = "Unknown";
-        if (drafts && drafts.length > 0) {
-          persona = drafts[0].target_persona;
-        }
+        let persona = drafts?.[0]?.target_persona || 'Unknown';
 
-        if (plan) {
-          setBriefData({
-            companyName: data.company_name || data.domain,
-            targetPersona: persona,
-            painPoints: plan.challenges || [],
-            buyingSignals: plan.key_initiatives || []
-          });
-        } else {
-          // Mock data if no analysis exists
-          setBriefData({
-            companyName: data.company_name || data.domain,
-            targetPersona: "Dana Whitfield (VP Operations)",
-            painPoints: [
-              "High Nursing Turnover - Mentioned 'critical shortage' in last two QBRs.",
-              "Integration Delays - Current API limitations causing 24hr lag."
-            ],
-            buyingSignals: [
-              "Budget Allocation Confirmed - Earmarked funds in the Q1 budget."
-            ]
-          });
-        }
+        const brief: CallBriefData = plan
+          ? {
+              companyName: data.company_name || data.domain,
+              targetPersona: persona,
+              painPoints: plan.challenges || [],
+              buyingSignals: plan.key_initiatives || [],
+            }
+          : {
+              companyName: data.company_name || data.domain,
+              targetPersona: 'Dana Whitfield (VP Operations)',
+              painPoints: [
+                "High Nursing Turnover — mentioned 'critical shortage' in last QBR.",
+                'Integration Delays — current API causes 24hr lag.',
+              ],
+              buyingSignals: ['Q1 budget allocated for workflow automation.'],
+            };
+
+        setBriefData(brief);
+
+        // Build brief text string for Vapi variable injection
+        const bt =
+          `Company: ${brief.companyName}\n` +
+          `Target Persona: ${brief.targetPersona}\n` +
+          `Pain Points:\n${brief.painPoints.map(p => `- ${p}`).join('\n')}\n` +
+          `Buying Signals:\n${brief.buyingSignals.map(s => `- ${s}`).join('\n')}`;
+        setBriefText(bt);
       })
       .catch(console.error)
       .finally(() => setLoadingBrief(false));
   }, [selectedAccountId]);
 
-  const updateStepStatus = (id: string, status: ExecutionStep['status'], result?: string) => {
+  // ─── WebSocket for live transcript ──────────────────────────────────────
+
+  const connectWebSocket = useCallback((callId: string) => {
+    if (wsRef.current) wsRef.current.close();
+    const wsUrl = `ws://localhost:8000/ws/transcript/${callId}`;
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('[WS] Connected to transcript stream');
+      // Keep-alive ping every 25s
+      const ping = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+      }, 25000);
+      ws.onclose = () => clearInterval(ping);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'transcript' && data.text) {
+          addMessage({
+            role: data.role === 'assistant' ? 'julian' : 'prospect',
+            content: data.text,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          });
+        } else if (data.type === 'call_ended') {
+          if (data.data?.summary) setCallSummary(data.data.summary);
+        }
+      } catch {}
+    };
+  }, []);
+
+  // ─── Vapi Event Wiring ──────────────────────────────────────────────────
+
+  const updateStep = (id: string, status: ExecutionStep['status'], result?: string) => {
     setSteps(prev => prev.map(s => s.id === id ? { ...s, status, result } : s));
   };
 
   const addMessage = (msg: Omit<ChatMessage, 'id'>) => {
-    setMessages(prev => [...prev, { ...msg, id: Math.random().toString(36).substring(7) }]);
+    setMessages(prev => [...prev, { ...msg, id: Math.random().toString(36).slice(2) }]);
   };
 
-  // Run the simulation
-  const startSimulation = (command: string) => {
-    if (!selectedAccountId) {
-      alert("Please select an account first");
-      return;
-    }
+  // ─── Start Call ──────────────────────────────────────────────────────────
 
-    setIsSimulating(true);
+  const handleStartCall = async () => {
+    if (!selectedAccountId || !assistantId || !briefText) return;
+
+    setCallStatus('connecting');
     setSteps(INITIAL_STEPS);
     setMessages([]);
     setFlaggedItems([]);
     setMeetingBooked(false);
+    setCallSummary('');
 
-    // Timeline for the simulation
-    setTimeout(() => {
-      updateStepStatus('1', 'active');
-      addMessage({ role: 'system', content: `Julian initialized with command: "${command}"`, timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-    }, 500);
+    updateStep('1', 'active');
+    addMessage({ role: 'system', content: 'Loading verified call brief...', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
 
-    setTimeout(() => {
-      updateStepStatus('1', 'completed');
-      updateStepStatus('2', 'active');
-    }, 2000);
+    // Wire up Vapi SDK events
+    offAll();
 
-    setTimeout(() => {
-      updateStepStatus('2', 'completed', `Target: ${briefData?.targetPersona}\nConstraints: Stick strictly to verified brief.`);
-      updateStepStatus('3', 'active');
-    }, 4000);
+    onCallStart(() => {
+      setCallStatus('active');
+      updateStep('1', 'completed');
+      updateStep('2', 'completed');
+      updateStep('3', 'completed');
+      updateStep('4', 'active');
+      addMessage({ role: 'system', content: 'WebRTC session established — Julian is live.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+    });
 
-    setTimeout(() => {
-      updateStepStatus('3', 'completed');
-      updateStepStatus('4', 'active');
-      addMessage({ role: 'system', content: 'Calling prospect...', timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-    }, 6000);
-
-    setTimeout(() => {
-      updateStepStatus('4', 'completed');
-      updateStepStatus('5', 'active');
-      addMessage({ role: 'prospect', content: 'Hello, this is Dana.', timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-    }, 8500);
-
-    setTimeout(() => {
-      addMessage({ 
-        role: 'julian', 
-        content: "Hi Dana, this is Julian calling. I noticed you mentioned a critical shortage in nursing turnover during the last QBR. I'm reaching out because we've successfully addressed exactly that for similar teams.", 
-        timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        citations: ['QBR Transcript Q3: "nursing turnover is our critical shortage"']
+    onTranscript((msg) => {
+      addMessage({
+        role: msg.role === 'assistant' ? 'julian' : 'prospect',
+        content: msg.text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       });
-    }, 11000);
+    });
 
-    setTimeout(() => {
-      addMessage({ 
-        role: 'prospect', 
-        content: 'Yes, turnover is a huge issue. But how does your tool handle integration? Our current API has a 24-hour lag and it\'s killing us. Also, does it support HIPAA-compliant SMS?', 
-        timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
-      });
-    }, 15000);
+    onCallEnd(() => {
+      setCallStatus('ended');
+      updateStep('4', 'completed');
+      addMessage({ role: 'system', content: 'Call ended.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      if (wsRef.current) wsRef.current.close();
+    });
 
-    setTimeout(() => {
-      updateStepStatus('5', 'flagged', 'Unverified Question Detected: HIPAA-compliant SMS');
-      addMessage({ role: 'system', content: 'Guardrail Triggered: Prospect asked about HIPAA SMS. Not found in verified brief.', timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-      setFlaggedItems(['Does the tool support HIPAA-compliant SMS?']);
-    }, 17000);
+    onError((err) => {
+      console.error('[Vapi]', err);
+      if (retryCount < 1) {
+        setRetryCount(r => r + 1);
+        addMessage({ role: 'system', content: 'Connection failed — retrying once...', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+        setTimeout(() => handleStartCall(), 2000);
+      } else {
+        setCallStatus('error');
+        updateStep('3', 'flagged', `Connection failed: ${err?.message || 'Unknown error'}`);
+        addMessage({ role: 'system', content: `❌ Call failed to connect: ${err?.message || 'Unknown error'}`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      }
+    });
 
-    setTimeout(() => {
-      addMessage({ 
-        role: 'julian', 
-        content: "I totally understand the frustration with the 24-hour API lag. We can eliminate that delay completely. Regarding the HIPAA-compliant SMS, I want to give you a 100% accurate answer, so I'll have my research agent verify our exact compliance scope for SMS and follow up with you today. Would you be open to a 15-minute sync next Tuesday to review the API integration?", 
-        timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        citations: ['Brief: Integration Delays - Current API limitations causing 24hr lag']
-      });
-    }, 20000);
+    // Show pipeline loading steps
+    updateStep('2', 'active');
+    await new Promise(r => setTimeout(r, 800));
+    updateStep('3', 'active');
 
-    setTimeout(() => {
-      addMessage({ role: 'prospect', content: 'Sure, Tuesday at 10 AM works. Send over the invite.', timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-    }, 24000);
-
-    setTimeout(() => {
-      addMessage({ role: 'julian', content: 'Perfect, I\'ve got you booked for Tuesday at 10 AM. Talk to you then, Dana.', timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-      setSteps(prev => [...prev, { id: '6', label: 'Booking Meeting', description: 'Integrating with calendar API', status: 'active' }]);
-    }, 27000);
-
-    setTimeout(() => {
-      updateStepStatus('5', 'completed');
-      updateStepStatus('6', 'completed');
-      setMeetingBooked(true);
-      addMessage({ role: 'system', content: 'Meeting booked for Tuesday 10:00 AM', timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-      setIsSimulating(false);
-    }, 30000);
+    try {
+      const callId = await startJulianCall(assistantId, briefText);
+      if (callId) {
+        setCurrentCallId(callId);
+        connectWebSocket(callId);
+      }
+    } catch (err: any) {
+      setCallStatus('error');
+      updateStep('3', 'flagged', `Failed: ${err?.message}`);
+      addMessage({ role: 'system', content: `❌ Failed to start call: ${err?.message}`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+    }
   };
+
+  const handleStopCall = () => {
+    stopCall();
+    offAll();
+    setCallStatus('ended');
+    updateStep('4', 'completed');
+    addMessage({ role: 'system', content: 'Call stopped by user.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+    if (wsRef.current) wsRef.current.close();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => { offAll(); if (wsRef.current) wsRef.current.close(); };
+  }, []);
+
+  const isActive = callStatus === 'active';
+  const isConnecting = callStatus === 'connecting';
 
   return (
     <div className="h-full flex flex-col lg:flex-row overflow-hidden max-w-[1600px] mx-auto bg-background">
       {/* LEFT PANEL */}
       <div className="w-full lg:w-[60%] h-full flex flex-col border-r border-border p-6 bg-card/30">
-        
+
         {/* Header & Controls */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -203,16 +249,16 @@ export default function JulianWorkspace() {
               <span className="material-symbols-outlined text-primary text-[28px]">record_voice_over</span>
               Julian
             </h1>
-            <p className="text-muted-foreground text-[14px]">Voice Outreach Agent</p>
+            <p className="text-muted-foreground text-[14px]">Voice Outreach Agent · Powered by Vapi + ElevenLabs</p>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-[12px] text-muted-foreground">Target Account:</span>
-            <select 
+            <select
               className="bg-card border border-border text-foreground text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary min-w-[200px]"
               value={selectedAccountId}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              disabled={isSimulating}
+              onChange={e => setSelectedAccountId(e.target.value)}
+              disabled={isActive || isConnecting}
             >
               <option value="">Select Account...</option>
               {accounts.map(acc => (
@@ -222,11 +268,11 @@ export default function JulianWorkspace() {
           </div>
         </div>
 
-        {/* Call Brief Area */}
+        {/* Call Brief */}
         <div className="shrink-0 mb-2">
           {loadingBrief ? (
             <div className="h-32 flex items-center justify-center bg-muted/20 border border-border rounded-lg animate-pulse">
-              <span className="material-symbols-outlined spin-slow text-muted-foreground">sync</span>
+              <span className="material-symbols-outlined text-muted-foreground animate-spin">sync</span>
             </div>
           ) : (
             <CallBrief data={briefData} />
@@ -236,8 +282,52 @@ export default function JulianWorkspace() {
         {/* Conversation Feed */}
         <ConversationFeed messages={messages} />
 
-        {/* Command Input */}
-        <CommandInput onCommand={startSimulation} disabled={isSimulating || !selectedAccountId} />
+        {/* Call Summary */}
+        {callSummary && (
+          <div className="mt-4 p-4 bg-muted/20 border border-border rounded-lg">
+            <h4 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Call Summary</h4>
+            <p className="text-[13px] text-foreground">{callSummary}</p>
+          </div>
+        )}
+
+        {/* Call Button */}
+        <div className="mt-4 flex gap-3">
+          {!isActive && !isConnecting ? (
+            <button
+              onClick={handleStartCall}
+              disabled={!selectedAccountId || !assistantId || !briefText || callStatus === 'connecting'}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-xl font-semibold text-[15px] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[20px]">call</span>
+              {assistantId ? `Call ${briefData?.targetPersona?.split(' ')[0] || 'Prospect'}` : 'Loading Julian...'}
+            </button>
+          ) : (
+            <>
+              {isConnecting && (
+                <div className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-muted border border-border rounded-xl text-muted-foreground font-semibold text-[15px]">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-ping mr-1"></span>
+                  Connecting to Vapi...
+                </div>
+              )}
+              {isActive && (
+                <button
+                  onClick={handleStopCall}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-destructive text-destructive-foreground rounded-xl font-semibold text-[15px] hover:bg-destructive/90 transition-all active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[20px]">call_end</span>
+                  End Call
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Google Calendar OAuth notice */}
+        {!isActive && callStatus === 'idle' && (
+          <p className="mt-3 text-[11px] text-muted-foreground text-center">
+            📅 First time? <a href="http://localhost:8000/api/google/auth" target="_blank" rel="noreferrer" className="underline hover:text-foreground">Connect Google Calendar</a> so Julian can book meetings.
+          </p>
+        )}
       </div>
 
       {/* RIGHT PANEL */}
@@ -249,11 +339,11 @@ export default function JulianWorkspace() {
           </h2>
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
-              {isSimulating && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>}
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isSimulating ? 'bg-primary' : 'bg-muted-foreground'}`}></span>
+              {isActive && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>}
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isActive ? 'bg-primary' : isConnecting ? 'bg-amber-500' : 'bg-muted-foreground'}`}></span>
             </span>
             <span className="text-[12px] text-muted-foreground font-mono uppercase tracking-wider">
-              {isSimulating ? 'Executing' : 'Standby'}
+              {isActive ? 'Live' : isConnecting ? 'Connecting' : callStatus === 'ended' ? 'Completed' : 'Standby'}
             </span>
           </div>
         </div>
@@ -262,17 +352,17 @@ export default function JulianWorkspace() {
           <ExecutionGraph steps={steps} />
         </div>
 
-        {/* Outcomes Section (Sticky Bottom) */}
+        {/* Outcomes */}
         {(flaggedItems.length > 0 || meetingBooked) && (
           <div className="p-6 border-t border-border bg-sidebar shrink-0 space-y-4">
             <h3 className="text-[14px] font-semibold text-foreground uppercase tracking-wider mb-2">Call Outcomes</h3>
-            
+
             {meetingBooked && (
               <div className="flex items-start gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg">
                 <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">event_available</span>
                 <div>
                   <div className="text-[14px] font-semibold text-primary">Meeting Booked</div>
-                  <div className="text-[12px] text-muted-foreground mt-0.5">Tuesday at 10:00 AM</div>
+                  <div className="text-[12px] text-muted-foreground mt-0.5">Via Google Calendar</div>
                 </div>
               </div>
             )}
@@ -282,7 +372,7 @@ export default function JulianWorkspace() {
                 <span className="material-symbols-outlined text-amber-500 text-[20px] mt-0.5">flag</span>
                 <div>
                   <div className="text-[14px] font-semibold text-amber-500">Flagged to Nova</div>
-                  <div className="text-[12px] text-muted-foreground mt-0.5">Julian encountered questions not in the verified brief.</div>
+                  <div className="text-[12px] text-muted-foreground mt-0.5">Unanswered questions sent for follow-up.</div>
                   <ul className="mt-2 space-y-1">
                     {flaggedItems.map((item, i) => (
                       <li key={i} className="text-[12px] text-foreground font-mono bg-black/20 p-1.5 rounded">{item}</li>
@@ -293,6 +383,24 @@ export default function JulianWorkspace() {
             )}
           </div>
         )}
+
+        {/* API Status */}
+        <div className="p-4 border-t border-border text-[11px] text-muted-foreground font-mono space-y-1">
+          <div className="flex justify-between">
+            <span>Julian Assistant</span>
+            <span className={assistantId ? 'text-primary' : 'text-destructive'}>{assistantId ? `✓ ${assistantId.slice(0, 8)}...` : '✗ Not ready'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Google Calendar</span>
+            <a href="http://localhost:8000/api/google/auth" target="_blank" rel="noreferrer" className="text-amber-500 underline">Connect →</a>
+          </div>
+          {currentCallId && (
+            <div className="flex justify-between">
+              <span>Call ID</span>
+              <span className="text-primary">{currentCallId.slice(0, 12)}...</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
