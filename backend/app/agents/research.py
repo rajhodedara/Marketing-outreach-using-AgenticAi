@@ -6,8 +6,22 @@ from app.core.llm import get_cerebras_llm
 from app.agents.state import PipelineState
 from app.schemas.ai import ResearchFindings, ResearchFinding, CitationRef
 from app.rag.retriever import retrieve as qdrant_retrieve
+from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+def _format_retrieved_chunk(doc: dict, idx: int) -> str:
+    chunk_id = doc.get("chunk_id", f"doc_{idx}")
+    document_name = doc.get("document_name", "unknown")
+    line_start = doc.get("line_start", 0)
+    line_end = doc.get("line_end", 0)
+    snippet = doc.get("snippet", "")
+    return (
+        f"Source ID: {chunk_id}\n"
+        f"Document: {document_name}\n"
+        f"Lines: {line_start}-{line_end}\n"
+        f"Snippet: {snippet}"
+    )
 
 async def research_node(state: PipelineState) -> dict:
     """
@@ -27,11 +41,8 @@ async def research_node(state: PipelineState) -> dict:
     query = f"Background information, products, services, recent news, and market positioning for {company_name}"
     retrieved_docs = await qdrant_retrieve(account_id, query, limit=5)
     
-    context = ""
-    for idx, doc in enumerate(retrieved_docs):
-        chunk_id = doc.get('chunk_id', f"doc_{idx}")
-        snippet = doc.get('snippet', '')
-        context += f"Source ID: {chunk_id}\nSnippet: {snippet}\n\n"
+    retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
+    context = "\n\n".join(retrieved_chunks)
         
     # 2. Mock LLM response if needed
     if settings.use_mock_llm:
@@ -45,7 +56,7 @@ async def research_node(state: PipelineState) -> dict:
                 )
             ]
         )
-        return {"research": mock_findings}
+        return {"research": mock_findings, "retrieved_chunks": retrieved_chunks}
         
     # 3. Call LLM for structured output
     llm = get_cerebras_llm(temperature=0.0)
@@ -64,7 +75,7 @@ async def research_node(state: PipelineState) -> dict:
     
     try:
         result = await chain.ainvoke({"company_name": company_name, "context": context})
-        return {"research": result}
+        return {"research": result, "retrieved_chunks": retrieved_chunks}
     except Exception as e:
         logger.error(f"Error in research node LLM call: {e}")
-        return {"research": ResearchFindings(findings=[])}
+        return {"research": ResearchFindings(findings=[]), "retrieved_chunks": retrieved_chunks}

@@ -99,7 +99,8 @@ export default function AIProcessingView({ params }: { params: Promise<{ id: str
           const res = await fetch(`/api/accounts/${accountId}`);
           if (res.ok) {
             const data = await res.json();
-            if (data.status === 'completed' || data.status === 'analyzed') {
+            const status = data.latest_analysis?.status || data.status;
+            if (status === 'completed' || status === 'analyzed') {
               clearInterval(pollInterval);
               setProgress(100);
               toast.success("Analysis Complete");

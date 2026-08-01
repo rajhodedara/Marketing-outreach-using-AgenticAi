@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 pii_masker = PIIMasker()
 chunker = DocumentChunker()
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+READ_CHUNK_BYTES = 1024 * 1024
 
 
 @router.post("/upload")
@@ -43,10 +45,23 @@ async def upload_data_pack(
             detail="File must be a .zip archive.",
         )
 
-    # 1. Save zip to temp location
+    # 1. Save zip to temp location with a bounded read.
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
-        content = await file.read()
-        tmp.write(content)
+        total_bytes = 0
+        while True:
+            content = await file.read(READ_CHUNK_BYTES)
+            if not content:
+                break
+            total_bytes += len(content)
+            if total_bytes > MAX_UPLOAD_BYTES:
+                tmp_path = Path(tmp.name)
+                tmp.close()
+                tmp_path.unlink(missing_ok=True)
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail="File exceeds the 25 MB upload limit.",
+                )
+            tmp.write(content)
         tmp_path = Path(tmp.name)
 
     try:

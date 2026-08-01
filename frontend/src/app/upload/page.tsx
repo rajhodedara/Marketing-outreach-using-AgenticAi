@@ -50,6 +50,9 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("account_name", accountName || file.name.replace(".zip", "").replace("_", " "));
+    if (companyDomain.trim()) {
+      formData.append("account_domain", companyDomain.trim());
+    }
 
     try {
       const res = await fetch("/api/upload", {
@@ -189,7 +192,7 @@ export default function UploadPage() {
           
           {/* Helper Microcopy */}
           <p className="mt-4 font-mono text-[13px] leading-[18px] text-muted-foreground text-center max-w-md mx-auto">
-            We'll research the company, map stakeholders, and identify buying signals — usually under 60 seconds.
+            We&apos;ll research the company, map stakeholders, and identify buying signals — usually under 60 seconds.
           </p>
         </div>
       </div>

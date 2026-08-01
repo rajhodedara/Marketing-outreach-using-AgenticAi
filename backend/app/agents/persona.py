@@ -7,11 +7,25 @@ from app.core.llm import get_cerebras_llm
 from app.agents.state import PipelineState
 from app.schemas.ai import StakeholderProfile
 from app.rag.retriever import retrieve as qdrant_retrieve
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 class StakeholderProfiles(BaseModel):
     profiles: list[StakeholderProfile]
+
+def _format_retrieved_chunk(doc: dict, idx: int) -> str:
+    chunk_id = doc.get("chunk_id", f"doc_{idx}")
+    document_name = doc.get("document_name", "unknown")
+    line_start = doc.get("line_start", 0)
+    line_end = doc.get("line_end", 0)
+    snippet = doc.get("snippet", "")
+    return (
+        f"Source ID: {chunk_id}\n"
+        f"Document: {document_name}\n"
+        f"Lines: {line_start}-{line_end}\n"
+        f"Snippet: {snippet}"
+    )
 
 async def persona_node(state: PipelineState) -> dict:
     """
@@ -29,10 +43,8 @@ async def persona_node(state: PipelineState) -> dict:
     query = f"Key stakeholders, decision makers, executives, and team members at {company_name}"
     retrieved_docs = await qdrant_retrieve(account_id, query, limit=5)
     
-    context = ""
-    for idx, doc in enumerate(retrieved_docs):
-        snippet = doc.get('snippet', '')
-        context += f"Snippet: {snippet}\n\n"
+    retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
+    context = "\n\n".join(retrieved_chunks)
         
     if settings.use_mock_llm:
         logger.info("Using mock LLM for persona node")
@@ -44,7 +56,7 @@ async def persona_node(state: PipelineState) -> dict:
                 key_concerns=["Revenue growth", "Market expansion"]
             )
         ]
-        return {"stakeholders": mock_profiles}
+        return {"stakeholders": mock_profiles, "retrieved_chunks": retrieved_chunks}
         
     llm = get_cerebras_llm(temperature=0.0)
     if not llm:
@@ -62,7 +74,7 @@ async def persona_node(state: PipelineState) -> dict:
     
     try:
         result = await chain.ainvoke({"company_name": company_name, "context": context})
-        return {"stakeholders": result.profiles}
+        return {"stakeholders": result.profiles, "retrieved_chunks": retrieved_chunks}
     except Exception as e:
         logger.error(f"Error in persona node LLM call: {e}")
-        return {"stakeholders": []}
+        return {"stakeholders": [], "retrieved_chunks": retrieved_chunks}

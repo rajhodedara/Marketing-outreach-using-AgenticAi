@@ -35,7 +35,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize Qdrant Client
     logger.info("Initializing Qdrant client...")
     if settings.qdrant_in_memory:
-        qdrant_client = AsyncQdrantClient(location=":memory:")
+        import os
+        os.makedirs("./data/qdrant", exist_ok=True)
+        qdrant_client = AsyncQdrantClient(path="./data/qdrant")
     else:
         qdrant_client = AsyncQdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
     

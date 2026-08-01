@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TypedDict
+import operator
+from typing import Annotated, TypedDict
 from app.schemas.ai import (
     ResearchFindings,
     StakeholderProfile,
@@ -32,7 +33,7 @@ class PipelineState(TypedDict, total=False):
     critic_retry_count: int
     
     # Retrieved knowledge
-    retrieved_chunks: list[str] | None
+    retrieved_chunks: Annotated[list[str], operator.add]
     
     # State tracking
     next_step: str | None
