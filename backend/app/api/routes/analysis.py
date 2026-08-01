@@ -14,7 +14,6 @@ from app.db.session import get_db, async_session_maker
 from app.db.models import Account, AnalysisSession
 from app.agents.graph import graph
 from app.agents.state import PipelineState
-from app.api.auth import verify_supabase_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -24,8 +23,7 @@ router = APIRouter()
 async def trigger_analysis(
     account_id: str,
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db),
-    token: dict = Depends(verify_supabase_token)
+    db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Trigger the multi-agent analysis pipeline for an account.
 
@@ -137,8 +135,7 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
 @router.get("/analysis/{session_id}")
 async def get_analysis_result(
     session_id: str,
-    db: AsyncSession = Depends(get_db),
-    token: dict = Depends(verify_supabase_token)
+    db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Get the result of an analysis session."""
     result = await db.execute(

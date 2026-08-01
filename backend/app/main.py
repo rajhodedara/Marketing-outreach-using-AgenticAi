@@ -13,7 +13,7 @@ from app.config import settings
 from app.db.session import engine
 from app.db.models import create_tables
 from app.db import chunk_model  # noqa: F401 — register table with metadata
-from app.api.routes import upload, analysis
+from app.api.routes import upload, accounts, analysis
 
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
@@ -77,4 +77,5 @@ async def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 app.include_router(upload.router, prefix="/api", tags=["Upload"])
+app.include_router(accounts.router, prefix="/api", tags=["Accounts"])
 app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
