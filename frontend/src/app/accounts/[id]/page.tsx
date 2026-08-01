@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import StakeholderMap from "./StakeholderMap";
 
 // Types
 type CitationRef = {
@@ -136,9 +137,21 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
   }
 
   // Extrapolate stakeholders from drafts (target_persona)
-  const stakeholders = result?.drafts?.length 
+  const rawStakeholders = result?.drafts?.length 
     ? result.drafts.map(d => d.target_persona).filter((v, i, a) => a.indexOf(v) === i)
     : ["Dana Whitfield (VP Clinical Ops)", "Marcus Iyer (Director IT)", "Priya Chandrasekaran (CFO)"]; // Fallbacks while pending
+
+  const stakeholders = rawStakeholders.map((s, i) => {
+    const name = typeof s === 'string' ? s.split('(')[0].trim() || s : s;
+    const roleMatch = typeof s === 'string' ? s.match(/\((.*?)\)/) : null;
+    const role = roleMatch ? roleMatch[1] : (i === 0 ? "VP Operations" : i === 1 ? "Director IT" : "CFO");
+    return {
+      name,
+      role,
+      key_concerns: ["Evaluating solutions for operational efficiency"],
+      history: []
+    };
+  });
 
   const painPoints = result?.plan?.challenges || [
     "High Nursing Turnover - Mentioned \"critical shortage\" in last two QBRs.",
@@ -206,41 +219,10 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* 2. Stakeholder Cards Row */}
+      {/* 2. Stakeholder Map */}
       <div>
-        <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4">Key Stakeholders</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {stakeholders.slice(0, 3).map((stakeholder, i) => {
-            const name = stakeholder.split('(')[0].trim() || stakeholder;
-            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'ST';
-            const roleMatch = stakeholder.match(/\((.*?)\)/);
-            const role = roleMatch ? roleMatch[1] : (i === 0 ? "VP Operations" : i === 1 ? "Director IT" : "CFO");
-            
-            return (
-              <div key={i} className="bg-card border border-border rounded-lg p-4 hover:shadow-sm transition-shadow shadow-sm cursor-pointer" onClick={() => router.push(`/accounts/${accountId}/stakeholder/${i}`)}>
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary font-bold">{initials}</div>
-                    <div>
-                      <div className="font-medium text-foreground text-[16px]">{name}</div>
-                      <div className="text-[12px] text-muted-foreground">{role}</div>
-                    </div>
-                  </div>
-                  <Link href={`/accounts/${accountId}/outreach`} className="text-primary hover:bg-primary/10 p-1 rounded transition-colors" onClick={(e) => e.stopPropagation()}>
-                    <span className="material-symbols-outlined text-[20px] text-primary">mail</span>
-                  </Link>
-                </div>
-                <div className="bg-background rounded p-3 border border-border">
-                  <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-1">Primary Concern</div>
-                  <div className="text-[12px] leading-[16px] text-foreground flex items-baseline justify-between">
-                    <span className="line-clamp-2">"Evaluating solutions for operational efficiency"</span>
-                    <span className="font-mono text-[13px] text-muted-foreground ml-2">[1]</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4">Stakeholder Map</h2>
+        <StakeholderMap stakeholders={stakeholders} accountId={accountId} />
       </div>
 
       {/* 3. Main Content Grid */}
@@ -335,7 +317,7 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
                   <span className="material-symbols-outlined text-[20px]">calendar_month</span>
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-foreground mb-1 text-[14px]">Schedule follow-up with {stakeholders[0]?.split('(')[0].trim() || 'Stakeholder'}</div>
+                  <div className="font-medium text-foreground mb-1 text-[14px]">Schedule follow-up with {stakeholders[0]?.name || 'Stakeholder'}</div>
                   <p className="text-[12px] leading-[16px] text-muted-foreground mb-2">Address budget finalization. Emphasize ROI timeline for operational efficiency tools.</p>
                   <Link href={`/accounts/${accountId}/outreach`} className="text-primary text-[14px] font-medium hover:underline flex items-center gap-1">
                     Draft Email <span className="material-symbols-outlined text-[16px]">arrow_forward</span>

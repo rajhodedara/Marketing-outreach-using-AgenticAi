@@ -9,11 +9,14 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from fastapi.responses import StreamingResponse
+import asyncio
 
 from app.db.session import get_db, async_session_maker
 from app.db.models import Account, AnalysisSession
 from app.agents.graph import graph
 from app.agents.state import PipelineState
+from app.core.events import publish_event, close_queue, get_queue
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -96,8 +99,18 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
             "status": "running"
         }
         
-        # Run graph
-        final_state = await graph.ainvoke(initial_state)
+        # Run graph with streaming
+        final_state = initial_state.copy()
+        await publish_event(session_id, json.dumps({"node": "system", "message": "Initializing Agent Swarm..."}))
+        
+        async for output in graph.astream(initial_state):
+            for node_name, state_update in output.items():
+                if isinstance(state_update, dict):
+                    final_state.update(state_update)
+                await publish_event(session_id, json.dumps({"node": node_name, "message": f"Agent {node_name} finished."}))
+        
+        await publish_event(session_id, json.dumps({"node": "system", "message": "Pipeline execution completed successfully."}))
+        close_queue(session_id)
         
         # Save result
         async with async_session_maker() as db:
@@ -130,6 +143,8 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
                 session.completed_at = datetime.now(timezone.utc)
                 session.error_message = str(e)
                 await db.commit()
+        await publish_event(session_id, json.dumps({"node": "system", "message": f"Error: {str(e)}"}))
+        close_queue(session_id)
 
 
 @router.get("/analysis/{session_id}")
@@ -154,3 +169,17 @@ async def get_analysis_result(
         "error_message": session.error_message,
         "result": json.loads(session.result_json) if session.result_json else None,
     }
+
+@router.get("/analysis/{session_id}/stream")
+async def stream_analysis(session_id: str):
+    """Stream analysis events."""
+    async def event_generator():
+        queue = get_queue(session_id)
+        while True:
+            data = await queue.get()
+            if data is None:
+                yield "data: [DONE]\n\n"
+                break
+            yield f"data: {data}\n\n"
+            
+    return StreamingResponse(event_generator(), media_type="text/event-stream")

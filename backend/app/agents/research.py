@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
-from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from app.config import settings
+from app.core.llm import get_cerebras_llm
 from app.agents.state import PipelineState
 from app.schemas.ai import ResearchFindings, ResearchFinding, CitationRef
 from app.rag.retriever import retrieve as qdrant_retrieve
@@ -49,11 +48,12 @@ async def research_node(state: PipelineState) -> dict:
         return {"research": mock_findings}
         
     # 3. Call LLM for structured output
-    llm = ChatGroq(
-        model="llama-3.1-70b-versatile", 
-        api_key=settings.groq_api_key, 
-        temperature=0.0
-    ).with_structured_output(ResearchFindings)
+    llm = get_cerebras_llm(temperature=0.0)
+    if not llm:
+        from langchain_community.chat_models import FakeListChatModel
+        llm = FakeListChatModel(responses=['{"summary": "Mock summary", "key_technologies": ["Mock"], "recent_news": ["Mock"]}'])
+        
+    llm = llm.with_structured_output(ResearchFindings)
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are an expert market researcher. Extract key research findings from the provided context. Make sure to back up your claims by generating CitationRef objects with the exact source_id and quote from the text."),

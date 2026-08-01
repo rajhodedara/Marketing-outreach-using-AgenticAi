@@ -24,7 +24,7 @@ export default function RootLayout({
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
       </head>
-      <body className={`${outfit.className} flex min-h-[100dvh] bg-background overflow-hidden text-foreground antialiased`}>
+      <body className={`${outfit.className} flex h-[100dvh] bg-background overflow-hidden text-foreground antialiased`}>
         <TooltipProvider delay={150}>
           <Sidebar />
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

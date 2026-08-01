@@ -8,7 +8,6 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 
 from app.db.chunk_model import DocumentChunkRecord
 from app.rag.embeddings import embedding_service
-from app.db.chunk_model import DocumentChunkRecord
 
 
 async def init_collection(account_id: str) -> None:

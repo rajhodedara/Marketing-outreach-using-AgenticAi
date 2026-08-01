@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     groq_api_key: str = ""
+    openrouter_api_key: str = ""
+    cerebras_api_key: str = ""
     database_url: str = "sqlite+aiosqlite:///./data/abm.db"
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
@@ -16,6 +18,6 @@ class Settings(BaseSettings):
 
     @property
     def use_mock_llm(self) -> bool:
-        return not bool(self.groq_api_key)
+        return not bool(self.openrouter_api_key) and not bool(self.cerebras_api_key) and not bool(self.groq_api_key)
 
 settings = Settings()

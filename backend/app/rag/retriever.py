@@ -20,16 +20,17 @@ async def retrieve(account_id: str, query: str, limit: int = 5) -> List[Dict[str
     # 1. Embed query
     query_vector = await embedding_service.get_embedding(query)
     
-    # 2. Search in Qdrant
-    search_result = await app.main.qdrant_client.search(
+    # 2. Search in Qdrant (query_points replaces deprecated .search())
+    from qdrant_client import models
+    search_result = await app.main.qdrant_client.query_points(
         collection_name=collection_name,
-        query_vector=query_vector,
+        query=query_vector,
         limit=limit,
     )
     
     # 3. Format citations
     citations = []
-    for hit in search_result:
+    for hit in search_result.points:
         payload = hit.payload or {}
         citations.append({
             "document_name": payload.get("document_name", ""),

@@ -88,7 +88,11 @@ export function Topbar() {
         <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2 h-8 text-[12px]">
           Export Data
         </Button>
-        <Button size="sm" className="flex items-center gap-2 h-8 bg-foreground text-background hover:bg-foreground/90 text-[12px]">
+        <Button 
+          onClick={() => router.push('/upload')}
+          size="sm" 
+          className="flex items-center gap-2 h-8 bg-foreground text-background hover:bg-foreground/90 text-[12px]"
+        >
           <span className="material-symbols-outlined text-[18px]">add</span>
           New Account
         </Button>

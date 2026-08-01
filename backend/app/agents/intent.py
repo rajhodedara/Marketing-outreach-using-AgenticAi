@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
-from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from app.config import settings
+from app.core.llm import get_cerebras_llm
 from app.agents.state import PipelineState
 from app.schemas.ai import IntentSignals, BuyingSignal
 from app.rag.retriever import retrieve as qdrant_retrieve
@@ -45,11 +44,12 @@ async def intent_node(state: PipelineState) -> dict:
         )
         return {"intent": mock_intent}
         
-    llm = ChatGroq(
-        model="llama-3.1-70b-versatile", 
-        api_key=settings.groq_api_key, 
-        temperature=0.0
-    ).with_structured_output(IntentSignals)
+    llm = get_cerebras_llm(temperature=0.0)
+    if not llm:
+        from langchain_community.chat_models import FakeListChatModel
+        llm = FakeListChatModel(responses=['{"intent_signals": [{"topic": "Mock", "urgency": "High", "supporting_quotes": []}]}'])
+        
+    llm = llm.with_structured_output(IntentSignals)
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are an expert intent analyst. Extract buying signals and compute an overall intent score from the provided context."),

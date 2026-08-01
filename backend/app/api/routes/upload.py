@@ -72,6 +72,9 @@ async def upload_data_pack(
                 industry=pack.crm_data.get("account", {}).get("industry") if pack.crm_data else None,
             )
             db.add(account)
+        else:
+            from app.db.models import utc_now
+            account.updated_at = utc_now()
             # await db.flush() - Removed because it might cause a hang
 
         account_id = account.id

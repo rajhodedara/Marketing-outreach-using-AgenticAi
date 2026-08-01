@@ -16,6 +16,7 @@ class PipelineState(TypedDict, total=False):
     """
     account_id: str
     company_name: str
+    qdrant_collection: str
     
     # Outcomes from parallel nodes
     research: ResearchFindings | None
@@ -35,3 +36,5 @@ class PipelineState(TypedDict, total=False):
     
     # State tracking
     next_step: str | None
+    status: str | None
+    step_count: int

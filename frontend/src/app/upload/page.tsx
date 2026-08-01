@@ -61,8 +61,9 @@ export default function UploadPage() {
         throw new Error("Failed to upload file");
       }
 
+      const data = await res.json();
       toast.success("Upload successful", { description: "Your data has been ingested successfully." });
-      router.push("/");
+      router.push(`/accounts/${data.account_id}`);
     } catch (error) {
       console.error(error);
       toast.error("Upload failed", { description: "There was an error uploading your data. Please try again." });

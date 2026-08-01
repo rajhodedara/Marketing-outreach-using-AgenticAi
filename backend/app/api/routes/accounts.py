@@ -19,7 +19,7 @@ async def list_accounts(
     db: AsyncSession = Depends(get_db)
 ) -> dict:
     """List all accounts."""
-    result = await db.execute(select(Account).order_by(Account.created_at.desc()))
+    result = await db.execute(select(Account).order_by(Account.updated_at.desc()))
     accounts = result.scalars().all()
     
     account_list = []
@@ -41,7 +41,7 @@ async def list_accounts(
             import json
             try:
                 res_dict = json.loads(latest_session.result_json)
-                intent_score = res_dict.get("intent_signals", {}).get("overall_score", "--")
+                intent_score = res_dict.get("intent", {}).get("overall_intent_score", "--")
                 stakeholders_count = len(res_dict.get("stakeholders", []))
             except Exception:
                 pass

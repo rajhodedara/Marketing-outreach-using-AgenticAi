@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 from pydantic import BaseModel
-from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from app.config import settings
+from app.core.llm import get_openrouter_llm
 from app.agents.state import PipelineState
 from app.schemas.ai import AccountPlan, OutreachDraft
 
@@ -45,11 +45,7 @@ async def action_node(state: PipelineState) -> dict:
             "outreach_drafts": [mock_draft]
         }
         
-    llm = ChatGroq(
-        model="llama-3.1-70b-versatile", 
-        api_key=settings.groq_api_key, 
-        temperature=0.4
-    ).with_structured_output(ActionOutput)
+    llm = get_openrouter_llm(temperature=0.2).with_structured_output(ActionOutput)
     
     research_text = research.model_dump_json(indent=2) if research else "No research available."
     stakeholders_text = "\n".join([s.model_dump_json() for s in stakeholders]) if stakeholders else "No stakeholders available."
