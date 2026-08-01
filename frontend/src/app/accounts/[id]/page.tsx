@@ -72,7 +72,7 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
 
   const fetchAccountData = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/accounts/${accountId}`);
+      const res = await fetch(`/api/accounts/${accountId}`);
       if (res.ok) {
         const data = await res.json();
         setAccount({

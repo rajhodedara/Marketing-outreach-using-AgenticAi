@@ -34,10 +34,10 @@ export function Sidebar() {
           <span className="text-[16px] leading-[24px]">Dashboard</span>
         </Link>
         <Link 
-          href="/"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          href="/workspace"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/workspace') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/') ? 'fill text-primary' : ''}`}>corporate_fare</span>
+          <span className={`material-symbols-outlined ${isActive('/workspace') ? 'fill text-primary' : ''}`}>corporate_fare</span>
           <span className="text-[16px] leading-[24px]">Accounts</span>
         </Link>
         <Link 
@@ -64,14 +64,14 @@ export function Sidebar() {
       </div>
       <div className="mt-auto space-y-1 pt-4 border-t border-border">
         <Link 
-          href="/settings"
+          href="/workspace"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50 transition-colors duration-200"
         >
           <span className="material-symbols-outlined">settings</span>
           <span className="text-[16px] leading-[24px]">Settings</span>
         </Link>
         <Link 
-          href="/support"
+          href="/workspace"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50 transition-colors duration-200"
         >
           <span className="material-symbols-outlined">help_outline</span>
