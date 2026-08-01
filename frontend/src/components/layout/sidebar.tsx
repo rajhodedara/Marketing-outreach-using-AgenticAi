@@ -41,18 +41,18 @@ export function Sidebar() {
           <span className="text-[16px] leading-[24px]">Accounts</span>
         </Link>
         <Link 
-          href="/segments"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/segments') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          href="/julian"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/julian') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/segments') ? 'fill text-primary' : ''}`}>groups</span>
-          <span className="text-[16px] leading-[24px]">Segments</span>
+          <span className={`material-symbols-outlined ${isActive('/julian') ? 'fill text-primary' : ''}`}>call</span>
+          <span className="text-[16px] leading-[24px]">Julian</span>
         </Link>
         <Link 
-          href="/campaigns"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/campaigns') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          href="/nova"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/nova') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/campaigns') ? 'fill text-primary' : ''}`}>rocket_launch</span>
-          <span className="text-[16px] leading-[24px]">Campaigns</span>
+          <span className={`material-symbols-outlined ${isActive('/nova') ? 'fill text-primary' : ''}`}>neurology</span>
+          <span className="text-[16px] leading-[24px]">Nova</span>
         </Link>
         <Link 
           href="/intelligence"
