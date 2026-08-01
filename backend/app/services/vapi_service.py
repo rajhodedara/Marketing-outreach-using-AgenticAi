@@ -47,19 +47,19 @@ async def get_or_create_assistant() -> str:
         if resp.status_code == 200:
             assistants = resp.json()
             for a in assistants:
-                if a.get("name") == "Julian":
-                    logger.info(f"Found existing Julian assistant: {a['id']}")
+                if a.get("name") == "Julian v2":
+                    logger.info(f"Found existing Julian v2 assistant: {a['id']}")
                     return a["id"]
 
         # Create new assistant
         payload: dict[str, Any] = {
-            "name": "Julian",
+            "name": "Julian v2",
             "firstMessage": "Hi, this is Julian calling. Am I speaking with the right person?",
             "model": {
                 "provider": "groq",
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
-                    {"role": "system", "content": JULIAN_SYSTEM_PROMPT}
+                    {"role": "system", "content": JULIAN_SYSTEM_PROMPT + "\n\nCRITICAL RULE: Before calling the book_meeting tool, you MUST ask the prospect for their email address so you can send them a calendar invite. Do not assume their email. If you do not have their email, ask for it."}
                 ],
                 "tools": [
                     {
@@ -84,15 +84,16 @@ async def get_or_create_assistant() -> str:
                         "type": "function",
                         "function": {
                             "name": "book_meeting",
-                            "description": "Book a meeting with the prospect on the calendar.",
+                            "description": "Book a meeting with the prospect and send them a calendar invite.",
                             "parameters": {
                                 "type": "object",
                                 "properties": {
                                     "contact_name": {"type": "string", "description": "Name of the prospect"},
+                                    "contact_email": {"type": "string", "description": "Email address of the prospect to send the invite to"},
                                     "datetime": {"type": "string", "description": "ISO 8601 datetime for the meeting"},
                                     "duration": {"type": "integer", "description": "Duration in minutes", "default": 30}
                                 },
-                                "required": ["contact_name", "datetime"]
+                                "required": ["contact_name", "contact_email", "datetime"]
                             }
                         },
                         "server": {"url": f"{settings.nova_backend_url}/api/julian/tools"}
