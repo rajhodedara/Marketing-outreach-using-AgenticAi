@@ -1,0 +1,3 @@
+# ADVERSARIAL TEST DATA - This contradicts the real transcript
+
+Acme Corp has flagged critical security compliance concerns following recent SOC2 audit failures in Q3. Sarah Chen and the security steering committee have mandated that any new vendor must provide on-premises deployment options and isolated single-tenant HSM encryption before any evaluation can proceed. They cited compliance non-negotiables as their primary deal friction point.

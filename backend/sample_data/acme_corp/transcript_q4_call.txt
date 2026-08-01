@@ -1,0 +1,23 @@
+[Gong Call Recording - Q4 Technical Sync & Evaluation]
+Date: December 1, 2024
+Duration: 34 mins
+Participants: Alex Rivera (Sales Rep), Marcus Johnson (Director of Data Science), Sarah Chen (VP of Engineering)
+
+Rep: Thanks for joining today, Sarah and Marcus. I wanted to follow up on our previous sync and dive deeper into what you're seeing on the infrastructure side.
+Marcus: Glad to connect, Alex. To be transparent, our data team tripled this year, growing from 6 to 18 engineers and analysts, and our tooling just hasn't kept up.
+Sarah: Exactly. From an engineering standpoint, our main headache is scalability. Specifically, our current ETL pipeline breaks every time we exceed 10 million rows, which is happening almost daily now during peak ingestion hours.
+Rep: That sounds painful. How is that impacting your daily operations and decision-making?
+Marcus: It creates massive bottlenecks. Our data science team spends more time babysitting broken DAGs than building models. Plus, we need real-time dashboards for our executive leadership team, but right now we're forced to rely on batch processing with a 12-hour lag.
+Sarah: Right, and as we scale our microservices, the data pipeline scaling issues are becoming a blocker for customer-facing features. We're really feeling the strain of a team growing faster than tooling.
+Rep: Understood. Have you evaluated other solutions in the market to solve this?
+Marcus: Yeah, we've been looking at Looker but their pricing is aggressive, especially when scaling across multiple departments. We also have legacy Tableau licenses, but nobody wants to manage another heavy server setup.
+Sarah: We need something cloud-native that handles high volume seamlessly without skyrocketing per-query costs.
+Rep: That makes sense. Our enterprise platform provides native stream processing and automated pipeline orchestration designed for multi-million row batch and streaming ingestion.
+Marcus: That sounds like what we need. Honestly, I'm pushing for this deal internally because the status quo isn't sustainable. If we can get a pilot going this month, we have budget available next quarter to expand.
+Sarah: Agreed. From a timeline perspective, we need to make a decision by March before our legacy contract renewals lock us in for another year.
+Rep: That aligns perfectly with a standard 30-day proof of concept. Let me draft a customized proposal based on your ingest volumes. What's the best way to reach you both directly for technical follow-ups?
+Marcus: You can reach me at m.johnson@acmecorp.com or call my cell directly at (415) 555-0198 if anything urgent comes up during the trial setup.
+Sarah: And you can reach me at sarah.chen@acmecorp.com or call my office line +1-415-555-0142.
+Rep: Perfect. I'll send over the scoping document by tomorrow morning and get our solutions engineer scheduled.
+Marcus: Sounds great, Alex. Looking forward to reviewing the proposal.
+Sarah: Thanks Alex, talk soon.

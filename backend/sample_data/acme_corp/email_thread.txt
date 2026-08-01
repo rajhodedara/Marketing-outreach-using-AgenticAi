@@ -1,0 +1,40 @@
+From: Alex Rivera <alex.rivera@outreachai.com>
+To: Sarah Chen <sarah.chen@acmecorp.com>
+Cc: Marcus Johnson <m.johnson@acmecorp.com>
+Subject: Re: Acme Corp & Enterprise Analytics - Next Steps & Scoping
+
+Hi Sarah,
+
+Following up on our Q4 call last week with you and Marcus. I've attached the enterprise proposal tailored to your ingestion volumes and team growth targets.
+
+As discussed, our Tier-2 Enterprise tier includes unlimited streaming connectors, zero-downtime pipeline scaling, and 24/7 dedicated support.
+
+Regarding your question on timing and tiering: we can structure the deployment to align with your Q1 budget allocation, provided we finalize the agreement prior to your March 15 renewal deadline.
+
+Best regards,
+
+Alex Rivera
+Enterprise Account Executive | OutreachAI
+Email: alex.rivera@outreachai.com | Mobile: +1-415-555-0199
+
+--------------------------------------------------
+From: Sarah Chen <sarah.chen@acmecorp.com>
+To: Alex Rivera <alex.rivera@outreachai.com>
+Cc: Marcus Johnson <m.johnson@acmecorp.com>
+Subject: Re: Acme Corp & Enterprise Analytics - Next Steps & Scoping
+
+Alex,
+
+Thanks for sending this over. Marcus has been pushing hard internally for us to adopt your solution, especially given our recurring ETL scaling issues.
+
+I reviewed the pricing deck with our finance team. The core platform costs look reasonable, but we need clarification on two technical requirements before Lisa (our CFO) signs off:
+
+1. Streaming Ingestion: Does the proposal cover real-time streaming for our web event pipelines, or is that an add-on module?
+2. Real-Time Alerting: We currently don't have real-time alerting capabilities for anomaly detection on corrupted payload schema changes. Is automated anomaly alerting natively supported or integrated via webhooks?
+
+If we can confirm these items by end of week, we can keep our target schedule to sign by late February. You can also reach Marcus at m.johnson@acmecorp.com or +1-415-555-0198 if you need technical logs from our current setup.
+
+Best,
+Sarah Chen
+VP of Engineering | Acme Corp
+sarah.chen@acmecorp.com | +1-415-555-0142

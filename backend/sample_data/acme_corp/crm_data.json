@@ -1,0 +1,72 @@
+{
+  "account": {
+    "name": "Acme Corp",
+    "domain": "acmecorp.com",
+    "industry": "Enterprise Software",
+    "employee_count": 2500,
+    "annual_revenue": "$450M",
+    "hq_location": "San Francisco, CA",
+    "current_products": [
+      "Basic Analytics Suite"
+    ],
+    "contract_value": "$120,000/yr",
+    "renewal_date": "2025-03-15",
+    "health_score": 72,
+    "stage": "Expansion Opportunity"
+  },
+  "contacts": [
+    {
+      "name": "Sarah Chen",
+      "title": "VP of Engineering",
+      "email": "sarah.chen@acmecorp.com",
+      "phone": "+1-415-555-0142",
+      "role_in_deal": "Decision Maker",
+      "last_contacted": "2024-11-20",
+      "engagement_score": 85
+    },
+    {
+      "name": "Marcus Johnson",
+      "title": "Director of Data Science",
+      "email": "m.johnson@acmecorp.com",
+      "phone": "(415) 555-0198",
+      "role_in_deal": "Champion",
+      "last_contacted": "2024-12-01",
+      "engagement_score": 92
+    },
+    {
+      "name": "Lisa Park",
+      "title": "CFO",
+      "email": "l.park@acmecorp.com",
+      "phone": "+1 415 555 0211",
+      "role_in_deal": "Economic Buyer",
+      "last_contacted": "2024-10-15",
+      "engagement_score": 45
+    }
+  ],
+  "recent_activities": [
+    {
+      "date": "2024-12-01",
+      "type": "meeting",
+      "note": "Q4 review call with Marcus - discussed scaling challenges"
+    },
+    {
+      "date": "2024-11-20",
+      "type": "email",
+      "note": "Sarah requested enterprise pricing for Advanced Analytics"
+    },
+    {
+      "date": "2024-11-15",
+      "type": "webinar",
+      "note": "Marcus attended our 'AI-Driven Analytics' webinar"
+    },
+    {
+      "date": "2024-10-15",
+      "type": "meeting",
+      "note": "Quarterly business review with Lisa - budget discussion for Q1"
+    }
+  ],
+  "competitor_mentions": [
+    "Noticed Looker evaluation in Q3",
+    "Tableau license spotted in their tech stack"
+  ]
+}
