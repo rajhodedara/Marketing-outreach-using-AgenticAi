@@ -201,17 +201,24 @@ export default function AIProcessingView({ params }: { params: Promise<{ id: str
           </div>
           
           {/* Orbiting nodes representing sub-agents */}
-          {[...Array(4)].map((_, i) => (
+          {["Persona", "Research", "Intent", "Action"].map((agentName, i) => (
             <motion.div
               key={i}
-              className="absolute w-3 h-3 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+              title={`${agentName} Agent Node`}
+              className="absolute w-4 h-4 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] cursor-pointer z-50"
+              whileHover={{ scale: 2, backgroundColor: "#3b82f6" }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                setActiveAgent(agentName);
+                toast.success(`Accessed ${agentName} Agent core`);
+              }}
               animate={{
                 rotate: [0, 360],
                 transformOrigin: "center 128px", // orbit radius
               }}
               style={{
                 top: 0,
-                left: "calc(50% - 6px)",
+                left: "calc(50% - 8px)",
               }}
               transition={{
                 duration: 5 + i * 2,

@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { NovaIntegrations } from '@/components/nova/NovaIntegrations';
 import { NovaComposer } from '@/components/nova/NovaComposer';
 import { NovaSequences } from '@/components/nova/NovaSequences';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Account = {
   id: string;
@@ -209,150 +209,167 @@ export default function NovaWorkspace() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden max-w-[1600px] mx-auto bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="h-full flex flex-col overflow-hidden w-full font-sans tracking-tight text-zinc-300 bg-[#050505] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/30 via-[#050505] to-[#050505] relative isolate">
       {/* HEADER */}
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-card/40 backdrop-blur-xl border-b border-border/50 shrink-0 gap-4"
+        initial={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 shrink-0 gap-4"
       >
         <div className="flex items-center gap-4">
-          <h1 className="text-[24px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-violet-500 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[28px]">neurology</span>
+          <h1 className="text-[28px] font-bold text-white flex items-center gap-2 tracking-tighter">
+              <span className="material-symbols-outlined text-white/80 text-[32px] font-light">neurology</span>
               Nova
           </h1>
-          <div className="flex items-center gap-2 bg-background/80 px-3 py-1 rounded-full border border-border/50">
+          <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <span className="relative flex h-2 w-2">
-              {isSimulating && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>}
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isSimulating ? 'bg-primary' : 'bg-muted-foreground'}`}></span>
+              {isSimulating && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isSimulating ? 'bg-emerald-400' : 'bg-white/20'}`}></span>
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground font-mono uppercase tracking-wider">
+              <span className="text-[10px] font-medium text-white/60 font-mono uppercase tracking-[0.2em]">
               {isSimulating ? 'Processing' : 'Standby'}
               </span>
           </div>
         </div>
         
-        <div className="flex items-center gap-3 bg-card/60 border border-border/50 p-2 rounded-lg shadow-sm backdrop-blur-md w-full sm:w-auto">
-            <span className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">Target Account:</span>
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-2 pl-4 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl w-full sm:w-auto transition-all hover:bg-white/10">
+            <span className="text-[10px] font-medium text-white/50 uppercase tracking-[0.2em] whitespace-nowrap">Target Account</span>
             <select 
-                className="bg-transparent text-foreground text-sm font-medium focus:outline-none focus:ring-0 min-w-[180px] cursor-pointer"
+                className="bg-transparent text-white text-sm font-medium focus:outline-none focus:ring-0 min-w-[180px] cursor-pointer appearance-none px-2"
                 value={selectedAccountId}
                 onChange={(e) => setSelectedAccountId(e.target.value)}
                 disabled={isSimulating}
             >
-                <option value="">Select Account...</option>
+                <option value="" className="bg-black text-white">Select Account...</option>
                 {accounts.map(acc => (
-                <option key={acc.id} value={acc.id}>{acc.company_name || acc.domain}</option>
+                <option key={acc.id} value={acc.id} className="bg-black text-white">{acc.company_name || acc.domain}</option>
                 ))}
             </select>
         </div>
       </motion.div>
 
       {/* TABS */}
-      <Tabs defaultValue="command" className="flex-1 flex flex-col min-h-0">
-        <TabsList variant="line" className="w-full justify-start border-b border-border/50 px-4 bg-card/20 backdrop-blur-sm shrink-0 rounded-none h-12">
-          <TabsTrigger value="command" className="h-full flex items-center gap-2 px-4">
-            <span className="material-symbols-outlined text-[18px]">terminal</span>
-            Command Center
-          </TabsTrigger>
-          <TabsTrigger value="compose" className="h-full flex items-center gap-2 px-4">
-            <span className="material-symbols-outlined text-[18px]">edit_note</span>
-            Compose
-          </TabsTrigger>
-          <TabsTrigger value="sequences" className="h-full flex items-center gap-2 px-4">
-            <span className="material-symbols-outlined text-[18px]">conversion_path</span>
-            Sequences
-          </TabsTrigger>
-          <TabsTrigger value="integrations" className="h-full flex items-center gap-2 px-4">
-            <span className="material-symbols-outlined text-[18px]">integration_instructions</span>
-            Integrations
-          </TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="command" className="flex-1 flex flex-col min-h-0 px-4 md:px-8 pb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
+          className="w-full flex justify-center mb-8 shrink-0 relative z-50"
+        >
+          <TabsList className="flex h-auto p-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl gap-1">
+            <TabsTrigger value="command" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+              Command Center
+            </TabsTrigger>
+            <TabsTrigger value="compose" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+              Compose
+            </TabsTrigger>
+            <TabsTrigger value="sequences" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+              Sequences
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="rounded-full px-6 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=active]:shadow-sm">
+              Integrations
+            </TabsTrigger>
+          </TabsList>
+        </motion.div>
 
-        <TabsContent value="command" className="flex-1 min-h-0 m-0">
-          <div className="h-full flex flex-col lg:flex-row overflow-hidden">
-            {/* LEFT PANEL */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="w-full lg:w-[60%] h-full flex flex-col border-r border-border p-6 bg-card/40 backdrop-blur-xl shadow-lg relative z-10"
-            >
-              {/* Source Data Preview */}
-              <div className="shrink-0 mb-2">
-                {sourceData.length > 0 ? (
-                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
-                       <span className="material-symbols-outlined text-[14px]">database</span>
-                       Ingested Intelligence
-                    </div>
-                    <SourceDataView sources={sourceData} />
-                  </motion.div>
-                ) : (
-                  <div className="h-[90px] flex items-center justify-center border border-dashed border-border/60 rounded-xl bg-muted/20 text-muted-foreground text-sm backdrop-blur-sm transition-all duration-300 hover:bg-muted/30">
-                    No data ingested yet. Select an account and run analysis.
-                  </div>
-                )}
-              </div>
-
-              {/* Agent Feed */}
-              <div className="flex-1 flex flex-col min-h-0 bg-background/50 rounded-xl border border-border/50 backdrop-blur-md overflow-hidden shadow-inner mt-4">
-                  <AgentFeed events={feedEvents} />
-              </div>
-
-              {/* Command Input */}
-              <div className="mt-6">
-                  <CommandInput 
-                    onCommand={startSimulation} 
-                    disabled={isSimulating || !selectedAccountId} 
-                    placeholder="Command Nova (e.g. 'Synthesize account data and prepare angle')..."
-                  />
-              </div>
-            </motion.div>
-
-            {/* RIGHT PANEL */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-full lg:w-[40%] h-full flex flex-col bg-card/30 backdrop-blur-lg overflow-y-auto relative z-0"
-            >
-              <div className="p-6 border-b border-border/50 sticky top-0 bg-card/60 backdrop-blur-xl z-20 flex justify-between items-center shadow-sm">
-                <h2 className="text-[16px] font-semibold text-foreground flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-primary">account_tree</span>
-                  Multi-Agent Pipeline
-                </h2>
-              </div>
-
-              <div className="flex-1">
-                <NovaExecutionGraph steps={steps} />
-              </div>
-
-              {/* Outcomes Section */}
-              {planData && (
+        {/* DOUBLE-BEZEL OUTER SHELL FOR TAB CONTENT */}
+        <div className="flex-1 min-h-0 bg-white/5 border border-white/10 p-1.5 rounded-[2rem] shadow-2xl relative overflow-hidden">
+          <div className="w-full h-full bg-[#0a0a0a] rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden">
+            
+            <TabsContent value="command" className="h-full m-0 p-0 border-none outline-none">
+              <div className="h-full flex flex-col lg:flex-row overflow-hidden">
+                {/* LEFT PANEL */}
                 <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-6 border-t border-border/50 bg-sidebar/80 backdrop-blur-xl shrink-0 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]"
+                  initial={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
+                  className="w-full lg:w-[60%] h-full flex flex-col border-r border-white/5 p-8 relative z-10"
                 >
-                  <NovaOutput data={planData} />
+                  {/* Source Data Preview */}
+                  <div className="shrink-0 mb-6">
+                    {sourceData.length > 0 ? (
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                        <div className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                           <span className="material-symbols-outlined text-[14px]">database</span>
+                           Ingested Intelligence
+                        </div>
+                        <SourceDataView sources={sourceData} />
+                      </motion.div>
+                    ) : (
+                      <div className="h-[90px] flex items-center justify-center border border-dashed border-white/10 rounded-2xl bg-white/5 text-white/40 text-sm">
+                        No data ingested yet. Select an account and run analysis.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Agent Feed */}
+                  <div className="flex-1 flex flex-col min-h-0 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md overflow-hidden mt-2 relative">
+                      <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+                      <AgentFeed events={feedEvents} />
+                      <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+                  </div>
+
+                  {/* Command Input */}
+                  <div className="mt-8">
+                      <CommandInput 
+                        onCommand={startSimulation} 
+                        disabled={isSimulating || !selectedAccountId} 
+                        placeholder="Command Nova (e.g. 'Synthesize account data and prepare angle')..."
+                      />
+                  </div>
                 </motion.div>
-              )}
-            </motion.div>
+
+                {/* RIGHT PANEL */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.7, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
+                  className="w-full lg:w-[40%] h-full flex flex-col bg-black/20 overflow-y-auto relative z-0"
+                >
+                  <div className="p-8 pb-4 sticky top-0 z-20 flex justify-between items-center">
+                    <h2 className="text-[12px] font-semibold text-white/50 uppercase tracking-[0.2em] flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-white/40">account_tree</span>
+                      Pipeline State
+                    </h2>
+                  </div>
+
+                  <div className="flex-1 px-4">
+                    <NovaExecutionGraph steps={steps} />
+                  </div>
+
+                  {/* Outcomes Section */}
+                  <AnimatePresence>
+                    {planData && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+                        transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+                        className="p-8 border-t border-white/5 bg-[#0a0a0a] shrink-0"
+                      >
+                        <NovaOutput data={planData} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="compose" className="h-full m-0 p-8 overflow-y-auto border-none outline-none">
+              <NovaComposer accountId={selectedAccountId} accountName={selectedAccountName} />
+            </TabsContent>
+
+            <TabsContent value="sequences" className="h-full m-0 p-8 overflow-y-auto border-none outline-none">
+              <NovaSequences accountId={selectedAccountId} accountName={selectedAccountName} />
+            </TabsContent>
+
+            <TabsContent value="integrations" className="h-full m-0 p-8 overflow-y-auto border-none outline-none">
+              <NovaIntegrations />
+            </TabsContent>
+
           </div>
-        </TabsContent>
-
-        <TabsContent value="compose" className="flex-1 min-h-0 m-0 overflow-y-auto">
-          <NovaComposer accountId={selectedAccountId} accountName={selectedAccountName} />
-        </TabsContent>
-
-        <TabsContent value="sequences" className="flex-1 min-h-0 m-0 overflow-y-auto">
-          <NovaSequences accountId={selectedAccountId} accountName={selectedAccountName} />
-        </TabsContent>
-
-        <TabsContent value="integrations" className="flex-1 min-h-0 m-0 overflow-y-auto">
-          <NovaIntegrations />
-        </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

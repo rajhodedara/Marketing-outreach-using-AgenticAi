@@ -24,6 +24,7 @@ export function CommandInput({ onCommand, disabled, placeholder }: { onCommand: 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={disabled}
+          suppressHydrationWarning
           placeholder={disabled ? "Processing..." : (placeholder || "Command Julian (e.g. 'Call Dana Whitfield and focus on API delays')...")}
           className="flex-1 py-3 px-2 bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground focus:outline-none"
         />

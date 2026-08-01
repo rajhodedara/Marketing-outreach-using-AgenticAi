@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function OutreachStrategyView({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -30,6 +31,27 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const regenerateDraft = async () => {
+    if (!accountId || drafts.length === 0) return;
+    const toastId = toast.loading("Re-generating draft with AI...", { description: "Agent is rewriting the draft based on latest insights." });
+    try {
+      const res = await fetch(`/api/accounts/${accountId}/drafts/${activeStep - 1}/regenerate`, {
+        method: "POST"
+      });
+      if (!res.ok) throw new Error("Failed to regenerate");
+      const data = await res.json();
+      
+      const newDrafts = [...drafts];
+      newDrafts[activeStep - 1] = data.draft;
+      setDrafts(newDrafts);
+      
+      toast.success("Draft successfully re-generated!", { id: toastId });
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to regenerate draft.", { id: toastId });
     }
   };
   const activeDraft = drafts[activeStep - 1] || null;
@@ -63,7 +85,7 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
               </div>
             </div>
           )) : (
-            <div className="text-[12px] text-muted-foreground">Loading drafts...</div>
+            <div className="text-[12px] text-muted-foreground">{loading ? 'Loading drafts...' : 'No drafts available for this account.'}</div>
           )}
           
           <button className="mt-6 w-full py-2 border border-dashed border-border rounded text-muted-foreground text-[12px] leading-[16px] hover:bg-muted/50 transition-colors flex items-center justify-center gap-1">
@@ -80,7 +102,11 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
             <h2 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground">Initial Outreach Email</h2>
           </div>
           <div className="flex gap-2">
-            <button className="bg-card text-foreground border border-border text-[12px] leading-[16px] px-4 py-2 rounded hover:bg-muted transition-colors flex items-center gap-1">
+            <button 
+              className="bg-card text-foreground border border-border text-[12px] leading-[16px] px-4 py-2 rounded hover:bg-muted transition-colors flex items-center gap-1 disabled:opacity-50"
+              onClick={regenerateDraft}
+              disabled={loading || drafts.length === 0}
+            >
               <span className="material-symbols-outlined text-[16px]">magic_button</span> Re-generate
             </button>
             <button className="bg-primary text-primary-foreground text-[12px] leading-[16px] px-4 py-2 rounded hover:bg-primary/90 transition-colors flex items-center gap-1">
@@ -95,7 +121,7 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
             <div className="bg-muted border border-border rounded p-3 space-y-2">
               <div className="flex items-center gap-3">
                 <span className="w-16 text-right text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground">To:</span>
-                <div className="text-[16px] leading-[24px] text-foreground bg-card border border-border px-2 py-1 rounded-sm w-full">sarah.jenkins@meridianhealth.com</div>
+                <div className="text-[16px] leading-[24px] text-foreground bg-card border border-border px-2 py-1 rounded-sm w-full">{activeDraft ? activeDraft.target_persona : 'Loading...'}</div>
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-16 text-right text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground">Subject:</span>
@@ -108,7 +134,7 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
             
             {/* Email Body */}
             <div className="bg-card border border-border rounded p-6 min-h-[400px] shadow-sm text-[16px] leading-relaxed text-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20 whitespace-pre-wrap">
-              {activeDraft ? activeDraft.content : 'Loading draft content...'}
+              {activeDraft ? activeDraft.content : (loading ? 'Loading draft content...' : 'No draft content available.')}
             </div>
           </div>
         </div>

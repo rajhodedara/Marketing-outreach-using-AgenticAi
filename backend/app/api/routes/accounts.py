@@ -10,6 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.db.models import Account, AnalysisSession
+from app.core.llm import get_openrouter_llm
+from langchain_core.messages import SystemMessage, HumanMessage
+
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -96,3 +99,51 @@ async def get_account(
             "result": json.loads(latest_session.result_json) if latest_session and latest_session.result_json else None,
         } if latest_session else None,
     }
+
+@router.post("/accounts/{account_id}/drafts/{draft_index}/regenerate")
+async def regenerate_draft(
+    account_id: str,
+    draft_index: int,
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Regenerate a specific outreach draft."""
+    # Get latest analysis session
+    session_result = await db.execute(
+        select(AnalysisSession)
+        .where(AnalysisSession.account_id == account_id)
+        .order_by(AnalysisSession.started_at.desc())
+        .limit(1)
+    )
+    latest_session = session_result.scalar_one_or_none()
+    
+    if not latest_session or not latest_session.result_json:
+        raise HTTPException(status_code=404, detail="No analysis found")
+
+    data = json.loads(latest_session.result_json)
+    drafts = data.get("outreach_drafts", [])
+    
+    if draft_index < 0 or draft_index >= len(drafts):
+        raise HTTPException(status_code=404, detail="Draft not found")
+
+    draft = drafts[draft_index]
+    
+    # Prompt LLM to regenerate
+    llm = get_openrouter_llm(temperature=0.7)
+    if not llm:
+        raise HTTPException(status_code=500, detail="LLM not configured")
+        
+    messages = [
+        SystemMessage(content="You are an expert enterprise B2B sales copywriter. Your goal is to rewrite and improve the following outreach draft. Make it more compelling, highly tailored, and professional. Output ONLY the raw rewritten email content. Do not output anything before or after the content."),
+        HumanMessage(content=f"Rewrite this email targeted at {draft.get('target_persona')}:\n\n{draft.get('content')}")
+    ]
+    response = await llm.ainvoke(messages)
+    
+    # Update draft
+    draft["content"] = response.content
+    drafts[draft_index] = draft
+    data["outreach_drafts"] = drafts
+    
+    latest_session.result_json = json.dumps(data)
+    await db.commit()
+    
+    return {"status": "success", "draft": draft}

@@ -13,6 +13,16 @@ type StakeholderProps = {
 export default function StakeholderMap({ stakeholders, accountId }: StakeholderProps) {
   const [selectedStakeholder, setSelectedStakeholder] = useState<any | null>(null);
 
+  const getInitials = (s: any) => {
+    let nameToUse = s.name;
+    if (!nameToUse || nameToUse.includes('[Not Provided]')) {
+      nameToUse = s.role || 'NA';
+    }
+    const clean = nameToUse.replace(/[^a-zA-Z\s]/g, '').trim();
+    if (!clean) return 'NA';
+    return clean.split(" ").map((n: string) => n[0]).join("").substring(0,2).toUpperCase();
+  };
+
   // Generate nodes from stakeholders
   const nodes: Node[] = stakeholders.map((s, i) => {
     return {
@@ -22,7 +32,7 @@ export default function StakeholderMap({ stakeholders, accountId }: StakeholderP
         label: (
           <div className="flex flex-col items-center justify-center p-2 cursor-pointer text-center">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary font-bold border border-border mb-2 shadow-sm">
-              {s.name.split(" ").map((n: string) => n[0]).join("").substring(0,2).toUpperCase()}
+              {getInitials(s)}
             </div>
             <div className="font-semibold text-foreground text-[14px]">{s.name}</div>
             <div className="text-[10px] text-muted-foreground">{s.role}</div>
@@ -89,7 +99,7 @@ export default function StakeholderMap({ stakeholders, accountId }: StakeholderP
             <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary text-[16px] font-bold border border-border">
-                  {selectedStakeholder.name.split(" ").map((n: string) => n[0]).join("").substring(0,2).toUpperCase()}
+                  {getInitials(selectedStakeholder)}
                 </div>
                 <div>
                   <h2 className="text-[16px] leading-[20px] font-semibold text-foreground">{selectedStakeholder.name}</h2>

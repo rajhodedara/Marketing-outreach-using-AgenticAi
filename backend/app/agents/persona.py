@@ -41,7 +41,7 @@ async def persona_node(state: PipelineState) -> dict:
         return {"stakeholders": []}
         
     query = f"Key stakeholders, decision makers, executives, and team members at {company_name}"
-    retrieved_docs = await qdrant_retrieve(account_id, query, limit=5)
+    retrieved_docs = await qdrant_retrieve(account_id, query, limit=15)
     
     retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
     context = "\n\n".join(retrieved_chunks)
@@ -66,7 +66,7 @@ async def persona_node(state: PipelineState) -> dict:
     llm = llm.with_structured_output(StakeholderProfiles)
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert in B2B sales and persona mapping. Extract stakeholder profiles from the provided context."),
+        ("system", "You are an expert in B2B sales and persona mapping. Extract stakeholder profiles from the provided context. You must identify exactly 5 key stakeholders, specifically targeting roles like CTO, SVP Risk & Compliance, Director of Data Engineering, CFO, and VP Product."),
         ("user", "Company: {company_name}\n\nContext:\n{context}\n\nPlease extract the key stakeholders.")
     ])
     

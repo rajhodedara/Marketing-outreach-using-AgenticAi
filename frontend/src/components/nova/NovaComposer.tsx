@@ -35,17 +35,8 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
       if (res.ok) {
         const data = await res.json();
         setSubject(data.subject || "");
-        setBody(data.body || "");
-        setCitations(data.citations || []);
-      } else {
-        // Mock data for MVP
-        setTimeout(() => {
-          setSubject(channel === "email" ? `Elevate ${accountName}'s growth strategy` : "");
-          setBody(`Hi there,\n\nI noticed ${accountName} is expanding its operations. Our platform can help streamline your processes.\n\nLet me know if you'd be open to a brief chat.\n\nBest,\nNova`);
-          setCitations(["Recent funding news", "Company career page"]);
-          setIsGenerating(false);
-        }, 1500);
-        return;
+        setBody(data.content || "");
+        setCitations(data.citations?.map((c: any) => c.quote || c.topic || "Source") || []);
       }
     } catch (err) {
       console.error(err);
@@ -60,117 +51,125 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Editor Pane */}
+    <div className="space-y-12 pb-16">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Editor Pane (Double-Bezel) */}
         <div className="flex-1 space-y-4">
-          <Card className="border-zinc-800 bg-zinc-900/50 shadow-lg">
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
-                  {(["email", "linkedin", "slack"] as Channel[]).map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setChannel(c)}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                        channel === c ? "bg-emerald-500/20 text-emerald-400" : "text-zinc-400 hover:text-zinc-200"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {c === "email" ? "mail" : c === "linkedin" ? "work" : "tag"}
-                      </span>
-                      <span className="capitalize">{c}</span>
-                    </button>
-                  ))}
+          <div className="bg-white/5 border border-white/10 p-1.5 rounded-[2rem] shadow-2xl relative overflow-hidden">
+            <div className="bg-[#0a0a0a] rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden flex flex-col h-full">
+              <div className="p-8 space-y-8 flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2 bg-white/5 p-1.5 rounded-full border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]">
+                    {(["email", "linkedin", "slack"] as Channel[]).map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setChannel(c)}
+                        className={`px-4 py-2 rounded-full text-[11px] uppercase tracking-widest font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex items-center gap-2 ${
+                          channel === c ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">
+                          {c === "email" ? "mail" : c === "linkedin" ? "work" : "tag"}
+                        </span>
+                        <span>{c}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <select
+                    value={tone}
+                    onChange={(e) => setTone(e.target.value as Tone)}
+                    className="bg-transparent border border-white/10 text-xs tracking-wider uppercase text-white/70 rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-white/20 appearance-none hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    {["Professional", "Friendly", "Executive", "Technical"].map((t) => (
+                      <option key={t} value={t} className="bg-black text-white">{t}</option>
+                    ))}
+                  </select>
                 </div>
-                <select
-                  value={tone}
-                  onChange={(e) => setTone(e.target.value as Tone)}
-                  className="bg-zinc-950 border border-zinc-800 text-sm text-zinc-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                >
-                  {["Professional", "Friendly", "Executive", "Technical"].map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-zinc-400 ml-1">Target Persona</label>
-                  <Input
-                    placeholder="e.g. VP of Engineering"
-                    className="bg-zinc-950 border-zinc-800 focus-visible:ring-emerald-500"
-                    value={persona}
-                    onChange={(e) => setPersona(e.target.value)}
-                  />
-                </div>
-                
-                {channel === "email" && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-                    <label className="text-xs font-medium text-zinc-400 ml-1">Subject</label>
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] ml-2 mb-2 block">Target Persona</label>
                     <Input
-                      placeholder="Enter subject..."
-                      className="bg-zinc-950 border-zinc-800 focus-visible:ring-emerald-500 font-medium text-white"
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder="e.g. VP of Engineering"
+                      className="bg-white/5 border-white/10 focus-visible:ring-white/20 rounded-2xl h-12 px-4 text-white placeholder:text-white/20"
+                      value={persona}
+                      onChange={(e) => setPersona(e.target.value)}
                     />
-                  </motion.div>
-                )}
+                  </div>
+                  
+                  <AnimatePresence>
+                    {channel === "email" && (
+                      <motion.div initial={{ opacity: 0, height: 0, y: -10 }} animate={{ opacity: 1, height: "auto", y: 0 }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}>
+                        <label className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] ml-2 mb-2 block mt-2">Subject</label>
+                        <Input
+                          placeholder="Enter subject..."
+                          className="bg-white/5 border-white/10 focus-visible:ring-white/20 rounded-2xl h-12 px-4 font-medium text-white placeholder:text-white/20"
+                          value={subject}
+                          onChange={(e) => setSubject(e.target.value)}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                <div>
-                  <label className="text-xs font-medium text-zinc-400 ml-1">Message Body</label>
-                  <textarea
-                    rows={8}
-                    className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-300 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
-                    placeholder="Write your message here or generate with AI..."
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                  />
+                  <div>
+                    <label className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] ml-2 mb-2 block">Message Body</label>
+                    <textarea
+                      rows={8}
+                      className="w-full rounded-2xl bg-white/5 border border-white/10 p-4 text-sm text-zinc-300 font-mono focus:outline-none focus:ring-1 focus:ring-white/20 resize-none placeholder:text-white/20"
+                      placeholder="Write your message here or generate with AI..."
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <Button 
+              <div className="p-6 bg-white/5 border-t border-white/10 flex items-center justify-between">
+                <button 
                   onClick={handleGenerate} 
                   disabled={isGenerating}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2"
+                  className="group bg-white text-black hover:bg-zinc-200 rounded-full pl-6 pr-2 py-2 flex items-center gap-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] font-medium text-sm"
                 >
-                  {isGenerating ? (
-                    <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
-                  ) : (
-                    <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                  )}
                   {isGenerating ? "Generating..." : "Generate with AI"}
-                </Button>
+                  <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center transition-transform duration-500 group-hover:scale-105 group-hover:translate-x-1">
+                    <span className={`material-symbols-outlined text-[16px] ${isGenerating ? 'animate-spin' : ''}`}>
+                      {isGenerating ? 'sync' : 'auto_awesome'}
+                    </span>
+                  </div>
+                </button>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-zinc-700 text-zinc-300" onClick={handleCopy} disabled={!body}>
-                    <span className="material-symbols-outlined text-[18px] mr-1.5">content_copy</span>
+                  <button onClick={handleCopy} disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-white/10 text-white/70 hover:text-white hover:bg-white/5 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
                     Copy
-                  </Button>
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center transition-transform duration-500 group-hover:bg-white/10 group-hover:scale-105">
+                      <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                    </div>
+                  </button>
                   {channel === "email" && (
-                    <Button variant="outline" className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" disabled={!body}>
-                      <span className="material-symbols-outlined text-[18px] mr-1.5">send</span>
-                      Send via Gmail
-                    </Button>
+                    <button disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
+                      Send
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center transition-transform duration-500 group-hover:bg-emerald-500/30 group-hover:scale-105 group-hover:translate-x-1">
+                        <span className="material-symbols-outlined text-[14px]">send</span>
+                      </div>
+                    </button>
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
           
           <AnimatePresence>
             {citations.length > 0 && (
               <motion.div 
-                initial={{ opacity: 0, y: -10 }} 
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 flex-wrap px-1"
+                initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }} 
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                className="flex items-center gap-2 flex-wrap px-4 py-2"
               >
-                <span className="text-xs text-zinc-500 font-medium flex items-center">
+                <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium flex items-center">
                   <span className="material-symbols-outlined text-[14px] mr-1">info</span> Sources:
                 </span>
                 {citations.map((cite, idx) => (
-                  <Badge key={idx} variant="outline" className="bg-zinc-900 border-zinc-700 text-zinc-400 text-[10px]">
+                  <Badge key={idx} variant="outline" className="bg-white/5 border-white/10 text-white/60 text-[10px] rounded-full px-3 py-1">
                     {cite}
                   </Badge>
                 ))}
@@ -179,48 +178,50 @@ export function NovaComposer({ accountId, accountName }: NovaComposerProps) {
           </AnimatePresence>
         </div>
 
-        {/* Preview Pane */}
+        {/* Preview Pane (Double-Bezel) */}
         <div className="flex-1">
           <div className="sticky top-6">
-            <h3 className="text-sm font-semibold text-zinc-400 mb-3 ml-1 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">visibility</span>
+            <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] mb-4 ml-2 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px]">visibility</span>
               Live Preview
             </h3>
-            <Card className="border-zinc-800 bg-black shadow-xl overflow-hidden liquid-glass">
-              <div className="bg-zinc-900 px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
-                <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+            <div className="bg-white/5 border border-white/10 p-1.5 rounded-[2rem] shadow-2xl overflow-hidden">
+              <div className="bg-[#050505] rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden">
+                <div className="bg-white/5 px-6 py-3 border-b border-white/5 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+                </div>
+                <div className="p-8">
+                  {channel === "email" ? (
+                    <div className="space-y-6">
+                      <div className="border-b border-white/5 pb-4 space-y-2">
+                        <div className="flex text-sm">
+                          <span className="text-white/40 w-16 text-[11px] uppercase tracking-widest mt-0.5">To:</span>
+                          <span className="text-white/80">{persona || "Recipient"} <span className="text-white/40">&lt;contact@{accountName.toLowerCase().replace(/\s/g, "")}.com&gt;</span></span>
+                        </div>
+                        <div className="flex text-sm font-medium">
+                          <span className="text-white/40 w-16 text-[11px] uppercase tracking-widest mt-0.5">Subj:</span>
+                          <span className="text-white">{subject || <span className="text-white/20 font-normal italic">(No subject)</span>}</span>
+                        </div>
+                      </div>
+                      <div className="text-white/80 text-[15px] whitespace-pre-wrap font-sans leading-relaxed tracking-wide">
+                        {body || <span className="text-white/20 italic">Your message will appear here...</span>}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-4">
+                      <div className="w-12 h-12 rounded-full bg-white/5 flex-shrink-0 flex items-center justify-center text-white/40 border border-white/10">
+                        <span className="material-symbols-outlined text-[20px]">person</span>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 rounded-3xl rounded-tl-none p-6 w-full text-[15px] text-white/80 whitespace-pre-wrap leading-relaxed shadow-sm">
+                        {body || <span className="text-white/20 italic">Your message will appear here...</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <CardContent className="p-6">
-                {channel === "email" ? (
-                  <div className="space-y-4">
-                    <div className="border-b border-zinc-800 pb-3">
-                      <div className="flex text-sm mb-1">
-                        <span className="text-zinc-500 w-12">To:</span>
-                        <span className="text-zinc-300">{persona || "Recipient"} &lt;contact@{accountName.toLowerCase().replace(/\s/g, "")}.com&gt;</span>
-                      </div>
-                      <div className="flex text-sm font-medium">
-                        <span className="text-zinc-500 w-12">Subj:</span>
-                        <span className="text-emerald-400">{subject || "(No subject)"}</span>
-                      </div>
-                    </div>
-                    <div className="text-zinc-300 text-sm whitespace-pre-wrap font-sans leading-relaxed">
-                      {body || <span className="text-zinc-600 italic">Your message will appear here...</span>}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500">
-                      <span className="material-symbols-outlined text-[20px]">person</span>
-                    </div>
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl rounded-tl-none p-4 w-full text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed shadow-sm">
-                      {body || <span className="text-zinc-600 italic">Your message will appear here...</span>}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            </div>
           </div>
         </div>
       </div>

@@ -15,12 +15,37 @@ type CitationRef = {
   end_line?: number;
 };
 
-type AccountPlan = {
+type IntentSignal = {
+  signal_type: string;
+  description: string;
+  urgency: string;
+};
+
+type IntentSignals = {
+  signals: IntentSignal[];
+  overall_intent_score: number;
+};
+
+type StakeholderProfile = {
+  name: string;
+  role: string;
+  influence_level: string;
+  key_concerns: string[];
+};
+
+type ResearchFinding = {
+  topic: string;
   summary: string;
-  key_initiatives: string[];
-  recent_news: string[];
-  challenges: string[];
-  citations: CitationRef[];
+};
+
+type ResearchFindings = {
+  findings: ResearchFinding[];
+};
+
+type AccountPlan = {
+  account_id: string;
+  strategy_summary: string;
+  key_steps: string[];
 };
 
 type CriticFeedback = {
@@ -42,6 +67,9 @@ type AnalysisResult = {
   status: string;
   plan: AccountPlan | null;
   drafts: OutreachDraft[];
+  intent: IntentSignals | null;
+  stakeholders: StakeholderProfile[];
+  research: ResearchFindings | null;
   error?: string;
 };
 
@@ -89,6 +117,9 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
              status: data.latest_analysis.status,
              plan: data.latest_analysis.result.account_plan || null,
              drafts: data.latest_analysis.result.outreach_drafts || [],
+             intent: data.latest_analysis.result.intent || null,
+             stakeholders: data.latest_analysis.result.stakeholders || [],
+             research: data.latest_analysis.result.research || null,
            });
         }
       }
@@ -136,32 +167,16 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
     );
   }
 
-  // Extrapolate stakeholders from drafts (target_persona)
-  const rawStakeholders = result?.drafts?.length 
-    ? result.drafts.map(d => d.target_persona).filter((v, i, a) => a.indexOf(v) === i)
-    : ["Dana Whitfield (VP Clinical Ops)", "Marcus Iyer (Director IT)", "Priya Chandrasekaran (CFO)"]; // Fallbacks while pending
+  const stakeholders = result?.stakeholders?.length 
+    ? result.stakeholders.map((s) => ({
+        ...s,
+        history: [] // Fallback for UI component
+      }))
+    : [];
 
-  const stakeholders = rawStakeholders.map((s, i) => {
-    const name = typeof s === 'string' ? s.split('(')[0].trim() || s : s;
-    const roleMatch = typeof s === 'string' ? s.match(/\((.*?)\)/) : null;
-    const role = roleMatch ? roleMatch[1] : (i === 0 ? "VP Operations" : i === 1 ? "Director IT" : "CFO");
-    return {
-      name,
-      role,
-      key_concerns: ["Evaluating solutions for operational efficiency"],
-      history: []
-    };
-  });
+  const painPoints = result?.stakeholders?.flatMap(s => s.key_concerns).filter(Boolean) || [];
 
-  const painPoints = result?.plan?.challenges || [
-    "High Nursing Turnover - Mentioned \"critical shortage\" in last two QBRs.",
-    "Integration Delays - Current API limitations causing 24hr lag."
-  ];
-
-  const buyingSignals = result?.plan?.key_initiatives || [
-    "Budget Allocation Confirmed - Earmarked funds in the Q1 budget specifically for operational efficiency.",
-    "Competitor Contract Expiring - Contract up for renewal in October."
-  ];
+  const buyingSignals = result?.intent?.signals?.map(s => s.description) || [];
 
   return (
     <div className="max-w-[1200px] mx-auto flex flex-col gap-6 py-6 px-6 lg:px-8">
@@ -199,7 +214,7 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
                   strokeWidth="4" 
                 />
               </svg>
-              <span className="text-[24px] leading-[32px] font-semibold text-foreground relative z-10">78</span>
+              <span className="text-[24px] leading-[32px] font-semibold text-foreground relative z-10">{result?.intent?.overall_intent_score ?? '--'}</span>
             </div>
           </div>
           <div className="h-12 w-px bg-border"></div>
@@ -233,20 +248,20 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
           <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
             <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Identified Pain Points</h3>
             <ul className="space-y-4">
-              {painPoints.map((point, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-destructive mt-0.5 text-[20px]">warning</span>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium text-foreground">{point.split('-')[0].trim()}</span>
-                      <span className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-[10px] font-mono border border-border">Insight</span>
+              {painPoints.length > 0 ? (
+                painPoints.map((point, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-destructive mt-0.5 text-[20px]">warning</span>
+                    <div className="flex-1">
+                      <p className="text-[14px] leading-[20px] text-foreground">
+                        {point}
+                      </p>
                     </div>
-                    <p className="text-[12px] leading-[16px] text-muted-foreground">
-                      {point.split('-').slice(1).join('-').trim() || point}
-                    </p>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                ))
+              ) : (
+                <li className="text-muted-foreground text-[14px]">No pain points identified yet.</li>
+              )}
             </ul>
           </div>
 
@@ -257,50 +272,37 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
               <span className="material-symbols-outlined text-primary text-[20px]">trending_up</span>
             </h3>
             <div className="space-y-3">
-              {buyingSignals.map((signal, idx) => (
-                <div key={idx} className={`${idx === 0 ? 'bg-primary/5 border border-primary/20' : 'bg-background border border-border'} rounded p-3`}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className={`font-medium ${idx === 0 ? 'text-primary' : 'text-foreground'}`}>{signal.split('-')[0].trim()}</span>
-                    <div className="flex gap-1">
-                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                      <div className={`w-2 h-4 rounded-sm ${idx === 0 ? 'bg-primary' : 'bg-muted/50'}`}></div>
-                    </div>
+              {buyingSignals.length > 0 ? (
+                buyingSignals.map((signal, idx) => (
+                  <div key={idx} className={`${idx === 0 ? 'bg-primary/5 border border-primary/20' : 'bg-background border border-border'} rounded p-3`}>
+                    <p className={`text-[14px] leading-[20px] ${idx === 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                      {signal}
+                    </p>
                   </div>
-                  <p className={`font-mono text-[13px] ${idx === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {signal.split('-').slice(1).join('-').trim() || signal}
-                  </p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-muted-foreground text-[14px]">No buying signals detected yet.</div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col gap-6">
-          {/* Whitespace Context */}
+          {/* Key Research Findings */}
           <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
-            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Whitespace & Competitive Context</h3>
-            <div className="mb-4">
-              <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-2">Current Stack Presence</div>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-background border border-border rounded text-[14px] text-muted-foreground">Workday (HRIS)</span>
-                <span className="px-2 py-1 bg-background border border-border rounded text-[14px] text-muted-foreground">Salesforce (CRM)</span>
-                <span className="px-2 py-1 bg-destructive/10 text-destructive border border-destructive/20 rounded text-[14px] font-medium">Competitor Inc</span>
-              </div>
-            </div>
-            <div>
-              <div className="text-[11px] leading-[16px] tracking-[0.05em] font-semibold uppercase text-muted-foreground mb-2">Cross-Sell Opportunities</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="border border-border rounded p-3 flex items-center justify-between">
-                  <span className="text-[14px] font-medium">Analytics Module</span>
-                  <span className="w-2 h-2 rounded-full bg-primary"></span>
-                </div>
-                <div className="border border-border rounded p-3 flex items-center justify-between bg-muted">
-                  <span className="text-[14px] font-medium text-muted-foreground">Integration API</span>
-                  <span className="w-2 h-2 rounded-full bg-border"></span>
-                </div>
-              </div>
+            <h3 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground mb-4 border-b border-border pb-2">Key Research Findings</h3>
+            <div className="space-y-4">
+              {result?.research?.findings && result.research.findings.length > 0 ? (
+                result.research.findings.map((finding, idx) => (
+                  <div key={idx} className="border border-border rounded p-3 bg-muted/20">
+                    <div className="text-[14px] font-semibold mb-1 text-foreground">{finding.topic}</div>
+                    <p className="text-[13px] text-muted-foreground">{finding.summary}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted-foreground text-[14px]">No research findings available.</div>
+              )}
             </div>
           </div>
 
@@ -312,27 +314,25 @@ export default function AccountDetailView({ params }: { params: Promise<{ id: st
               Recommended Next Actions
             </h3>
             <div className="space-y-3 relative z-10">
-              <div className="flex items-start gap-3 p-3 bg-background border border-primary/20 rounded shadow-sm">
-                <div className="mt-0.5 text-primary">
-                  <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground mb-1 text-[14px]">Schedule follow-up with {stakeholders[0]?.name || 'Stakeholder'}</div>
-                  <p className="text-[12px] leading-[16px] text-muted-foreground mb-2">Address budget finalization. Emphasize ROI timeline for operational efficiency tools.</p>
-                  <Link href={`/accounts/${accountId}/outreach`} className="text-primary text-[14px] font-medium hover:underline flex items-center gap-1">
-                    Draft Email <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                  </Link>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-background border border-border rounded">
-                <div className="mt-0.5 text-muted-foreground">
-                  <span className="material-symbols-outlined text-[20px]">description</span>
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground mb-1 text-[14px]">Send Technical Integration Guide</div>
-                  <p className="text-[12px] leading-[16px] text-muted-foreground">Send preemptively address integration concerns.</p>
-                </div>
-              </div>
+              {result?.plan?.key_steps && result.plan.key_steps.length > 0 ? (
+                result.plan.key_steps.map((step, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 bg-background border border-border rounded shadow-sm">
+                    <div className="mt-0.5 text-primary">
+                      <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-foreground text-[14px]">{step}</div>
+                      {idx === 0 && (
+                        <Link href={`/accounts/${accountId}/outreach`} className="text-primary text-[14px] font-medium hover:underline flex items-center gap-1 mt-2">
+                          View Outreach Drafts <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted-foreground text-[14px]">No recommended actions at this time.</div>
+              )}
             </div>
           </div>
         </div>

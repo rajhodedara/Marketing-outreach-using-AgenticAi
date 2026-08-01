@@ -74,18 +74,7 @@ export default function JulianWorkspace() {
             buyingSignals: plan.key_initiatives || []
           });
         } else {
-          // Mock data if no analysis exists
-          setBriefData({
-            companyName: data.company_name || data.domain,
-            targetPersona: "Dana Whitfield (VP Operations)",
-            painPoints: [
-              "High Nursing Turnover - Mentioned 'critical shortage' in last two QBRs.",
-              "Integration Delays - Current API limitations causing 24hr lag."
-            ],
-            buyingSignals: [
-              "Budget Allocation Confirmed - Earmarked funds in the Q1 budget."
-            ]
-          });
+          setBriefData(null);
         }
       })
       .catch(console.error)
