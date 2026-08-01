@@ -6,6 +6,7 @@ from app.core.llm import get_cerebras_llm
 from app.agents.state import PipelineState
 from app.schemas.ai import IntentSignals, BuyingSignal
 from app.rag.retriever import retrieve as qdrant_retrieve
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
