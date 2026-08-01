@@ -2,6 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { 
+  SquaresFour, 
+  Buildings, 
+  Users, 
+  RocketLaunch, 
+  Brain, 
+  Gear, 
+  Question,
+  CaretDoubleLeft
+} from "@phosphor-icons/react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -11,74 +21,71 @@ export function Sidebar() {
   };
 
   return (
-    <nav className="hidden md:flex flex-col h-screen w-64 border-r border-border bg-sidebar dark:bg-[#1a1b22] py-4 px-2 shrink-0">
-      <div className="mb-6 px-3">
+    <nav className="hidden md:flex flex-col h-full w-64 bg-sidebar border-r border-sidebar-border py-6 px-4 shrink-0 transition-all duration-300">
+      <div className="mb-8 px-2">
         <div className="flex items-center gap-3">
           <img 
             alt="Organization Logo" 
-            className="w-8 h-8 rounded" 
+            className="w-8 h-8 rounded-xl shadow-sm object-cover" 
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuC41X0UfvfA0JWbdywFNYkSnlZxPUuaRoGYf_HXCO6uN2Fo6r-N33VBgno2LeNNAESOwxg_HQi8tMUQiY1Hjfx5t14ezFKU2l6_Rqfrp-VBBrOsP6DKaK2DFoKH8y5M0gODz4p9GDfbpZB5SL0ZrT3rNGFlBQzvV2IgJ51BP7r-sRMI7aXRZ_EPJTlNk7P3foEU5lRPtAs6fPcMe3zeB9FFk_FdbnCshd953vWJl5mLyzL2V7Z-_UbYTA"
           />
           <div>
-            <h1 className="text-[18px] leading-[24px] tracking-[-0.01em] font-semibold text-foreground">ABM Orchestrator</h1>
-            <p className="text-[12px] leading-[16px] text-muted-foreground">Enterprise Tier</p>
+            <h1 className="text-base tracking-tight font-semibold text-sidebar-foreground">ABM Orchestrator</h1>
+            <p className="text-xs text-muted-foreground">Enterprise Tier</p>
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto space-y-1">
+      
+      <div className="flex-1 overflow-y-auto space-y-2">
         <Link 
           href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/dashboard') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 active:scale-95 ${isActive('/dashboard') ? 'bg-primary/10 text-primary font-medium' : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/dashboard') ? 'fill text-primary' : ''}`}>dashboard</span>
-          <span className="text-[16px] leading-[24px]">Dashboard</span>
+          <SquaresFour size={20} weight={isActive('/dashboard') ? "fill" : "regular"} />
+          <span className="text-sm">Dashboard</span>
         </Link>
-        <Link 
-          href="/"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
-        >
-          <span className={`material-symbols-outlined ${isActive('/') ? 'fill text-primary' : ''}`}>corporate_fare</span>
-          <span className="text-[16px] leading-[24px]">Accounts</span>
-        </Link>
+
         <Link 
           href="/segments"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/segments') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 active:scale-95 ${isActive('/segments') ? 'bg-primary/10 text-primary font-medium' : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/segments') ? 'fill text-primary' : ''}`}>groups</span>
-          <span className="text-[16px] leading-[24px]">Segments</span>
+          <Users size={20} weight={isActive('/segments') ? "fill" : "regular"} />
+          <span className="text-sm">Segments</span>
         </Link>
         <Link 
           href="/campaigns"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/campaigns') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 active:scale-95 ${isActive('/campaigns') ? 'bg-primary/10 text-primary font-medium' : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/campaigns') ? 'fill text-primary' : ''}`}>rocket_launch</span>
-          <span className="text-[16px] leading-[24px]">Campaigns</span>
+          <RocketLaunch size={20} weight={isActive('/campaigns') ? "fill" : "regular"} />
+          <span className="text-sm">Campaigns</span>
         </Link>
         <Link 
           href="/intelligence"
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/intelligence') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 active:scale-95 ${isActive('/intelligence') ? 'bg-primary/10 text-primary font-medium' : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`}
         >
-          <span className={`material-symbols-outlined ${isActive('/intelligence') ? 'fill text-primary' : ''}`}>psychology</span>
-          <span className="text-[16px] leading-[24px]">Intelligence</span>
+          <Brain size={20} weight={isActive('/intelligence') ? "fill" : "regular"} />
+          <span className="text-sm">Intelligence</span>
         </Link>
       </div>
-      <div className="mt-auto space-y-1 pt-4 border-t border-border">
+      
+      <div className="mt-auto space-y-1 pt-6">
         <Link 
           href="/settings"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50 transition-colors duration-200"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors duration-200"
         >
-          <span className="material-symbols-outlined">settings</span>
-          <span className="text-[16px] leading-[24px]">Settings</span>
+          <Gear size={20} />
+          <span className="text-sm">Settings</span>
         </Link>
         <Link 
           href="/support"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50 transition-colors duration-200"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors duration-200"
         >
-          <span className="material-symbols-outlined">help_outline</span>
-          <span className="text-[16px] leading-[24px]">Support</span>
+          <Question size={20} />
+          <span className="text-sm">Support</span>
         </Link>
-        <button className="w-full flex items-center justify-center gap-2 mt-4 px-3 py-2 border border-border rounded-lg text-foreground hover:bg-muted/50 transition-colors text-[12px] font-medium">
-          <span className="material-symbols-outlined text-[18px]">keyboard_double_arrow_left</span>
+        
+        <button className="w-full flex items-center justify-center gap-2 mt-4 px-3 py-2.5 border border-sidebar-border rounded-xl text-sidebar-foreground hover:bg-sidebar-accent transition-colors text-xs font-medium">
+          <CaretDoubleLeft size={16} />
           Collapse View
         </button>
       </div>

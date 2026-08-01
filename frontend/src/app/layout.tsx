@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ABM Orchestrator",
@@ -22,14 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
       </head>
-      <body className={`${inter.className} flex h-screen bg-background overflow-hidden text-on-surface antialiased`}>
+      <body className={`${outfit.className} flex min-h-[100dvh] bg-background overflow-hidden text-foreground antialiased`}>
         <TooltipProvider delay={150}>
           <Sidebar />
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <Topbar />
-            <main className="flex-1 overflow-y-auto bg-[#FAFAF9] dark:bg-background">
+            <main className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
               {children}
             </main>
           </div>
