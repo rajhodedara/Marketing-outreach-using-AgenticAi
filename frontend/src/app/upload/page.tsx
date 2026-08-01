@@ -52,7 +52,7 @@ export default function UploadPage() {
     formData.append("account_name", accountName || file.name.replace(".zip", "").replace("_", " "));
 
     try {
-      const res = await fetch("http://localhost:8000/api/upload", {
+      const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });

@@ -25,13 +25,15 @@ export default function AIProcessingView({ params }: { params: Promise<{ id: str
 
   const startAnalysis = async () => {
     try {
-      const accountRes = await fetch(`http://localhost:8000/api/accounts/${accountId}`);
+      // Get basic account info first
+      const accountRes = await fetch(`/api/accounts/${accountId}`);
       if (accountRes.ok) {
         const data = await accountRes.json();
         setAccount({ company_name: data.company_name || data.domain, domain: data.domain });
       }
 
-      const res = await fetch(`http://localhost:8000/api/accounts/${accountId}/analyze`, {
+      // Trigger analysis
+      const res = await fetch(`/api/accounts/${accountId}/analyze`, {
         method: 'POST'
       });
       
@@ -54,7 +56,7 @@ export default function AIProcessingView({ params }: { params: Promise<{ id: str
   };
 
   const subscribeToStream = (sessionId: string) => {
-    const eventSource = new EventSource(`http://localhost:8000/api/analysis/${sessionId}/stream`);
+    const eventSource = new EventSource(`/api/analysis/${sessionId}/stream`);
     
     eventSource.onmessage = (event) => {
       if (event.data === '[DONE]') {
@@ -93,7 +95,8 @@ export default function AIProcessingView({ params }: { params: Promise<{ id: str
     const pollInterval = setInterval(async () => {
       try {
         if (!sessionId) {
-          const res = await fetch(`http://localhost:8000/api/accounts/${accountId}`);
+          // fallback
+          const res = await fetch(`/api/accounts/${accountId}`);
           if (res.ok) {
             const data = await res.json();
             if (data.status === 'completed' || data.status === 'analyzed') {
@@ -108,7 +111,7 @@ export default function AIProcessingView({ params }: { params: Promise<{ id: str
           return;
         }
 
-        const res = await fetch(`http://localhost:8000/api/analysis/${sessionId}`);
+        const res = await fetch(`/api/analysis/${sessionId}`);
         if (res.ok) {
           const session = await res.json();
           if (session.status === 'completed') {

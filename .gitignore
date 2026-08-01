@@ -5,3 +5,5 @@ venv/
 .env
 backend/data/
 backend/.env
+
+package.json
