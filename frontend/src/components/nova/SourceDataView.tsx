@@ -31,7 +31,7 @@ export function SourceDataView({ sources }: { sources: SourceData[] }) {
               <span className="text-[12px] font-semibold text-foreground truncate">{src.name}</span>
             </div>
             <p className="text-[10px] text-muted-foreground line-clamp-2 font-mono">
-              "{src.preview}"
+              &quot;{src.preview}&quot;
             </p>
           </div>
         );

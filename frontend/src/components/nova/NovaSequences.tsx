@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowsClockwise, Plus, X, GitMerge, EnvelopeSimple, LinkedinLogo, Phone, Hash, User, Trash, Target } from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 interface NovaSequencesProps {
   accountId: string;
@@ -40,10 +38,6 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
   const [bSteps, setBSteps] = useState<Step[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchSequences();
-  }, [accountId]);
-
   const fetchSequences = async () => {
     setLoading(true);
     try {
@@ -58,6 +52,10 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSequences();
+  }, [accountId]);
 
   const handleOpenBuilder = () => {
     setBName(`Outreach for ${accountName}`);
@@ -75,6 +73,7 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
     setBSteps([...bSteps, { day: maxDay + 2, channel: "email", content: "", status: "Pending" }]);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpdateStep = (index: number, field: keyof Step, value: any) => {
     const newSteps = [...bSteps];
     newSteps[index] = { ...newSteps[index], [field]: value };
@@ -120,21 +119,14 @@ export function NovaSequences({ accountId, accountName }: NovaSequencesProps) {
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        setSequences(prev => prev.map(s => s.id === id ? { ...s, status: newStatus as any } : s));
+        setSequences(prev => prev.map(s => s.id === id ? { ...s, status: newStatus as "Active" | "Paused" | "Completed" } : s));
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-      case "Paused": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-      case "Completed": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-      default: return "bg-zinc-800 text-zinc-400 border-zinc-700";
-    }
-  };
+
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {

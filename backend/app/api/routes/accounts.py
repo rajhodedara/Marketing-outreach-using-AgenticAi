@@ -191,3 +191,40 @@ async def send_draft_email(
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/stakeholders/all")
+async def list_all_stakeholders(
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """List all stakeholders across all analyzed accounts."""
+    result = await db.execute(select(Account).order_by(Account.updated_at.desc()))
+    accounts = result.scalars().all()
+    
+    all_stakeholders = []
+    
+    for a in accounts:
+        session_result = await db.execute(
+            select(AnalysisSession)
+            .where(AnalysisSession.account_id == a.id)
+            .order_by(AnalysisSession.started_at.desc())
+            .limit(1)
+        )
+        latest_session = session_result.scalar_one_or_none()
+        
+        if latest_session and latest_session.result_json:
+            try:
+                res_dict = json.loads(latest_session.result_json)
+                stakeholders = res_dict.get("stakeholders", [])
+                for idx, s in enumerate(stakeholders):
+                    # Inject account context and stakeholder ID (index)
+                    s_copy = dict(s)
+                    s_copy["account_id"] = a.id
+                    s_copy["company_name"] = a.company_name
+                    s_copy["stakeholder_index"] = str(idx)
+                    all_stakeholders.append(s_copy)
+            except Exception as e:
+                logger.error(f"Error parsing session {latest_session.id}: {e}")
+                
+    return {
+        "stakeholders": all_stakeholders
+    }

@@ -11,9 +11,9 @@ let _instance: Vapi | null = null;
 export function getVapi(): Vapi {
   if (!_instance) {
     if (!PUBLIC_KEY) {
-      throw new Error("NEXT_PUBLIC_VAPI_PUBLIC_KEY is not set in .env.local");
+      console.warn("NEXT_PUBLIC_VAPI_PUBLIC_KEY is not set in .env.local");
     }
-    _instance = new Vapi(PUBLIC_KEY);
+    _instance = new Vapi(PUBLIC_KEY || "dummy_key");
   }
   return _instance;
 }
@@ -60,18 +60,19 @@ export function onCallEnd(cb: () => void): void {
 }
 
 export function onTranscript(cb: (msg: TranscriptMessage) => void): void {
-  getVapi().on("message", (message: any) => {
-    if (message?.type === "transcript") {
+  getVapi().on("message", (message: unknown) => {
+    const msg = message as Record<string, unknown>;
+    if (msg?.type === "transcript") {
       cb({ 
-        role: message.role, 
-        text: message.transcript,
-        isFinal: message.transcriptType === "final"
+        role: msg.role as "user" | "assistant", 
+        text: msg.transcript as string,
+        isFinal: msg.transcriptType === "final"
       });
     }
   });
 }
 
-export function onError(cb: (err: any) => void): void {
+export function onError(cb: (err: unknown) => void): void {
   getVapi().on("error", cb);
 }
 

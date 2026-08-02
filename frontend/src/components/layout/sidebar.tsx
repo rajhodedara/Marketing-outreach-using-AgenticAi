@@ -55,6 +55,13 @@ export function Sidebar() {
           <span className="text-[16px] leading-[24px]">Nova</span>
         </Link>
         <Link 
+          href="/outreach"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/outreach') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
+        >
+          <span className={`material-symbols-outlined ${isActive('/outreach') ? 'fill text-primary' : ''}`}>send</span>
+          <span className="text-[16px] leading-[24px]">Outreach</span>
+        </Link>
+        <Link 
           href="/intelligence"
           className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 active:scale-95 transition-transform ${isActive('/intelligence') ? 'text-primary font-bold border-r-2 border-primary bg-muted/50' : 'text-secondary-foreground/70 hover:text-foreground hover:bg-muted/50'}`}
         >
