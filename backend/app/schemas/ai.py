@@ -6,6 +6,14 @@ class CitationRef(BaseModel):
     source_id: str = Field(..., description="ID of the source document")
     quote: str = Field(..., description="Exact quote from the source")
 
+class CitationMetadata(BaseModel):
+    id: str = Field(..., description="ID matching the inline marker (e.g., '1' for [1])")
+    source_type: str = Field(..., description="Type of source (e.g., 'Transcript', 'News', 'CRM')")
+    source_name: str = Field(..., description="Name of the source")
+    context: str = Field(..., description="Date, timestamp, or context (e.g., 'Q3 review - 02:14')")
+    snippet: str = Field(..., description="Exact quote or snippet from the source")
+
+
 class ResearchFinding(BaseModel):
     topic: str = Field(..., description="Topic of the finding")
     summary: str = Field(..., description="Summary of the finding")
@@ -32,7 +40,8 @@ class IntentSignals(BaseModel):
 class OutreachDraft(BaseModel):
     target_persona: str = Field(..., description="The target persona for the outreach")
     channel: str = Field(..., description="Channel for the outreach (e.g., Email, LinkedIn)")
-    content: str = Field(..., description="The draft content")
+    content: str = Field(..., description="The draft content. Use inline markers like [1] to cite sources.")
+    citations: list[CitationMetadata] = Field(default_factory=list, description="List of citations used in the draft content")
 
 class AccountPlan(BaseModel):
     account_id: str = Field(..., description="Account identifier")

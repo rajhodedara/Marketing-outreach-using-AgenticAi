@@ -227,3 +227,20 @@ async def list_all_stakeholders(
     return {
         "stakeholders": all_stakeholders
     }
+
+@router.get("/accounts/{account_id}/qdrant_debug")
+async def qdrant_debug(account_id: str):
+    import app.main
+    if not app.main.qdrant_client:
+        return {"error": "Qdrant not initialized"}
+    
+    collection_name = f"account_{account_id}"
+    try:
+        count = await app.main.qdrant_client.count(collection_name)
+        res = await app.main.qdrant_client.scroll(collection_name, limit=5)
+        return {
+            "count": count.count,
+            "sample_points": [p.payload for p in res[0]]
+        }
+    except Exception as e:
+        return {"error": str(e)}

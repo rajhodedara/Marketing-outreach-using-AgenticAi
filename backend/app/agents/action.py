@@ -25,6 +25,7 @@ async def action_node(state: PipelineState) -> dict:
     research = state.get("research")
     stakeholders = state.get("stakeholders", [])
     intent = state.get("intent")
+    retrieved_chunks = state.get("retrieved_chunks", [])
     
     logger.info(f"Generating account plan and outreach drafts for account: {company_name}")
     
@@ -35,10 +36,21 @@ async def action_node(state: PipelineState) -> dict:
             strategy_summary="Focus on executive alignment and ROI-driven messaging.",
             key_steps=["Send intro to CEO", "Follow up with Technical team"]
         )
+        from app.schemas.ai import CitationMetadata
+        
         mock_draft = OutreachDraft(
             target_persona="CEO",
             channel="Email",
-            content="Hi Jane, noticed your focus on AI orchestration. Let's chat."
+            content="Hi Jane, noticed your focus on AI orchestration [1]. Let's chat.",
+            citations=[
+                CitationMetadata(
+                    id="1",
+                    source_type="Transcript",
+                    source_name="Gong Call",
+                    context="Q3 planning - 04:12",
+                    snippet="we are heavily focused on AI orchestration"
+                )
+            ]
         )
         return {
             "account_plan": mock_plan,
@@ -50,10 +62,11 @@ async def action_node(state: PipelineState) -> dict:
     research_text = research.model_dump_json(indent=2) if research else "No research available."
     stakeholders_text = "\n".join([s.model_dump_json() for s in stakeholders]) if stakeholders else "No stakeholders available."
     intent_text = intent.model_dump_json(indent=2) if intent else "No intent signals available."
+    chunks_text = "\n\n".join(retrieved_chunks) if retrieved_chunks else "No raw source documents available."
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert Go-To-Market and ABM strategist. Synthesize the provided research, stakeholders, and intent data to generate a strategic Account Plan and draft personalized outreach messages."),
-        ("user", "Company: {company_name}\nAccount ID: {account_id}\n\nResearch:\n{research}\n\nStakeholders:\n{stakeholders}\n\nIntent Signals:\n{intent}\n\nPlease generate the account plan and outreach drafts.")
+        ("system", "You are an expert Go-To-Market and ABM strategist. Synthesize the provided research, stakeholders, intent data, and Raw Source Documents to generate a strategic Account Plan and draft personalized outreach messages.\n\nIMPORTANT: When drafting the outreach content, you MUST include inline citations to the Raw Source Documents you are using. Use markers like [1], [2], etc. in the text, and output the corresponding citation metadata in the 'citations' array matching the marker ID. Use the Document name for 'source_name' and provide the exact snippet text. If there are no Raw Source Documents, do not invent citations."),
+        ("user", "Company: {company_name}\nAccount ID: {account_id}\n\nResearch Summary:\n{research}\n\nStakeholders:\n{stakeholders}\n\nIntent Signals:\n{intent}\n\nRaw Source Documents:\n{chunks}\n\nPlease generate the account plan and outreach drafts.")
     ])
     
     chain = prompt | llm
@@ -64,7 +77,8 @@ async def action_node(state: PipelineState) -> dict:
             "account_id": account_id or "unknown",
             "research": research_text,
             "stakeholders": stakeholders_text,
-            "intent": intent_text
+            "intent": intent_text,
+            "chunks": chunks_text
         })
         return {
             "account_plan": result.account_plan,
