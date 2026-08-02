@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   description: "B2B SaaS Dashboard for Account Based Marketing",
 };
 
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,16 +27,18 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
       </head>
       <body className={`${outfit.className} flex h-[100dvh] bg-background overflow-hidden text-foreground antialiased`} suppressHydrationWarning>
-        <TooltipProvider delay={150}>
-          <Sidebar />
-          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <Topbar />
-            <main className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
-              {children}
-            </main>
-          </div>
-        </TooltipProvider>
-        <Toaster />
+        <Providers>
+          <TooltipProvider delay={150}>
+            <Sidebar />
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+              <Topbar />
+              <main className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
+                {children}
+              </main>
+            </div>
+          </TooltipProvider>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

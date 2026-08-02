@@ -32,14 +32,27 @@ async def list_accounts(
     accounts = result.scalars().all()
     
     account_list = []
-    for a in accounts:
-        session_result = await db.execute(
+    
+    if accounts:
+        account_ids = [a.id for a in accounts]
+        # DB agnostic way to get the latest session for each account in 1 query
+        sessions_result = await db.execute(
             select(AnalysisSession)
-            .where(AnalysisSession.account_id == a.id)
+            .where(AnalysisSession.account_id.in_(account_ids))
             .order_by(AnalysisSession.started_at.desc())
-            .limit(1)
         )
-        latest_session = session_result.scalar_one_or_none()
+        all_sessions = sessions_result.scalars().all()
+        
+        latest_sessions_map = {}
+        for s in all_sessions:
+            if s.account_id not in latest_sessions_map:
+                latest_sessions_map[s.account_id] = s
+    else:
+        latest_sessions_map = {}
+
+    import json
+    for a in accounts:
+        latest_session = latest_sessions_map.get(a.id)
         
         intent_score = "--"
         status_label = "Pending"
@@ -47,7 +60,6 @@ async def list_accounts(
         
         if latest_session and latest_session.result_json:
             status_label = "Analyzed"
-            import json
             try:
                 res_dict = json.loads(latest_session.result_json)
                 intent_score = res_dict.get("intent", {}).get("overall_intent_score", "--")
