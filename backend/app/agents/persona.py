@@ -46,7 +46,9 @@ async def persona_node(state: PipelineState) -> dict:
     retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
     context = "\n\n".join(retrieved_chunks)
         
-    if settings.use_mock_llm:
+    user_prompt = state.get("user_prompt")
+        
+    if not user_prompt and settings.use_mock_llm:
         logger.info("Using mock LLM for persona node")
         mock_profiles = [
             StakeholderProfile(
@@ -65,8 +67,13 @@ async def persona_node(state: PipelineState) -> dict:
         
     llm = llm.with_structured_output(StakeholderProfiles)
     
+    if user_prompt:
+        system_instruction = f"You are an expert in B2B sales and persona mapping. The user has given a specific directive: {user_prompt}. Your mapping MUST fulfill this directive. Extract stakeholder profiles from the provided context. You must identify exactly 5 key stakeholders, specifically targeting roles relevant to the directive or default roles like CTO, SVP Risk & Compliance, Director of Data Engineering, CFO, and VP Product."
+    else:
+        system_instruction = "You are an expert in B2B sales and persona mapping. Extract stakeholder profiles from the provided context. You must identify exactly 5 key stakeholders, specifically targeting roles like CTO, SVP Risk & Compliance, Director of Data Engineering, CFO, and VP Product."
+
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert in B2B sales and persona mapping. Extract stakeholder profiles from the provided context. You must identify exactly 5 key stakeholders, specifically targeting roles like CTO, SVP Risk & Compliance, Director of Data Engineering, CFO, and VP Product."),
+        ("system", system_instruction),
         ("user", "Company: {company_name}\n\nContext:\n{context}\n\nPlease extract the key stakeholders.")
     ])
     

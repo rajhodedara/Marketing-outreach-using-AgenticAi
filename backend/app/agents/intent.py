@@ -42,7 +42,9 @@ async def intent_node(state: PipelineState) -> dict:
     retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
     context = "\n\n".join(retrieved_chunks)
         
-    if settings.use_mock_llm:
+    user_prompt = state.get("user_prompt")
+        
+    if not user_prompt and settings.use_mock_llm:
         logger.info("Using mock LLM for intent node")
         mock_intent = IntentSignals(
             signals=[
@@ -63,8 +65,13 @@ async def intent_node(state: PipelineState) -> dict:
         
     llm = llm.with_structured_output(IntentSignals)
     
+    if user_prompt:
+        system_instruction = f"You are an expert intent analyst. The user has given a specific directive: {user_prompt}. Your analysis MUST fulfill this directive. Extract buying signals and compute an overall intent score from the provided context."
+    else:
+        system_instruction = "You are an expert intent analyst. Extract buying signals and compute an overall intent score from the provided context."
+
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert intent analyst. Extract buying signals and compute an overall intent score from the provided context."),
+        ("system", system_instruction),
         ("user", "Company: {company_name}\n\nContext:\n{context}\n\nPlease extract the intent signals and provide an overall score (0-100).")
     ])
     

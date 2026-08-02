@@ -44,8 +44,10 @@ async def research_node(state: PipelineState) -> dict:
     retrieved_chunks = [_format_retrieved_chunk(doc, idx) for idx, doc in enumerate(retrieved_docs)]
     context = "\n\n".join(retrieved_chunks)
         
+    user_prompt = state.get("user_prompt")
+        
     # 2. Mock LLM response if needed
-    if settings.use_mock_llm:
+    if not user_prompt and settings.use_mock_llm:
         logger.info("Using mock LLM for research node")
         mock_findings = ResearchFindings(
             findings=[
@@ -66,8 +68,13 @@ async def research_node(state: PipelineState) -> dict:
         
     llm = llm.with_structured_output(ResearchFindings)
     
+    if user_prompt:
+        system_instruction = f"You are an expert market researcher. The user has given a specific directive: {user_prompt}. Your research MUST strictly fulfill this directive based on the context. Extract key research findings. Make sure to back up your claims by generating CitationRef objects with the exact source_id and quote from the text."
+    else:
+        system_instruction = "You are an expert market researcher. Extract key research findings from the provided context. Make sure to back up your claims by generating CitationRef objects with the exact source_id and quote from the text."
+
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert market researcher. Extract key research findings from the provided context. Make sure to back up your claims by generating CitationRef objects with the exact source_id and quote from the text."),
+        ("system", system_instruction),
         ("user", "Company: {company_name}\n\nContext:\n{context}\n\nPlease extract the key research findings.")
     ])
     

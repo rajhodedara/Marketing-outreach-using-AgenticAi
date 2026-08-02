@@ -29,7 +29,9 @@ async def action_node(state: PipelineState) -> dict:
     
     logger.info(f"Generating account plan and outreach drafts for account: {company_name}")
     
-    if settings.use_mock_llm:
+    user_prompt = state.get("user_prompt")
+    
+    if not user_prompt and settings.use_mock_llm:
         logger.info("Using mock LLM for action node")
         mock_plan = AccountPlan(
             account_id=account_id or "acc_123",
@@ -54,7 +56,8 @@ async def action_node(state: PipelineState) -> dict:
         )
         return {
             "account_plan": mock_plan,
-            "outreach_drafts": [mock_draft]
+            "outreach_drafts": [mock_draft],
+            "custom_response": None
         }
         
     llm = get_openrouter_llm(temperature=0.2).with_structured_output(ActionOutput)
@@ -64,9 +67,14 @@ async def action_node(state: PipelineState) -> dict:
     intent_text = intent.model_dump_json(indent=2) if intent else "No intent signals available."
     chunks_text = "\n\n".join(retrieved_chunks) if retrieved_chunks else "No raw source documents available."
     
+    if user_prompt:
+        system_instruction = f"The user has given a specific custom directive: {user_prompt}. You MUST completely fulfill this directive and output your entire comprehensive analysis into the `custom_response` field. Ignore the default account plan and outreach formats. Use markdown formatting to make your response easy to read. Synthesize any provided research, intent data, and stakeholders ONLY if they are relevant to answering the prompt. If there are no Raw Source Documents, do not invent citations."
+    else:
+        system_instruction = "You are an expert Go-To-Market and ABM strategist. Synthesize the provided research, stakeholders, intent data, and Raw Source Documents to generate a strategic Account Plan and draft personalized outreach messages.\n\nIMPORTANT: When drafting the outreach content, you MUST include inline citations to the Raw Source Documents you are using. Use markers like [1], [2], etc. in the text, and output the corresponding citation metadata in the 'citations' array matching the marker ID. Use the Document name for 'source_name' and provide the exact snippet text. If there are no Raw Source Documents, do not invent citations."
+
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert Go-To-Market and ABM strategist. Synthesize the provided research, stakeholders, intent data, and Raw Source Documents to generate a strategic Account Plan and draft personalized outreach messages.\n\nIMPORTANT: When drafting the outreach content, you MUST include inline citations to the Raw Source Documents you are using. Use markers like [1], [2], etc. in the text, and output the corresponding citation metadata in the 'citations' array matching the marker ID. Use the Document name for 'source_name' and provide the exact snippet text. If there are no Raw Source Documents, do not invent citations."),
-        ("user", "Company: {company_name}\nAccount ID: {account_id}\n\nResearch Summary:\n{research}\n\nStakeholders:\n{stakeholders}\n\nIntent Signals:\n{intent}\n\nRaw Source Documents:\n{chunks}\n\nPlease generate the account plan and outreach drafts.")
+        ("system", system_instruction),
+        ("user", "Company: {company_name}\nAccount ID: {account_id}\n\nResearch Summary:\n{research}\n\nStakeholders:\n{stakeholders}\n\nIntent Signals:\n{intent}\n\nRaw Source Documents:\n{chunks}\n\nPlease fulfill your directive.")
     ])
     
     chain = prompt | llm
@@ -82,11 +90,13 @@ async def action_node(state: PipelineState) -> dict:
         })
         return {
             "account_plan": result.account_plan,
-            "outreach_drafts": result.outreach_drafts
+            "outreach_drafts": result.outreach_drafts,
+            "custom_response": result.custom_response
         }
     except Exception as e:
         logger.error(f"Error in action node LLM call: {e}")
         return {
             "account_plan": None,
-            "outreach_drafts": []
+            "outreach_drafts": [],
+            "custom_response": None
         }

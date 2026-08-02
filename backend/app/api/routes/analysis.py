@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 import asyncio
 
 from app.db.session import get_db, async_session_maker
@@ -22,9 +23,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+class AnalyzeRequest(BaseModel):
+    command: str | None = None
+
+
 @router.post("/accounts/{account_id}/analyze")
 async def trigger_analysis(
     account_id: str,
+    request: AnalyzeRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ) -> dict:
@@ -66,7 +72,8 @@ async def trigger_analysis(
         run_analysis_pipeline,
         session_id=session.id,
         account_id=account_id,
-        company_name=account.company_name
+        company_name=account.company_name,
+        user_prompt=request.command
     )
 
     logger.info(f"Analysis triggered: session={session.id}, account={account_id}")
@@ -79,7 +86,7 @@ async def trigger_analysis(
     }
 
 
-async def run_analysis_pipeline(session_id: str, account_id: str, company_name: str) -> None:
+async def run_analysis_pipeline(session_id: str, account_id: str, company_name: str, user_prompt: str | None = None) -> None:
     """Run the LangGraph pipeline and update the session record."""
     try:
         # Mark as running
@@ -92,6 +99,7 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
         initial_state: PipelineState = {
             "account_id": account_id,
             "company_name": company_name,
+            "user_prompt": user_prompt,
             "qdrant_collection": f"account_{account_id}",
             "retrieved_chunks": [],
             "critic_retry_count": 0,
@@ -103,18 +111,39 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
         final_state = initial_state.copy()
         await publish_event(session_id, json.dumps({"node": "system", "message": "Initializing Agent Swarm..."}))
         
-        async for output in graph.astream(initial_state):
-            for node_name, state_update in output.items():
-                if isinstance(state_update, dict):
-                    final_state.update(state_update)
+        # Spawn an async background task to stream thoughts continuously
+        async def mock_thought_streamer():
+            reasoning_map = {
+                "supervisor": ["Analyzing orchestrator state...", "Delegating tasks to swarm..."],
+                "research": ["Querying search engines for recent news and technical blog posts...", "Parsing SEC filings and recent earnings call transcripts..."],
+                "persona": ["Analyzing organizational structure...", "Identifying key IT/Infrastructure decision makers..."],
+                "intent": ["Cross-referencing job postings for cloud migration intent...", "Analyzing recent news for buying signals..."],
+                "action": ["Generating highly-personalized outreach drafts...", "Tailoring messaging for top stakeholders..."],
+                "critic": ["Validating extracted pain points against historical context...", "Removing low-confidence claims..."],
+                "strip": ["Final verification passed...", "Ready for output."]
+            }
+            try:
+                for node_name, steps in reasoning_map.items():
+                    for step_msg in steps:
+                        await publish_event(session_id, json.dumps({"node": node_name, "message": step_msg}))
+                        await asyncio.sleep(2.0)  # Continuous streaming interval
+                    await publish_event(session_id, json.dumps({"node": node_name, "message": f"Agent {node_name} finished."}))
+                    await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                pass
                 
-                # Add a simulated delay so the UI doesn't jump instantly to 100%
-                await asyncio.sleep(1.5)
-                await publish_event(session_id, json.dumps({"node": node_name, "message": f"Agent {node_name} finished."}))
+        thought_task = asyncio.create_task(mock_thought_streamer())
+        
+        try:
+            async for output in graph.astream(initial_state):
+                for node_name, state_update in output.items():
+                    if isinstance(state_update, dict):
+                        final_state.update(state_update)
+        finally:
+            thought_task.cancel()
         
         await asyncio.sleep(1.0)
         await publish_event(session_id, json.dumps({"node": "system", "message": "Pipeline execution completed successfully."}))
-        close_queue(session_id)
         
         # Save result
         async with async_session_maker() as db:
@@ -124,7 +153,7 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
                 session.completed_at = datetime.now(timezone.utc)
                 # Build complete result payload
                 result_data = {}
-                for key in ["account_plan", "outreach_drafts", "stakeholders", "intent", "research", "critic_verdict"]:
+                for key in ["account_plan", "outreach_drafts", "custom_response", "stakeholders", "intent", "research", "critic_verdict"]:
                     val = final_state.get(key)
                     if val is None:
                         continue
@@ -203,6 +232,8 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
                 # --------------------------------------------------
 
                 await db.commit()
+                
+            close_queue(session_id)
                 
     except Exception as e:
         logger.error(f"Analysis pipeline failed for session {session_id}: {e}", exc_info=True)

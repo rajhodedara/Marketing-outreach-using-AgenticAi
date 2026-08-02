@@ -43,6 +43,11 @@ class OutreachDraft(BaseModel):
     content: str = Field(..., description="The draft content. Use inline markers like [1] to cite sources.")
     citations: list[CitationMetadata] = Field(default_factory=list, description="List of citations used in the draft content")
 
+class ActionOutput(BaseModel):
+    account_plan: AccountPlan | None = Field(None, description="The structured account plan. Optional if a custom directive was given.")
+    outreach_drafts: list[OutreachDraft] | None = Field(None, description="The drafted outreach messages. Optional if a custom directive was given.")
+    custom_response: str | None = Field(None, description="The comprehensive, raw markdown response strictly fulfilling a user's custom directive. Ignore the other fields if you use this.")
+
 class AccountPlan(BaseModel):
     account_id: str = Field(..., description="Account identifier")
     strategy_summary: str = Field(..., description="Summary of the strategy")

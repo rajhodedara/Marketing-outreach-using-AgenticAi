@@ -18,6 +18,7 @@ class PipelineState(TypedDict, total=False):
     account_id: str
     company_name: str
     qdrant_collection: str
+    user_prompt: str | None
     
     # Outcomes from parallel nodes
     research: ResearchFindings | None
@@ -27,6 +28,7 @@ class PipelineState(TypedDict, total=False):
     # Outcomes from action node
     account_plan: AccountPlan | None
     outreach_drafts: list[OutreachDraft] | None
+    custom_response: str | None
     
     # Outcome from critic node (Phase 4)
     critic_verdict: CriticVerdict | None
