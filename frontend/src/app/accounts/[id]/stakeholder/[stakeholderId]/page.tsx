@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export default function StakeholderDetailView({ params }: { params: Promise<{ id: string, stakeholderId: string }> }) {
   const resolvedParams = use(params);
@@ -64,7 +64,7 @@ export default function StakeholderDetailView({ params }: { params: Promise<{ id
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
   
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -72,7 +72,7 @@ export default function StakeholderDetailView({ params }: { params: Promise<{ id
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
