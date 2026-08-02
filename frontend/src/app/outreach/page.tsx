@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { PaperPlaneRight, CalendarBlank, ChartLineUp, EnvelopeSimple, LinkedinLogo, Phone, Hash } from "@phosphor-icons/react";
 
 export default function GlobalOutreach() {
@@ -73,7 +73,7 @@ export default function GlobalOutreach() {
     }
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -81,7 +81,7 @@ export default function GlobalOutreach() {
     }
   };
 
-  const rowVariants = {
+  const rowVariants: Variants = {
     hidden: { opacity: 0, y: 10 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
     exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }

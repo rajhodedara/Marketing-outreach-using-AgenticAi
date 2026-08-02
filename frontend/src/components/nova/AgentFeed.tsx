@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Brain, Info, Lightbulb, Warning, Database } from '@phosphor-icons/react';
 
 export interface FeedEvent {
@@ -43,7 +43,7 @@ export function AgentFeed({ events }: { events: FeedEvent[] }) {
         variants={{
           hidden: { opacity: 0 },
           visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-        }}
+        } as Variants}
         className="space-y-4"
       >
       <AnimatePresence>
@@ -80,7 +80,7 @@ export function AgentFeed({ events }: { events: FeedEvent[] }) {
             variants={{
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 20 } }
-            }}
+            } as Variants}
             exit={{ opacity: 0, scale: 0.95 }}
             className={`flex gap-3 p-3 rounded-lg border shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] ${bgStyle} ${borderStyle}`}
           >
