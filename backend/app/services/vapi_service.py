@@ -169,8 +169,8 @@ async def get_or_create_assistant() -> str:
         if resp.status_code == 200:
             assistants = resp.json()
             for a in assistants:
-                if a.get("name") == "Julian v4":
-                    logger.info(f"Found existing Julian v4 assistant: {a['id']}. Updating configuration.")
+                if a.get("name") == "Armin v4":
+                    logger.info(f"Found existing Armin v4 assistant: {a['id']}. Updating configuration.")
                     # Update to ensure ngrok webhook URLs are synchronized
                     patch_resp = await client.patch(f"{VAPI_BASE}/assistant/{a['id']}", headers=_headers(), json=payload)
                     if patch_resp.status_code in (200, 201):
