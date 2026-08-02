@@ -83,6 +83,34 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
     }
   };
 
+  const handleSendSlack = async () => {
+    if (!accountId || !body) return;
+    const toastId = toast.loading("SENDING TO SLACK...", { description: "Pinging Slack integration." });
+    
+    try {
+      // Calls the outreach endpoint which automatically creates a campaign and sends it to Slack 
+      // if slack_user_id is provided. Using U0BMJL15K60 as a default fallback for now.
+      const res = await fetch("/api/outreach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account_id: accountId,
+          channel: "slack",
+          draft_content: body,
+          slack_user_id: "U0BMJL15K60" 
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to send to Slack");
+      }
+      toast.success("SLACK NOTIFICATION SENT", { id: toastId });
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`SLACK DISPATCH FAILED: ${e.message}`, { id: toastId });
+    }
+  };
+
   return (
     <div className="space-y-12 pb-16">
       <div className="flex flex-col md:flex-row gap-8">
@@ -190,6 +218,14 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
                       Send
                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center transition-transform duration-500 group-hover:bg-emerald-500/30 group-hover:scale-105 group-hover:translate-x-1">
                         <PaperPlaneRight weight="duotone" size={14} />
+                      </div>
+                    </button>
+                  )}
+                  {channel === "slack" && (
+                    <button onClick={handleSendSlack} disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
+                      Send to Slack
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center transition-transform duration-500 group-hover:bg-emerald-500/30 group-hover:scale-105 group-hover:translate-x-1">
+                        <Hash weight="duotone" size={14} />
                       </div>
                     </button>
                   )}

@@ -21,43 +21,6 @@ def build_outreach_block_kit(campaign_id: str, channel: str, draft_content: str,
                 "type": "mrkdwn",
                 "text": content
             }
-        },
-        {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Approve",
-                        "emoji": True
-                    },
-                    "style": "primary",
-                    "value": campaign_id,
-                    "action_id": "approve_outreach"
-                },
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Edit",
-                        "emoji": True
-                    },
-                    "value": campaign_id,
-                    "action_id": "edit_outreach"
-                },
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Reject",
-                        "emoji": True
-                    },
-                    "style": "danger",
-                    "value": campaign_id,
-                    "action_id": "reject_outreach"
-                }
-            ]
         }
     ]
 
@@ -70,7 +33,7 @@ async def send_draft_for_review(slack_user_id: str, campaign_id: str, channel: s
     payload = {
         "channel": slack_user_id,
         "blocks": blocks,
-        "text": f"Review requested for {account_name} outreach"
+        "text": f"New outreach message for {account_name}"
     }
     
     async with httpx.AsyncClient() as client:
