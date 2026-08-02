@@ -301,7 +301,7 @@ export default function OutreachStrategyView({ params }: { params: Promise<{ id:
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: 320, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
-                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                transition={{ type: "spring" as any, bounce: 0, duration: 0.4 }}
                 className="border-l border-border bg-[#0d0d0d] flex flex-col shrink-0 z-10 overflow-hidden"
               >
                  <div className="p-4 border-b border-border/50 flex items-center justify-between w-[320px]">

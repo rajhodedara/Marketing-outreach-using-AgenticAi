@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { NovaExecutionGraph, NovaExecutionStep } from '@/components/nova/NovaExecutionGraph';
+import { LunaExecutionGraph, LunaExecutionStep } from '@/components/nova/LunaExecutionGraph';
 import { AgentFeed, FeedEvent } from '@/components/nova/AgentFeed';
 import { SourceDataView, SourceData } from '@/components/nova/SourceDataView';
 import { CommandInput } from '@/components/julian/CommandInput';
-import { NovaOutput, NovaPlanData } from '@/components/nova/NovaOutput';
+import { LunaOutput, LunaPlanData } from '@/components/nova/LunaOutput';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { NovaIntegrations } from '@/components/nova/NovaIntegrations';
-import { NovaComposer } from '@/components/nova/NovaComposer';
-import { NovaSequences } from '@/components/nova/NovaSequences';
+import { LunaIntegrations } from '@/components/nova/LunaIntegrations';
+import { LunaComposer } from '@/components/nova/LunaComposer';
+import { LunaSequences } from '@/components/nova/LunaSequences';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Database, TreeStructure } from '@phosphor-icons/react';
 
@@ -32,7 +32,7 @@ const NODE_TO_STEP_ID: Record<string, string> = {
   strip: '5'
 };
 
-const INITIAL_STEPS: NovaExecutionStep[] = [
+const INITIAL_STEPS: LunaExecutionStep[] = [
   { id: '1', label: 'Data Ingestion', description: 'Fetch CRM, call transcripts, emails, and web data', status: 'pending' },
   { id: '2', label: 'Persona Analysis', description: 'Identify target stakeholders and constraints', status: 'pending' },
   { id: '3', label: 'Intent Extraction', description: 'Synthesize pain points and buying signals', status: 'pending' },
@@ -40,17 +40,17 @@ const INITIAL_STEPS: NovaExecutionStep[] = [
   { id: '5', label: 'Fact Check Guardrail', description: 'Verify all claims against source data', status: 'pending' },
 ];
 
-export default function NovaWorkspace() {
+export default function LunaWorkspace() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [loadingAccounts, setLoadingAccounts] = useState(true);
 
   // Simulation State -> Actual State
   const [isSimulating, setIsSimulating] = useState(false);
-  const [steps, setSteps] = useState<NovaExecutionStep[]>(INITIAL_STEPS);
+  const [steps, setSteps] = useState<LunaExecutionStep[]>(INITIAL_STEPS);
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const [sourceData, setSourceData] = useState<SourceData[]>([]);
-  const [planData, setPlanData] = useState<NovaPlanData | null>(null);
+  const [planData, setPlanData] = useState<LunaPlanData | null>(null);
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
   const selectedAccountName = selectedAccount?.company_name || selectedAccount?.domain || '';
@@ -66,7 +66,7 @@ export default function NovaWorkspace() {
       .finally(() => setLoadingAccounts(false));
   }, []);
 
-  const updateStepStatus = (id: string, status: NovaExecutionStep['status'], result?: string) => {
+  const updateStepStatus = (id: string, status: LunaExecutionStep['status'], result?: string) => {
     setSteps(prev => prev.map(s => s.id === id ? { ...s, status, result: result || s.result } : s));
   };
 
@@ -221,7 +221,7 @@ export default function NovaWorkspace() {
         <div className="flex items-center gap-4">
           <h1 className="text-[28px] font-bold text-white flex items-center gap-2 tracking-tighter">
               <Brain weight="light" className="text-white/80 w-8 h-8" />
-              Nova
+              Luna
           </h1>
           <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <span className="relative flex h-2 w-2">
@@ -316,7 +316,7 @@ export default function NovaWorkspace() {
                       <CommandInput 
                         onCommand={startSimulation} 
                         disabled={isSimulating || !selectedAccountId} 
-                        placeholder="Command Nova (e.g. 'Synthesize account data and prepare angle')..."
+                        placeholder="Command Luna (e.g. 'Synthesize account data and prepare angle')..."
                       />
                   </div>
                 </motion.div>
@@ -336,7 +336,7 @@ export default function NovaWorkspace() {
                   </div>
 
                   <div className="flex-1 px-4">
-                    <NovaExecutionGraph steps={steps} />
+                    <LunaExecutionGraph steps={steps} />
                   </div>
 
                   {/* Outcomes Section */}
@@ -349,7 +349,7 @@ export default function NovaWorkspace() {
                         transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
                         className="p-8 border-t border-white/5 bg-[#0a0a0a] shrink-0"
                       >
-                        <NovaOutput data={planData} />
+                        <LunaOutput data={planData} />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -358,15 +358,15 @@ export default function NovaWorkspace() {
             </TabsContent>
 
             <TabsContent value="compose" className="h-full m-0 p-8 overflow-y-auto border-none outline-none">
-              <NovaComposer accountId={selectedAccountId} accountName={selectedAccountName} />
+              <LunaComposer accountId={selectedAccountId} accountName={selectedAccountName} />
             </TabsContent>
 
             <TabsContent value="sequences" className="h-full m-0 p-8 overflow-y-auto border-none outline-none">
-              <NovaSequences accountId={selectedAccountId} accountName={selectedAccountName} />
+              <LunaSequences accountId={selectedAccountId} accountName={selectedAccountName} />
             </TabsContent>
 
             <TabsContent value="integrations" className="h-full m-0 p-8 overflow-y-auto border-none outline-none">
-              <NovaIntegrations />
+              <LunaIntegrations />
             </TabsContent>
 
           </div>

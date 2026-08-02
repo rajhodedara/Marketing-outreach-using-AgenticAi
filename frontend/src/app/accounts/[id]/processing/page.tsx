@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ---------------------------------------------------------------------------
-// Scramble Text — isolated client component (performance)
+// Scramble Text ? isolated client component (performance)
 // ---------------------------------------------------------------------------
 
 const ScrambleText = memo(function ScrambleText({
@@ -48,7 +48,7 @@ const ScrambleText = memo(function ScrambleText({
 });
 
 // ---------------------------------------------------------------------------
-// Orbiting Agent Node — isolated for animation perf
+// Orbiting Agent Node ? isolated for animation perf
 // ---------------------------------------------------------------------------
 
 const AGENTS = [
@@ -304,7 +304,7 @@ export default function AIProcessingView({
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center relative min-h-[100dvh] overflow-hidden bg-background">
-      {/* Ambient glow — fixed, pointer-events-none, no scroll repaint */}
+      {/* Ambient glow ? fixed, pointer-events-none, no scroll repaint */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <motion.div
           animate={{ scale: [1, 1.08, 1], opacity: [0.15, 0.25, 0.15] }}

@@ -708,7 +708,7 @@ export default function AccountDetailView({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-0.5">
-                        Step {idx + 1} — {step.type}
+                        Step {idx + 1} ? {step.type}
                       </p>
                       <p className="text-[12px] leading-[17px] text-foreground/80">
                         {step.content}

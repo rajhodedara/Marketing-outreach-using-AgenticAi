@@ -1,7 +1,7 @@
 // Removed import './style.css'
 
 // ============================================
-// Nova & Julian — Interactive Logic
+// Luna & Armin — Interactive Logic
 // 11x.ai-Inspired Premium Landing Page
 // ============================================
 
@@ -69,11 +69,11 @@ document.querySelectorAll(
 });
 
 
-// 3. Ticker Simulation for Nova and Julian Cards
-const novaTicker = document.getElementById('nova-ticker-text');
-const julianTicker = document.getElementById('julian-ticker-text');
+// 3. Ticker Simulation for Luna and Armin Cards
+const lunaTicker = document.getElementById('luna-ticker-text');
+const arminTicker = document.getElementById('armin-ticker-text');
 
-const novaLogs = [
+const lunaLogs = [
   "Analyzing account data for Acme Corp — Found 3 new contacts.",
   "Enriching decision-maker profiles for TechFlow...",
   "Prioritizing high-intent leads from DeltaInc (Intent score: 96/100).",
@@ -81,41 +81,41 @@ const novaLogs = [
   "Flagging active buying signals for CloudSynergy."
 ];
 
-const julianLogs = [
+const arminLogs = [
   "Connecting with prospect TechFlow — Live call...",
   "Handling objection: 'Send an email first' — Overcoming...",
-  "Julian: 'We integrate directly with Salesforce' — Pitching...",
+  "Armin: 'We integrate directly with Salesforce' — Pitching...",
   "Meeting booked successfully with VP of Sales at TechFlow!",
   "Dialing lead John Doe from Zenith Enterprise..."
 ];
 
-let novaLogIndex = 0;
-let julianLogIndex = 0;
+let lunaLogIndex = 0;
+let arminLogIndex = 0;
 
 setInterval(() => {
-  if (novaTicker) {
-    novaLogIndex = (novaLogIndex + 1) % novaLogs.length;
-    novaTicker.style.opacity = '0';
+  if (lunaTicker) {
+    lunaLogIndex = (lunaLogIndex + 1) % lunaLogs.length;
+    lunaTicker.style.opacity = '0';
     setTimeout(() => {
-      novaTicker.textContent = novaLogs[novaLogIndex];
-      novaTicker.style.opacity = '1';
+      lunaTicker.textContent = lunaLogs[lunaLogIndex];
+      lunaTicker.style.opacity = '1';
     }, 300);
   }
 }, 5000);
 
 setInterval(() => {
-  if (julianTicker) {
-    julianLogIndex = (julianLogIndex + 1) % julianLogs.length;
-    julianTicker.style.opacity = '0';
+  if (arminTicker) {
+    arminLogIndex = (arminLogIndex + 1) % arminLogs.length;
+    arminTicker.style.opacity = '0';
     setTimeout(() => {
-      julianTicker.textContent = julianLogs[julianLogIndex];
-      julianTicker.style.opacity = '1';
+      arminTicker.textContent = arminLogs[arminLogIndex];
+      arminTicker.style.opacity = '1';
     }, 300);
   }
 }, 6200);
 
-if (novaTicker) novaTicker.style.transition = 'opacity 0.3s ease';
-if (julianTicker) julianTicker.style.transition = 'opacity 0.3s ease';
+if (lunaTicker) lunaTicker.style.transition = 'opacity 0.3s ease';
+if (arminTicker) arminTicker.style.transition = 'opacity 0.3s ease';
 
 
 // 4. Audio Waveform Player
@@ -131,62 +131,22 @@ let timerInterval = null;
 let secondsElapsed = 0;
 let animationFrameId = null;
 
-// Web Audio API (lazy loaded)
-let audioCtx = null;
-let oscillator1 = null;
-let oscillator2 = null;
-let gainNode = null;
+// Audio Object for Armin Voice
+const arminAudio = new Audio('/armin-greeting.mp3');
 
-function initAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  gainNode = audioCtx.createGain();
-  gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
-  gainNode.connect(audioCtx.destination);
-}
+arminAudio.addEventListener('ended', () => {
+  if (isPlaying) {
+    toggleAudio(); // Reset UI when audio finishes
+  }
+});
 
 function playSynthesizedVoice() {
-  if (!audioCtx) initAudio();
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-
-  oscillator1 = audioCtx.createOscillator();
-  oscillator2 = audioCtx.createOscillator();
-  
-  oscillator1.type = 'sawtooth';
-  oscillator2.type = 'triangle';
-  oscillator1.frequency.setValueAtTime(180, audioCtx.currentTime);
-  oscillator2.frequency.setValueAtTime(220, audioCtx.currentTime);
-  
-  oscillator1.connect(gainNode);
-  oscillator2.connect(gainNode);
-  oscillator1.start();
-  oscillator2.start();
-
-  function modulate() {
-    if (!isPlaying) return;
-    const now = audioCtx.currentTime;
-    const freqMod1 = 180 + Math.sin(now * 8) * 40 + (Math.random() * 20 - 10);
-    const freqMod2 = 220 + Math.cos(now * 10) * 35;
-    oscillator1.frequency.setValueAtTime(freqMod1, now);
-    oscillator2.frequency.setValueAtTime(freqMod2, now);
-    const randomSilence = Math.random() > 0.85;
-    gainNode.gain.setTargetAtTime(randomSilence ? 0.005 : 0.04, now, 0.05);
-    setTimeout(modulate, 150 + Math.random() * 200);
-  }
-  modulate();
+  arminAudio.currentTime = 0;
+  arminAudio.play().catch(e => console.error("Error playing audio:", e));
 }
 
 function stopSynthesizedVoice() {
-  if (oscillator1) {
-    try { oscillator1.stop(); } catch (e) {}
-    oscillator1.disconnect();
-  }
-  if (oscillator2) {
-    try { oscillator2.stop(); } catch (e) {}
-    oscillator2.disconnect();
-  }
+  arminAudio.pause();
 }
 
 const bars = document.querySelectorAll('.waveform-wrapper .bar');
@@ -266,13 +226,13 @@ if (carouselTrack && dots.length > 0) {
 }
 
 
-// 6. Ask Julian widget click
-const askJulianWidget = document.getElementById('ask-julian-widget');
-if (askJulianWidget) {
-  askJulianWidget.addEventListener('click', () => {
-    const julianSection = document.getElementById('listen-julian');
-    if (julianSection) {
-      julianSection.scrollIntoView({ behavior: 'smooth' });
+// 6. Ask Armin widget click
+const askArminWidget = document.getElementById('ask-armin-widget');
+if (askArminWidget) {
+  askArminWidget.addEventListener('click', () => {
+    const arminSection = document.getElementById('listen-armin');
+    if (arminSection) {
+      arminSection.scrollIntoView({ behavior: 'smooth' });
     }
   });
 }
@@ -314,11 +274,11 @@ const modalOutputBody = document.getElementById('modal-output-body');
 const modalMetricsRow = document.getElementById('modal-metrics-row');
 
 const agentData = {
-  nova: {
-    title: "Hi, I'm Nova.",
+  luna: {
+    title: "Hi, I'm Luna.",
     tagline: "Research & Strategy Agent. Every claim traceable to real source data — no hallucinated personalization, ever.",
     roleBadge: "Autopilot activated • Research & Strategy",
-    image: "/nova-portrait.png",
+    image: "/luna-portrait.png",
     inputTitle: "Raw Account Data",
     inputBody: `
       <ul>
@@ -343,7 +303,7 @@ const agentData = {
       <ul>
         <li>Structured Account Plan (stakeholders, pain points, whitespace).</li>
         <li>Cited outreach email draft.</li>
-        <li>Verified <strong>"Call Brief"</strong> for Julian containing only confirmed facts.</li>
+        <li>Verified <strong>"Call Brief"</strong> for Armin containing only confirmed facts.</li>
       </ul>
     `,
     metrics: [
@@ -352,15 +312,15 @@ const agentData = {
       { num: "10x", label: "Faster Account Research", sub: "Instant CRM & transcript analysis" }
     ]
   },
-  julian: {
-    title: "Hi, I'm Julian.",
+  armin: {
+    title: "Hi, I'm Armin.",
     tagline: "Voice Outreach Agent. Autonomous, natural adaptive phone conversations backed strictly by verified facts.",
     roleBadge: "Active • Voice Outreach Agent",
-    image: "/julian-portrait.png",
+    image: "/armin-portrait.png",
     inputTitle: "Verified Call Brief",
     inputBody: `
       <ul>
-        <li>Verified call brief directly from Nova.</li>
+        <li>Verified call brief directly from Luna.</li>
         <li>Confirmed prospect pain points & budget context.</li>
         <li>Zero unconfirmed assumptions or hearsay.</li>
       </ul>
@@ -372,7 +332,7 @@ const agentData = {
         <li>Responds to objections mid-call using only verified brief facts.</li>
       </ul>
       <div class="workflow-highlight-box">
-        <strong>📞 Fail-Safe Protocol:</strong> If asked something not in the brief, Julian never guesses or improvises — he commits to follow up and flags the question back to Nova.
+        <strong>📞 Fail-Safe Protocol:</strong> If asked something not in the brief, Armin never guesses or improvises — he commits to follow up and flags the question back to Luna.
       </div>
     `,
     outputTitle: "Booked Meeting & Flagged Follow-ups",
@@ -380,7 +340,7 @@ const agentData = {
       <ul>
         <li>Completed adaptive outbound call.</li>
         <li>Direct booked meeting scheduled into calendar.</li>
-        <li>Unresolved prospect questions flagged back to Nova for research.</li>
+        <li>Unresolved prospect questions flagged back to Luna for research.</li>
       </ul>
     `,
     metrics: [
@@ -428,41 +388,41 @@ function closeAgentModal() {
   document.body.style.overflow = '';
 }
 
-// Attach event listeners for Nova
-const hireNovaBtn = document.getElementById('link-hire-nova');
-const novaCard = document.getElementById('nova-card');
+// Attach event listeners for Luna
+const hireLunaBtn = document.getElementById('link-hire-luna');
+const lunaCard = document.getElementById('luna-card');
 
-if (hireNovaBtn) {
-  hireNovaBtn.addEventListener('click', (e) => {
+if (hireLunaBtn) {
+  hireLunaBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    openAgentModal('nova');
+    openAgentModal('luna');
   });
 }
-if (novaCard) {
-  novaCard.style.cursor = 'pointer';
-  novaCard.addEventListener('click', (e) => {
+if (lunaCard) {
+  lunaCard.style.cursor = 'pointer';
+  lunaCard.addEventListener('click', (e) => {
     // Only trigger if not clicking child links directly
     if (!e.target.closest('a')) {
-      openAgentModal('nova');
+      openAgentModal('luna');
     }
   });
 }
 
-// Attach event listeners for Julian
-const hireJulianBtn = document.getElementById('link-hire-julian');
-const julianCard = document.getElementById('julian-card');
+// Attach event listeners for Armin
+const hireArminBtn = document.getElementById('link-hire-armin');
+const arminCard = document.getElementById('armin-card');
 
-if (hireJulianBtn) {
-  hireJulianBtn.addEventListener('click', (e) => {
+if (hireArminBtn) {
+  hireArminBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    openAgentModal('julian');
+    openAgentModal('armin');
   });
 }
-if (julianCard) {
-  julianCard.style.cursor = 'pointer';
-  julianCard.addEventListener('click', (e) => {
+if (arminCard) {
+  arminCard.style.cursor = 'pointer';
+  arminCard.addEventListener('click', (e) => {
     if (!e.target.closest('a')) {
-      openAgentModal('julian');
+      openAgentModal('armin');
     }
   });
 }

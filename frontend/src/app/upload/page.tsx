@@ -192,7 +192,7 @@ export default function UploadPage() {
           
           {/* Helper Microcopy */}
           <p className="mt-4 font-mono text-[13px] leading-[18px] text-muted-foreground text-center max-w-md mx-auto">
-            We&apos;ll research the company, map stakeholders, and identify buying signals — usually under 60 seconds.
+            We&apos;ll research the company, map stakeholders, and identify buying signals ? usually under 60 seconds.
           </p>
         </div>
       </div>

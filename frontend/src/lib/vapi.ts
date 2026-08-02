@@ -1,5 +1,5 @@
 /**
- * vapi.ts — Singleton wrapper for the Vapi Web SDK.
+ * vapi.ts ? Singleton wrapper for the Vapi Web SDK.
  * Import { vapiClient } from '@/lib/vapi' wherever you need voice call functionality.
  */
 import Vapi from "@vapi-ai/web";
@@ -27,20 +27,21 @@ export interface TranscriptMessage {
 }
 
 /**
- * Start a voice call with the Julian assistant.
+ * Start a voice call with the Armin assistant.
  * @param assistantId - Vapi assistant ID from backend
- * @param briefText   - The verified brief to inject into Julian's system prompt
+ * @param briefText   - The verified brief to inject into Armin's system prompt
  * @returns The call object (contains call.id for WebSocket subscription)
  */
-export async function startJulianCall(
+export async function startArminCall(
   assistantId: string,
   briefText: string
 ): Promise<string> {
-  console.log("Starting Julian Call with Assistant ID:", assistantId);
+  console.log("Starting Armin Call with Assistant ID:", assistantId);
   const vapi = getVapi();
   const call = await vapi.start(assistantId, {
     variableValues: {
       verified_brief: briefText,
+      current_datetime: new Date().toString(),
     },
   });
   return call?.id ?? "";

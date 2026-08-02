@@ -53,7 +53,7 @@ export default function StakeholderMap({
     return "border-border bg-card";
   };
 
-  // Build nodes with better layout — arc arrangement
+  // Build nodes with better layout ? arc arrangement
   const nodes: Node[] = stakeholders.map((s, i) => {
     const angle = (Math.PI / (stakeholders.length + 1)) * (i + 1);
     const radiusX = Math.max(200, stakeholders.length * 100);

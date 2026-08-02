@@ -325,7 +325,7 @@ export default function DashboardPage() {
     return { totalAccounts, highIntent, totalStakeholders, avgIntent };
   }, [accounts]);
 
-  // Priority accounts — sorted by intent score desc, top 5
+  // Priority accounts ? sorted by intent score desc, top 5
   const priorityAccounts = useMemo(() => {
     return [...accounts]
       .filter((a) => a.status?.toLowerCase() === "analyzed")

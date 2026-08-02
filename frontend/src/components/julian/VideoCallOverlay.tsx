@@ -75,7 +75,7 @@ function useMicLevel() {
       };
       rafRef.current = requestAnimationFrame(tick);
     } catch {
-      // mic permission denied — keep static bars
+      // mic permission denied ? keep static bars
     }
   }, []);
 
@@ -88,7 +88,7 @@ function useMicLevel() {
   return { levels, start, stop };
 }
 
-// ─── Avatar Face — animated talking head ─────────────────────────────────────
+// ─── Avatar Face ? animated talking head ─────────────────────────────────────
 
 function AvatarFace({ isSpeaking, isConnecting }: { isSpeaking: boolean; isConnecting: boolean }) {
   const [ringScale, setRingScale] = useState(1);
@@ -151,7 +151,7 @@ function AvatarFace({ isSpeaking, isConnecting }: { isSpeaking: boolean; isConne
       </div>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/10">
-        <span className="text-white text-sm font-semibold tracking-wide">Julian · AI Agent</span>
+        <span className="text-white text-sm font-semibold tracking-wide">Armin · AI Agent</span>
       </div>
     </div>
   );
@@ -275,7 +275,7 @@ export default function VideoCallOverlay({
           <div className="absolute top-20 left-6 z-30 flex items-center gap-3 px-4 py-3 bg-amber-500/15 border border-amber-500/30 backdrop-blur-md rounded-xl max-w-xs">
             <span className="material-symbols-outlined text-amber-400 text-[20px]">flag</span>
             <div>
-              <div className="text-[11px] font-semibold text-amber-400">Escalated to Nova</div>
+              <div className="text-[11px] font-semibold text-amber-400">Escalated to Luna</div>
               <div className="text-[10px] text-amber-300/70 truncate max-w-[200px]">{flaggedItems.at(-1)}</div>
             </div>
           </div>
@@ -293,17 +293,55 @@ export default function VideoCallOverlay({
             </div>
             <div ref={transcriptRef} className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map(msg => {
-                if (msg.role === "system") return (
-                  <div key={msg.id} className="text-center py-1">
-                    <span className="text-[10px] text-white/25 font-mono uppercase">{msg.content}</span>
-                    {msg.link && <a href={msg.link} target="_blank" rel="noreferrer" className="block text-[11px] text-indigo-400 underline mt-0.5">{msg.linkText}</a>}
-                  </div>
-                );
-                const isJulian = msg.role === "julian";
+                if (msg.role === "system") {
+                  // Meeting booked ? prominent card in transcript
+                  if (msg.link) {
+                    return (
+                      <div key={msg.id} className="py-2">
+                        <div className="bg-emerald-500/15 border border-emerald-500/30 rounded-xl p-3 flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-emerald-400 text-[16px]">event_available</span>
+                            <span className="text-[12px] font-semibold text-emerald-400">Meeting Scheduled</span>
+                          </div>
+                          <p className="text-[10px] text-white/50 leading-relaxed">{msg.content}</p>
+                          <a
+                            href={msg.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-semibold rounded-lg transition-all"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                            {msg.linkText || 'Open in Google Calendar'}
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Escalation ? amber card
+                  if (msg.content.startsWith('🚩')) {
+                    return (
+                      <div key={msg.id} className="py-1">
+                        <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-2.5 flex items-start gap-2">
+                          <span className="material-symbols-outlined text-amber-400 text-[14px] mt-0.5 shrink-0">flag</span>
+                          <span className="text-[10px] text-amber-300/70 leading-relaxed">{msg.content.replace('🚩 ', '')}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Default system message
+                  return (
+                    <div key={msg.id} className="text-center py-1">
+                      <span className="text-[10px] text-white/25 font-mono uppercase">{msg.content}</span>
+                    </div>
+                  );
+                }
+                const isArmin = msg.role === "julian";
                 return (
-                  <div key={msg.id} className={`flex flex-col gap-0.5 ${isJulian ? "items-start" : "items-end"}`}>
-                    <span className="text-[10px] text-white/30 font-mono px-1">{isJulian ? "Julian" : "You"} · {msg.timestamp}</span>
-                    <div className={`px-3 py-2 rounded-xl text-[12px] leading-relaxed max-w-[90%] ${isJulian ? "bg-indigo-600/20 border border-indigo-500/20 text-white/80" : "bg-white/8 border border-white/10 text-white/70"}`}>
+                  <div key={msg.id} className={`flex flex-col gap-0.5 ${isArmin ? "items-start" : "items-end"}`}>
+                    <span className="text-[10px] text-white/30 font-mono px-1">{isArmin ? "Armin" : "You"} · {msg.timestamp}</span>
+                    <div className={`px-3 py-2 rounded-xl text-[13px] leading-relaxed max-w-[90%] ${isArmin ? "bg-indigo-600/20 border border-indigo-500/20 text-white/80" : "bg-white/8 border border-white/10 text-white/70"}`}>
                       {msg.content}
                       {msg.partialContent && <span className="opacity-50">{msg.partialContent}</span>}
                       {msg.isStreaming && <span className="inline-block w-1 h-3 ml-1 bg-indigo-400 opacity-60 animate-pulse" />}

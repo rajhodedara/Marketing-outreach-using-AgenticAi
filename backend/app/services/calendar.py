@@ -95,10 +95,15 @@ async def book_meeting(contact_name: str, meeting_datetime: str, duration: int =
 
         event = {
             "summary": f"Meeting with {contact_name}",
-            "description": "Booked by Julian — AI Voice Outreach Agent",
-            "start": {"dateTime": start_dt.isoformat(), "timeZone": "UTC"},
-            "end": {"dateTime": end_dt.isoformat(), "timeZone": "UTC"},
+            "description": "Booked by Armin — AI Voice Outreach Agent",
+            "start": {"dateTime": start_dt.isoformat()},
+            "end": {"dateTime": end_dt.isoformat()},
         }
+        
+        # Fallback if the LLM provided a naive datetime without an offset
+        if start_dt.tzinfo is None:
+            event["start"]["timeZone"] = "UTC"
+            event["end"]["timeZone"] = "UTC"
         
         result = await asyncio.to_thread(
             lambda: service.events().insert(calendarId="primary", body=event).execute()

@@ -151,7 +151,15 @@ async def handle_tool_call(request: Request):
 
     for tool_call in tool_calls:
         fn_name = tool_call.get("function", {}).get("name", "")
-        fn_args = tool_call.get("function", {}).get("arguments", {})
+        fn_args_raw = tool_call.get("function", {}).get("arguments", {})
+        if isinstance(fn_args_raw, str):
+            try:
+                fn_args = json.loads(fn_args_raw)
+            except Exception:
+                fn_args = {}
+        else:
+            fn_args = fn_args_raw or {}
+
         tool_call_id = tool_call.get("id", "")
 
         if fn_name == "check_calendar_availability":
