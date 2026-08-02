@@ -173,16 +173,19 @@ async def send_draft_email(
         # Convert plain text newlines to HTML breaks for the Gmail service
         html_content = req.content.replace('\n', '<br>')
         
-        success = await gmail_service.send_email(
-            to_email=req.to_email,
-            subject=req.subject,
-            body_html=html_content
-        )
-        
-        if success:
+        try:
+            success = await gmail_service.send_email(
+                to_email=req.to_email,
+                subject=req.subject,
+                body_html=html_content
+            )
+            if not success:
+                raise HTTPException(status_code=500, detail="Failed to obtain Gmail credentials or unknown error.")
+            
             return {"status": "success"}
-        else:
-            raise HTTPException(status_code=500, detail="Failed to send email via Gmail API")
+        except Exception as e:
+            logger.error(f"Failed to send email via Gmail API: {e}")
+            raise HTTPException(status_code=500, detail=f"Gmail API Error: {str(e)}")
             
     except Exception as e:
         logger.error(f"Failed to send email: {e}")

@@ -75,8 +75,10 @@ async def send_email(to_email: str, subject: str, body_html: str) -> bool:
             return True
             
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error sending email: {e.response.text}")
-        return False
+        error_msg = f"HTTP error sending email: {e.response.text}"
+        logger.error(error_msg)
+        raise Exception(error_msg)
     except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {e}")
-        return False
+        error_msg = f"Failed to send email to {to_email}: {e}"
+        logger.error(error_msg)
+        raise Exception(error_msg)
