@@ -45,7 +45,7 @@ async def trigger_analysis(
         .where(AnalysisSession.account_id == account_id)
         .where(AnalysisSession.status == "running")
     )
-    if running_result.scalar_one_or_none():
+    if running_result.first():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="An analysis is already running for this account.",
@@ -148,6 +148,60 @@ async def run_analysis_pipeline(session_id: str, account_id: str, company_name: 
                 # ----------------------------------------------------
                         
                 session.result_json = json.dumps(result_data)
+                
+                # --- Integrate real data for Intelligence Board ---
+                intent_state = final_state.get("intent")
+                logger.info(f"DEBUG INTENT_STATE TYPE: {type(intent_state)}")
+                logger.info(f"DEBUG INTENT_STATE CONTENT: {intent_state}")
+                
+                # Support both Pydantic objects and dictionaries
+                intent_signals = []
+                if intent_state:
+                    if hasattr(intent_state, "signals"):
+                        intent_signals = intent_state.signals
+                    elif isinstance(intent_state, dict) and "signals" in intent_state:
+                        intent_signals = intent_state.get("signals", [])
+                        
+                if intent_signals:
+                    from app.db.models import IntentSignal
+                    from app.api.routes.ws import broadcast_intelligence
+                    
+                    for buying_signal in intent_signals:
+                        # Extract description safely depending on type
+                        desc = buying_signal.description if hasattr(buying_signal, "description") else buying_signal.get("description", "")
+                        stype = buying_signal.signal_type if hasattr(buying_signal, "signal_type") else buying_signal.get("signal_type", "")
+                        stype = stype.lower()
+                        mapped_type = "intent"
+                        if "risk" in stype or "competitor" in stype:
+                            mapped_type = "risk"
+                        elif "whitespace" in stype or "opportunity" in stype:
+                            mapped_type = "whitespace"
+                            
+                        # Extract intent score safely
+                        score = intent_state.overall_intent_score if hasattr(intent_state, "overall_intent_score") else (intent_state.get("overall_intent_score", 0) if isinstance(intent_state, dict) else 0)
+                            
+                        new_signal = IntentSignal(
+                            account_id=account_id,
+                            signal_type=mapped_type,
+                            content=desc,
+                            score=score
+                        )
+                        db.add(new_signal)
+                        await db.flush() # get the ID before committing
+                        
+                        signal_payload = {
+                            "id": new_signal.id,
+                            "account_id": new_signal.account_id,
+                            "company_name": company_name,
+                            "signal_type": new_signal.signal_type,
+                            "content": new_signal.content,
+                            "source_id": new_signal.source_id,
+                            "score": new_signal.score,
+                            "created_at": new_signal.created_at.isoformat() if new_signal.created_at else datetime.now(timezone.utc).isoformat()
+                        }
+                        await broadcast_intelligence(json.dumps(signal_payload))
+                # --------------------------------------------------
+
                 await db.commit()
                 
     except Exception as e:

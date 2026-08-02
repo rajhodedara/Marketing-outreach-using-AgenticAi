@@ -224,10 +224,10 @@ export default function AccountsPage() {
             Showing {accounts.length > 0 ? 1 : 0} to {accounts.length} of {accounts.length} entries
           </span>
           <div className="flex gap-1">
-            <button className="px-2 py-1 border border-border rounded bg-card text-muted-foreground hover:bg-muted disabled:opacity-50" disabled>
+            <button className="px-2 py-1 border border-border rounded bg-card text-muted-foreground hover:bg-muted disabled:opacity-50" disabled={true}>
               <span className="material-symbols-outlined text-[16px]">chevron_left</span>
             </button>
-            <button className="px-2 py-1 border border-border rounded bg-card text-muted-foreground hover:bg-muted disabled:opacity-50" disabled={accounts.length === 0}>
+            <button className="px-2 py-1 border border-border rounded bg-card text-muted-foreground hover:bg-muted disabled:opacity-50" disabled={loading || accounts.length === 0}>
               <span className="material-symbols-outlined text-[16px]">chevron_right</span>
             </button>
           </div>

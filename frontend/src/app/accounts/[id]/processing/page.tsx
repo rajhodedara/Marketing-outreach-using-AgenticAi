@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use, useCallback, memo } from "react";
+import { useEffect, useState, use, useCallback, memo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -222,9 +222,21 @@ export default function AIProcessingView({
     };
   };
 
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
+
   const pollStatus = useCallback(
     async (sessionId: string | null) => {
-      const interval = setInterval(async () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+      
+      pollIntervalRef.current = setInterval(async () => {
         try {
           if (!sessionId) {
             const res = await fetch(`/api/accounts/${accountId}`);
@@ -232,7 +244,7 @@ export default function AIProcessingView({
               const data = await res.json();
               const s = data.latest_analysis?.status || data.status;
               if (s === "completed" || s === "analyzed") {
-                clearInterval(interval);
+                if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
                 setProgress(100);
                 toast.success("Analysis Complete");
                 setTimeout(
@@ -240,7 +252,7 @@ export default function AIProcessingView({
                   1200
                 );
               } else if (s === "failed") {
-                clearInterval(interval);
+                if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
                 setFailed(true);
               } else {
                 setProgress((prev) =>
@@ -255,7 +267,7 @@ export default function AIProcessingView({
           if (res.ok) {
             const session = await res.json();
             if (session.status === "completed") {
-              clearInterval(interval);
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
               setProgress(100);
               setMessages((prev) => [
                 ...prev,
@@ -267,7 +279,7 @@ export default function AIProcessingView({
                 1200
               );
             } else if (session.status === "failed") {
-              clearInterval(interval);
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
               setFailed(true);
               toast.error("Analysis Failed");
             } else {

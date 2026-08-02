@@ -70,7 +70,20 @@ class OutreachSequence(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
+class IntentSignal(Base):
+    __tablename__ = "intent_signals"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
+    signal_type: Mapped[str] = mapped_column(String)  # intent, whitespace, risk
+    content: Mapped[str] = mapped_column(Text)
+    source_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    score: Mapped[int] = mapped_column(default=50)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
 async def create_tables(engine) -> None:
     """Create all tables in the database."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
