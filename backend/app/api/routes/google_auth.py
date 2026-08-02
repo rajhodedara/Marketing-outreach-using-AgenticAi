@@ -102,8 +102,9 @@ async def google_callback(code: str):
         logger.error(f"Could not save refresh token to .env: {e}")
 
     return HTMLResponse(
-        f"<h2>✅ Google Calendar Connected!</h2>"
-        f"<p>Your refresh token has been saved. Julian can now book meetings.</p>"
-        f"<p><strong>Refresh token:</strong> <code>{refresh_token[:20]}...</code></p>"
-        f"<p>You can close this tab and return to the app.</p>"
+        f"<h2>✅ Google Connected Successfully!</h2>"
+        f"<p>Since this is a deployed server, we cannot save to .env automatically.</p>"
+        f"<p><strong>Please copy the FULL refresh token below and add it to your Render Environment Variables as <code>GOOGLE_REFRESH_TOKEN</code>:</strong></p>"
+        f"<p><code style='background:#eee;padding:10px;display:block;word-break:break-all;'>{refresh_token}</code></p>"
+        f"<p>After saving it in Render, you can close this tab.</p>"
     )
