@@ -81,6 +81,18 @@ class IntentSignal(Base):
     score: Mapped[int] = mapped_column(default=50)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
+class OutreachCampaign(Base):
+    __tablename__ = "outreach_campaigns"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
+    ae_user_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    channel: Mapped[str] = mapped_column(String)  # email, linkedin
+    draft_content: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String, default="PENDING")  # PENDING, APPROVED, REJECTED, SENT, FAILED
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+
 
 async def create_tables(engine) -> None:
     """Create all tables in the database."""

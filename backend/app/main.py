@@ -13,7 +13,7 @@ from app.config import settings
 from app.db.session import engine
 from app.db.models import create_tables
 from app.db import chunk_model  # noqa: F401 — register table with metadata
-from app.api.routes import upload, accounts, analysis, julian, google_auth, ws, nova, intelligence
+from app.api.routes import upload, accounts, analysis, julian, google_auth, ws, nova, intelligence, outreach, slack_webhook
 from app.services import vapi_service
 
 logging.basicConfig(level=settings.log_level)
@@ -98,4 +98,6 @@ app.include_router(google_auth.router, prefix="/api", tags=["Google OAuth"])
 app.include_router(ws.router, tags=["WebSocket"])
 app.include_router(nova.router, prefix="/api", tags=["Nova SDR"])
 app.include_router(intelligence.router, prefix="/api/intelligence", tags=["Intelligence"])
+app.include_router(outreach.router, prefix="/api", tags=["Outreach"])
+app.include_router(slack_webhook.router, prefix="/api", tags=["Slack Webhooks"])
 

@@ -13,7 +13,10 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/gmail.send"
+]
 REDIRECT_URI = f"{settings.nova_backend_url}/api/google/callback"
 
 

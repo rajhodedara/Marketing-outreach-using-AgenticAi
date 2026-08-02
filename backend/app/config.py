@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     # Nova backend URL (ngrok)
     nova_backend_url: str = ""
 
+    # Slack
+    slack_bot_token: str = ""
+    slack_signing_secret: str = ""
+
+    # Gmail (sending)
+    google_gmail_scopes: str = "https://www.googleapis.com/auth/gmail.send"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property
