@@ -166,28 +166,24 @@ async def send_draft_email(
     req: SendEmailRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """Send the outreach draft via SMTP."""
-    smtp_user = settings.smtp_user
-    smtp_pass = settings.smtp_password
-    smtp_host = settings.smtp_host
-    smtp_port = settings.smtp_port
-    
-    if not smtp_user or not smtp_pass:
-        raise HTTPException(status_code=500, detail="SMTP credentials not configured in backend .env")
-        
+    """Send the outreach draft via the Gmail API."""
     try:
-        msg = MIMEMultipart()
-        msg['From'] = smtp_user
-        msg['To'] = req.to_email
-        msg['Subject'] = req.subject
-        msg.attach(MIMEText(req.content, 'plain'))
+        from app.services import gmail_service
         
-        server = smtplib.SMTP(smtp_host, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
-        server.quit()
-        return {"status": "success"}
+        # Convert plain text newlines to HTML breaks for the Gmail service
+        html_content = req.content.replace('\n', '<br>')
+        
+        success = await gmail_service.send_email(
+            to_email=req.to_email,
+            subject=req.subject,
+            body_html=html_content
+        )
+        
+        if success:
+            return {"status": "success"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to send email via Gmail API")
+            
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
         raise HTTPException(status_code=500, detail=str(e))
