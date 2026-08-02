@@ -14,6 +14,9 @@ class ActionOutput(BaseModel):
     account_plan: AccountPlan
     outreach_drafts: list[OutreachDraft]
 
+class CustomActionOutput(BaseModel):
+    custom_response: str
+
 async def action_node(state: PipelineState) -> dict:
     """
     Action Sequencing Agent Node.
@@ -60,7 +63,10 @@ async def action_node(state: PipelineState) -> dict:
             "custom_response": None
         }
         
-    llm = get_openrouter_llm(temperature=0.2).with_structured_output(ActionOutput)
+    if user_prompt:
+        llm = get_openrouter_llm(temperature=0.7).with_structured_output(CustomActionOutput)
+    else:
+        llm = get_openrouter_llm(temperature=0.2).with_structured_output(ActionOutput)
     
     research_text = research.model_dump_json(indent=2) if research else "No research available."
     stakeholders_text = "\n".join([s.model_dump_json() for s in stakeholders]) if stakeholders else "No stakeholders available."
@@ -89,9 +95,9 @@ async def action_node(state: PipelineState) -> dict:
             "chunks": chunks_text
         })
         return {
-            "account_plan": result.account_plan,
-            "outreach_drafts": result.outreach_drafts,
-            "custom_response": result.custom_response
+            "account_plan": getattr(result, "account_plan", None),
+            "outreach_drafts": getattr(result, "outreach_drafts", []),
+            "custom_response": getattr(result, "custom_response", None)
         }
     except Exception as e:
         logger.error(f"Error in action node LLM call: {e}")
