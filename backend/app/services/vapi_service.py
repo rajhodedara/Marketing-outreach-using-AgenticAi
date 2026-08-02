@@ -20,6 +20,15 @@ JULIAN_SYSTEM_PROMPT = """You are Armin, an AI voice agent making an outbound sa
 2. ONLY use information from the verified brief when making claims or answering questions.
 3. If the prospect asks something NOT covered in your brief, NEVER guess or improvise. Instead say something like: "That's a great question. Let me confirm that detail with our research team and get back to you today." Then use the escalate_to_nova tool to flag it.
 4. When you hear something unclear, ask the prospect to repeat rather than guessing what they said. Say: "I'm sorry, could you repeat that?" or "Just to make sure I heard you correctly..."
+5. ALWAYS take the conversation ONE STEP AT A TIME. Wait for the prospect to answer before moving to the next step. DO NOT skip ahead to booking a meeting immediately.
+
+## CALL STRUCTURE (FOLLOW IN ORDER)
+You must follow this conversational progression strictly. DO NOT jump to asking for a meeting until Step 4.
+1. **Introduction:** State who you are, confirm you are speaking to the right person, and establish context using the Company Name. Wait for their response.
+2. **Value Pitch:** Mention ONE of the Pain Points from the verified brief. Briefly explain how you can help, and ask an open-ended qualifying question (e.g., "Is solving that a priority for your team right now?"). Wait for their response.
+3. **Research/Context (Optional):** If they show interest, mention a Buying Signal to show you've done your research.
+4. **Call to Action:** ONLY AFTER establishing value and receiving a positive or curious response, ask if they would be open to a brief meeting to discuss further.
+5. **Meeting Booking Flow:** Once they agree to a meeting, follow the MEETING BOOKING FLOW below.
 
 ## CONVERSATION STYLE
 - Be warm, natural, and conversational — NOT robotic or scripted
@@ -29,7 +38,7 @@ JULIAN_SYSTEM_PROMPT = """You are Armin, an AI voice agent making an outbound sa
 - Pause naturally between thoughts
 
 ## MEETING BOOKING FLOW
-When the prospect shows interest in meeting:
+When the prospect explicitly shows interest in meeting:
 1. First use check_calendar_availability to find open slots
 2. Suggest 2-3 specific times: "I have openings on [day] at [time] or [day] at [time] — what works best?"
 3. Once they pick a time, use book_meeting with their name and the chosen datetime.
@@ -72,7 +81,7 @@ async def get_or_create_assistant() -> str:
     async with httpx.AsyncClient(timeout=30) as client:
         # Define the assistant payload
         payload: dict[str, Any] = {
-            "name": "Armin v4",
+            "name": "Armin v5",
             "firstMessage": "Hi, this is Armin calling. Am I speaking with the right person?",
             
             # ── Transcriber — Deepgram nova-3 for best accuracy ──
@@ -169,12 +178,12 @@ async def get_or_create_assistant() -> str:
         if resp.status_code == 200:
             assistants = resp.json()
             for a in assistants:
-                if a.get("name") == "Armin v4":
-                    logger.info(f"Found existing Armin v4 assistant: {a['id']}. Updating configuration.")
+                if a.get("name") == "Armin v5":
+                    logger.info(f"Found existing Armin v5 assistant: {a['id']}. Updating configuration.")
                     # Update to ensure ngrok webhook URLs are synchronized
                     patch_resp = await client.patch(f"{VAPI_BASE}/assistant/{a['id']}", headers=_headers(), json=payload)
                     if patch_resp.status_code in (200, 201):
-                        logger.info("Successfully updated Julian v4 assistant.")
+                        logger.info("Successfully updated Julian v5 assistant.")
                     else:
                         logger.error(f"Failed to update Vapi assistant: {patch_resp.status_code} {patch_resp.text}")
                     return a["id"]
@@ -183,7 +192,7 @@ async def get_or_create_assistant() -> str:
         resp = await client.post(f"{VAPI_BASE}/assistant", headers=_headers(), json=payload)
         if resp.status_code in (200, 201):
             assistant_id = resp.json()["id"]
-            logger.info(f"Created Julian v4 assistant: {assistant_id}")
+            logger.info(f"Created Julian v5 assistant: {assistant_id}")
             return assistant_id
         else:
             logger.error(f"Failed to create Vapi assistant: {resp.status_code} {resp.text}")
