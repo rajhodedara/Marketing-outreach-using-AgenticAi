@@ -255,8 +255,8 @@ export default function JulianWorkspace() {
         setTimeout(() => handleStartCall(), 2000);
       } else {
         setCallStatus('error');
-        updateStep('3', 'flagged', `Connection failed: ${err?.message || 'Unknown error'}`);
-        addMessage({ role: 'system', content: `❌ Call failed to connect: ${err?.message || 'Unknown error'}`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+        updateStep('3', 'flagged', `Connection failed: ${(err as any)?.message || 'Unknown error'}`);
+        addMessage({ role: 'system', content: `❌ Call failed to connect: ${(err as any)?.message || 'Unknown error'}`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
       }
     });
 
