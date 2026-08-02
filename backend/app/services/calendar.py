@@ -99,7 +99,7 @@ async def book_meeting(contact_name: str, meeting_datetime: str, duration: int =
             "start": {"dateTime": start_dt.isoformat(), "timeZone": "UTC"},
             "end": {"dateTime": end_dt.isoformat(), "timeZone": "UTC"},
         }
-
+        
         result = await asyncio.to_thread(
             lambda: service.events().insert(calendarId="primary", body=event).execute()
         )

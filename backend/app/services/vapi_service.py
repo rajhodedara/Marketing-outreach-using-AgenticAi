@@ -47,13 +47,13 @@ async def get_or_create_assistant() -> str:
         if resp.status_code == 200:
             assistants = resp.json()
             for a in assistants:
-                if a.get("name") == "Julian":
-                    logger.info(f"Found existing Julian assistant: {a['id']}")
+                if a.get("name") == "Julian v3":
+                    logger.info(f"Found existing Julian v3 assistant: {a['id']}")
                     return a["id"]
 
         # Create new assistant
         payload: dict[str, Any] = {
-            "name": "Julian",
+            "name": "Julian v3",
             "firstMessage": "Hi, this is Julian calling. Am I speaking with the right person?",
             "model": {
                 "provider": "groq",
