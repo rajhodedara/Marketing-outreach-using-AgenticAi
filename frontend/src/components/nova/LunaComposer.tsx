@@ -22,6 +22,7 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
   const [channel, setChannel] = useState<Channel>("email");
   const [tone, setTone] = useState<Tone>("Professional");
   const [persona, setPersona] = useState("");
+  const [toEmail, setToEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -58,14 +59,15 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
     const toastId = toast.loading("DISPATCHING...", { description: "Uplinking to SMTP relay." });
     
     const nameOnly = persona?.split('(')[0].trim() || "recipient";
-    const toEmail = nameOnly.toLowerCase().replace(/[^a-z0-9]/g, '.') + "@" + (accountName ? accountName.toLowerCase().replace(/\s/g, "") : "example") + ".com";
+    const defaultEmail = nameOnly.toLowerCase().replace(/[^a-z0-9]/g, '.') + "@" + (accountName ? accountName.toLowerCase().replace(/\s/g, "") : "example") + ".com";
+    const sendToEmail = toEmail.trim() || defaultEmail;
     
     try {
       const res = await fetch(`/api/accounts/${accountId}/drafts/0/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to_email: toEmail,
+          to_email: sendToEmail,
           subject: subject || "Update",
           content: body
         })
@@ -131,6 +133,13 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
                   <AnimatePresence>
                     {channel === "email" && (
                       <motion.div initial={{ opacity: 0, height: 0, y: -10 }} animate={{ opacity: 1, height: "auto", y: 0 }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}>
+                        <label className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] ml-2 mb-2 block mt-2">To Email</label>
+                        <Input
+                          placeholder="recipient@example.com"
+                          className="bg-white/5 border-white/10 focus-visible:ring-white/20 rounded-2xl h-12 px-4 font-medium text-white placeholder:text-white/20 mb-6"
+                          value={toEmail}
+                          onChange={(e) => setToEmail(e.target.value)}
+                        />
                         <label className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.2em] ml-2 mb-2 block mt-2">Subject</label>
                         <Input
                           placeholder="Enter subject..."
@@ -229,7 +238,7 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
                       <div className="border-b border-white/5 pb-4 space-y-2">
                         <div className="flex text-sm">
                           <span className="text-white/40 w-16 text-[11px] uppercase tracking-widest mt-0.5">To:</span>
-                          <span className="text-white/80">{persona || "Recipient"} <span className="text-white/40">&lt;contact@{accountName.toLowerCase().replace(/\s/g, "")}.com&gt;</span></span>
+                          <span className="text-white/80">{persona || "Recipient"} <span className="text-white/40">&lt;{toEmail || `contact@${accountName.toLowerCase().replace(/\s/g, "")}.com`}&gt;</span></span>
                         </div>
                         <div className="flex text-sm font-medium">
                           <span className="text-white/40 w-16 text-[11px] uppercase tracking-widest mt-0.5">Subj:</span>
