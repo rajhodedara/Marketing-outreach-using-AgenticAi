@@ -89,7 +89,7 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
     
     try {
       // Calls the outreach endpoint which automatically creates a campaign and sends it to Slack 
-      // if slack_user_id is provided. Using U0BMJL15K60 as a default fallback for now.
+      // if slack_user_id is provided.
       const res = await fetch("/api/outreach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
           account_id: accountId,
           channel: "slack",
           draft_content: body,
-          slack_user_id: "U0BMJL15K60" 
+          slack_user_id: "U0BLZHY7L0P" 
         })
       });
       if (!res.ok) {
