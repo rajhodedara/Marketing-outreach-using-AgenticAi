@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
+import { toast } from "sonner";
+
 interface LunaComposerProps {
   accountId: string;
   accountName: string;
@@ -49,6 +51,34 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
   const handleCopy = () => {
     const textToCopy = channel === "email" ? `Subject: ${subject}\n\n${body}` : body;
     navigator.clipboard.writeText(textToCopy);
+  };
+
+  const handleSendEmail = async () => {
+    if (!accountId || !body) return;
+    const toastId = toast.loading("DISPATCHING...", { description: "Uplinking to SMTP relay." });
+    
+    const nameOnly = persona?.split('(')[0].trim() || "recipient";
+    const toEmail = nameOnly.toLowerCase().replace(/[^a-z0-9]/g, '.') + "@" + (accountName ? accountName.toLowerCase().replace(/\s/g, "") : "example") + ".com";
+    
+    try {
+      const res = await fetch(`/api/accounts/${accountId}/drafts/0/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to_email: toEmail,
+          subject: subject || "Update",
+          content: body
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to send");
+      }
+      toast.success("DISPATCH CONFIRMED", { id: toastId });
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`DISPATCH FAILED: ${e.message}`, { id: toastId });
+    }
   };
 
   return (
@@ -147,7 +177,7 @@ export function LunaComposer({ accountId, accountName }: LunaComposerProps) {
                     </div>
                   </button>
                   {channel === "email" && (
-                    <button disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
+                    <button onClick={handleSendEmail} disabled={!body} className="group rounded-full pl-5 pr-2 py-2 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-3 transition-all duration-500 active:scale-[0.98] text-sm">
                       Send
                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center transition-transform duration-500 group-hover:bg-emerald-500/30 group-hover:scale-105 group-hover:translate-x-1">
                         <PaperPlaneRight weight="duotone" size={14} />
