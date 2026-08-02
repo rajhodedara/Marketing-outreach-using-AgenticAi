@@ -29,7 +29,7 @@ export function AgentFeed({ events }: { events: FeedEvent[] }) {
         </div>
         <h3 className="text-foreground font-semibold mb-2">Awaiting Instructions</h3>
         <p className="text-muted-foreground text-sm max-w-[250px]">
-          Command Nova to begin synthesizing account data and formulating an outreach strategy.
+          Command Luna to begin synthesizing account data and formulating an outreach strategy.
         </p>
       </div>
     );

@@ -1,26 +1,31 @@
 /* ============================================
-   Nova & Julian — 11x.ai-Inspired Premium Design
-   Warm Earth Tones, Martian Aesthetic
+   Nova & Julian — Lunar Premium Design
+   Moon/Space Aesthetic with Dark-Light Contrast
    ============================================ */
 
 :root {
-  /* Warm Earth Tone Palette */
-  --bg-cream: #F5E6D3;
-  --bg-light-pink: #F0DDD0;
-  --bg-dark-green: #1A2E1F;
-  --bg-dark: #1a1a1a;
+  /* Lunar Palette */
+  --bg-cream: #0c0c14;
+  --bg-light-pink: #f5f5fa;
+  --bg-dark-green: #080810;
+  --bg-dark: #0a0a12;
   --bg-white: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-hover: #faf5f0;
+  --bg-card-hover: #f0f0f8;
 
   --text-dark: #1a1a1a;
   --text-body: #4a4a4a;
   --text-muted: #7a7a7a;
   --text-white: #ffffff;
-  --text-cream: #F5E6D3;
+  --text-cream: #c8c8e0;
 
   --border-light: rgba(0, 0, 0, 0.08);
   --border-dark: rgba(255, 255, 255, 0.12);
+
+  /* Moon glow accents */
+  --moon-glow: rgba(180, 200, 255, 0.15);
+  --moon-glow-strong: rgba(180, 200, 255, 0.3);
+  --moon-silver: #d0d8f0;
 
   --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -43,7 +48,7 @@
 html {
   scroll-behavior: smooth;
   background-color: var(--bg-cream);
-  color: var(--text-dark);
+  color: var(--text-white);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -233,8 +238,14 @@ img {
 .hero-bg-image {
   position: absolute;
   inset: 0;
-  background: url('/hero-bg.png') center/cover no-repeat;
   z-index: 0;
+  overflow: hidden;
+}
+
+.hero-bg-image video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hero-overlay {
@@ -242,11 +253,26 @@ img {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(40, 25, 15, 0.55) 0%,
-    rgba(40, 25, 15, 0.4) 50%,
-    rgba(40, 25, 15, 0.7) 100%
+    rgba(6, 6, 16, 0.5) 0%,
+    rgba(6, 6, 16, 0.3) 50%,
+    rgba(6, 6, 16, 0.7) 100%
   );
   z-index: 1;
+}
+
+/* Subtle lunar glow in hero center */
+.hero-overlay::after {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,200,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  animation: moonPulse 6s ease-in-out infinite;
 }
 
 .hero-content {
@@ -255,8 +281,8 @@ img {
   text-align: left;
   max-width: var(--container-max);
   width: 100%;
-  padding: 0 2rem;
-  padding-top: 6rem;
+  padding: 0 4rem; /* More padding so it's not touching extreme left */
+  margin-top: -15vh; /* Push text up into the dark sky */
 }
 
 .hero-title {
@@ -266,6 +292,7 @@ img {
   line-height: 1.0;
   margin-bottom: 1.5rem;
   letter-spacing: -0.03em;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.5); /* Pop text from bg */
 }
 
 .hero-subtitle {
@@ -273,11 +300,14 @@ img {
   color: rgba(255,255,255,0.8);
   margin-bottom: 1.5rem;
   font-weight: 400;
+  max-width: 600px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 .hero-ratings {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 1.25rem;
   margin-bottom: 2rem;
 }
@@ -602,7 +632,7 @@ img {
 
 /* ============ SECTION 5: MARQUEE TAGS ============ */
 .marquee-tags-section {
-  background: var(--bg-cream);
+  background: #10101a;
   padding: 2rem 0;
   overflow: hidden;
   display: flex;
@@ -631,20 +661,21 @@ img {
   gap: 0.3rem;
   padding: 0.5rem 1.1rem;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--border-light);
-  background: var(--bg-white);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
   font-size: 0.82rem;
   font-weight: 500;
-  color: var(--text-dark);
+  color: var(--moon-silver);
   white-space: nowrap;
   flex-shrink: 0;
   transition: var(--transition);
 }
 
 .tag-pill:hover {
-  background: var(--bg-dark);
+  background: rgba(255,255,255,0.1);
   color: var(--text-white);
-  border-color: var(--bg-dark);
+  border-color: rgba(180,200,255,0.3);
+  box-shadow: 0 0 15px rgba(180,200,255,0.1);
 }
 
 @keyframes scrollTags {
@@ -659,7 +690,7 @@ img {
 
 /* ============ SECTION 6: PLATFORM ============ */
 .platform-section {
-  background: var(--bg-dark-green);
+  background: #060610;
   padding: 6rem 2rem;
   color: var(--text-white);
 }
@@ -696,12 +727,20 @@ img {
   margin-bottom: 3rem;
 }
 
-/* Dashboard Mockup */
-.platform-dashboard {
+.platform-dashboard-image-wrapper {
   margin-bottom: 4rem;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  background: var(--bg-white);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.platform-dashboard-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .dashboard-chrome {
@@ -902,7 +941,7 @@ img {
 
 /* ============ SECTION 7: TRANSFORM ============ */
 .transform-section {
-  background: var(--bg-light-pink);
+  background: #f5f5fa;
   padding: 6rem 2rem;
 }
 
@@ -965,7 +1004,7 @@ img {
 
 .feature-visual {
   height: 180px;
-  background: #f2ece6;
+  background: #eeeef6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -973,7 +1012,7 @@ img {
 }
 
 .feature-card-active .feature-visual {
-  background: var(--bg-cream);
+  background: #e8e8f4;
 }
 
 .feature-card h4 {
@@ -1071,21 +1110,49 @@ img {
 
 /* ============ SECTION 8: AMPLIFY ============ */
 .amplify-section {
-  background: var(--bg-dark-green);
+  background: #060610;
   padding: 8rem 2rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.amplify-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/moon-surface.jpg') center/cover no-repeat;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.amplify-section::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,200,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+  animation: moonPulse 8s ease-in-out infinite;
+  z-index: 0;
 }
 
 .amplify-container {
   max-width: 700px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .section-badge-light {
   display: inline-block;
   font-size: 0.8rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.6);
+  color: var(--moon-silver);
   margin-bottom: 1rem;
   letter-spacing: 0.05em;
 }
@@ -1120,14 +1187,14 @@ img {
 .listen-bg-image {
   position: absolute;
   inset: 0;
-  background: url('/hero-bg.png') center/cover no-repeat;
+  background: url('/moon-base.jpg') center/cover no-repeat;
   z-index: 0;
 }
 
 .listen-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(120, 60, 30, 0.3);
+  background: rgba(6, 6, 16, 0.5);
   z-index: 1;
 }
 
@@ -1156,7 +1223,7 @@ img {
 
 /* Waveform Player */
 .waveform-player {
-  background: #f2ece6;
+  background: #eeeef6;
   border-radius: var(--radius-md);
   padding: 1.5rem;
   position: relative;
@@ -1183,13 +1250,13 @@ img {
 
 .bar {
   width: 3px;
-  background-color: #8B7355;
+  background-color: #8890b0;
   border-radius: var(--radius-pill);
   transition: height 0.15s ease-in-out, background-color 0.3s ease;
 }
 
 .waveform-player.playing .bar {
-  background-color: #5C4033;
+  background-color: #4a50a0;
   animation: dance 1.2s infinite ease-in-out alternate;
 }
 
@@ -1254,7 +1321,7 @@ img {
 
 /* ============ SECTION 10: IMPACT / TESTIMONIALS ============ */
 .impact-section {
-  background: var(--bg-light-pink);
+  background: #f5f5fa;
   padding: 6rem 2rem;
 }
 
@@ -1307,7 +1374,7 @@ img {
 
 .metric-sub {
   font-size: 0.82rem;
-  color: #4a7a5a;
+  color: #4a5a8a;
   font-weight: 500;
   margin-top: 0.5rem;
 }
@@ -1405,7 +1472,7 @@ img {
 
 /* ============ SECTION 11: HIRE CTA ============ */
 .hire-section {
-  background: var(--bg-cream);
+  background: #0c0c14;
   padding: 4rem 2rem;
 }
 
@@ -1415,8 +1482,9 @@ img {
 }
 
 .hire-card {
-  background: var(--bg-light-pink);
+  background: #16162a;
   border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.06);
   display: flex;
   overflow: hidden;
   min-height: 300px;
@@ -1434,11 +1502,12 @@ img {
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   margin-bottom: 1rem;
   line-height: 1.15;
+  color: var(--text-white);
 }
 
 .hire-desc {
   font-size: 0.92rem;
-  color: var(--text-body);
+  color: rgba(255,255,255,0.6);
   margin-bottom: 2rem;
   max-width: 440px;
   line-height: 1.6;
@@ -1456,7 +1525,7 @@ img {
   border-radius: var(--radius-lg);
 }
 
-/* ============ SECTION 12: MARS FOOTER ============ */
+/* ============ SECTION 12: LUNAR FOOTER ============ */
 .mars-footer {
   position: relative;
   min-height: 450px;
@@ -1466,14 +1535,14 @@ img {
 .footer-bg-image {
   position: absolute;
   inset: 0;
-  background: url('/hero-bg.png') center bottom/cover no-repeat;
+  background: url('/moon-horizon.jpg') center bottom/cover no-repeat;
   z-index: 0;
 }
 
 .footer-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(60,35,20,0.5) 0%, rgba(60,35,20,0.3) 100%);
+  background: linear-gradient(180deg, rgba(6,6,16,0.65) 0%, rgba(6,6,16,0.4) 100%);
   z-index: 1;
 }
 
@@ -1489,13 +1558,14 @@ img {
 }
 
 .footer-card {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
   border-radius: var(--radius-md);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  border: 1px solid rgba(255,255,255,0.15);
 }
 
 .footer-logo-card {
@@ -1624,7 +1694,7 @@ img {
 }
 
 /* ============ ASK JULIAN WIDGET ============ */
-.ask-julian-widget {
+.ask-armin-widget {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
@@ -1640,25 +1710,25 @@ img {
   transition: var(--transition);
 }
 
-.ask-julian-widget:hover {
+.ask-armin-widget:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.2);
 }
 
-.julian-avatar-mini {
+.armin-avatar-mini {
   width: 36px;
   height: 36px;
   border-radius: 50%;
   overflow: hidden;
 }
 
-.julian-mini-img {
+.armin-mini-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.ask-julian-text {
+.ask-armin-text {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-dark);
@@ -1669,7 +1739,7 @@ img {
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: rgba(15, 12, 10, 0.8);
+  background: rgba(6, 6, 16, 0.85);
   backdrop-filter: blur(16px);
   display: flex;
   justify-content: center;
@@ -1687,13 +1757,13 @@ img {
 }
 
 .agent-modal-container {
-  background: var(--bg-cream);
+  background: #f5f5fa;
   max-width: 1100px;
   width: 100%;
   border-radius: 28px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 30px 90px rgba(0,0,0,0.5);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.6);
   transform: translateY(0);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   margin: auto 0;
@@ -1742,14 +1812,14 @@ img {
 .modal-hero-bg {
   position: absolute;
   inset: 0;
-  background: url('/hero-bg.png') center/cover no-repeat;
+  background: url('/moon-base.jpg') center/cover no-repeat;
   z-index: 0;
 }
 
 .modal-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(35, 20, 12, 0.88) 0%, rgba(20, 12, 8, 0.75) 100%);
+  background: linear-gradient(135deg, rgba(6, 6, 16, 0.88) 0%, rgba(6, 6, 16, 0.75) 100%);
   z-index: 1;
 }
 
@@ -1852,7 +1922,7 @@ img {
 
 /* Core Concept Banner */
 .modal-concept-banner {
-  background: var(--bg-light-pink);
+  background: #f0f0f8;
   padding: 3rem;
   border-bottom: 1px solid var(--border-light);
 }
@@ -1924,7 +1994,7 @@ img {
 .workflow-card-highlight {
   border-color: #1a1a1a;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-  background: #faf7f2;
+  background: #f0f0f8;
 }
 
 .workflow-step-num {
@@ -2000,7 +2070,7 @@ img {
 
 /* Modal Impact Section */
 .modal-impact-section {
-  background: var(--bg-dark-green);
+  background: #080810;
   color: var(--text-white);
   padding: 4rem 3rem;
   text-align: center;
@@ -2051,7 +2121,7 @@ img {
 .modal-footer-cta {
   padding: 4rem 3rem;
   text-align: center;
-  background: var(--bg-cream);
+  background: #f5f5fa;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2181,4 +2251,56 @@ img {
     width: 100%;
     max-width: 320px;
   }
+}
+
+/* ============ MOON GLOW ANIMATIONS ============ */
+@keyframes moonPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes moonShimmer {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+.moon-glow {
+  position: relative;
+}
+
+.moon-glow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--moon-glow) 0%, transparent 70%);
+  pointer-events: none;
+  animation: moonPulse 6s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* Section transition gradients - smooth dark/light transitions */
+.workers-section {
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.hire-section .btn-dark {
+  background: var(--text-white);
+  color: var(--bg-dark);
+}
+
+.hire-section .btn-dark:hover {
+  background: var(--moon-silver);
+  box-shadow: 0 8px 30px rgba(180,200,255,0.2);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(180, 200, 255, 0.3);
+  color: #fff;
 }

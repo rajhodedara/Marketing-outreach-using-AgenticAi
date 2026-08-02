@@ -6,7 +6,7 @@ import { CallBrief, CallBriefData } from '@/components/julian/CallBrief';
 import { ConversationFeed, ChatMessage } from '@/components/julian/ConversationFeed';
 import VideoCallOverlay from '@/components/julian/VideoCallOverlay';
 import {
-  startJulianCall,
+  startArminCall,
   stopCall,
   onCallStart,
   onCallEnd,
@@ -23,13 +23,13 @@ type Account = {
 };
 
 const INITIAL_STEPS: ExecutionStep[] = [
-  { id: '1', label: 'Load Brief', description: 'Ingest verified facts from Nova', status: 'pending' },
-  { id: '2', label: 'Prepare Script', description: 'Configure Julian with verified context', status: 'pending' },
+  { id: '1', label: 'Load Brief', description: 'Ingest verified facts from Luna', status: 'pending' },
+  { id: '2', label: 'Prepare Script', description: 'Configure Armin with verified context', status: 'pending' },
   { id: '3', label: 'Connecting', description: 'Establishing WebRTC voice session', status: 'pending' },
   { id: '4', label: 'In Call', description: 'Executing adaptive voice dialogue', status: 'pending' },
 ];
 
-export default function JulianWorkspace() {
+export default function ArminWorkspace() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [briefData, setBriefData] = useState<CallBriefData | null>(null);
@@ -59,7 +59,7 @@ export default function JulianWorkspace() {
       .then(d => setAccounts(d.accounts || []))
       .catch(console.error);
 
-    // Pre-fetch Julian assistant ID
+    // Pre-fetch Armin assistant ID
     fetch('/api/julian/assistant-id')
       .then(r => r.json())
       .then(d => setAssistantId(d.assistant_id || ''))
@@ -87,8 +87,8 @@ export default function JulianWorkspace() {
               companyName: data.company_name || data.domain,
               targetPersona: 'Dana Whitfield (VP Operations)',
               painPoints: [
-                "High Nursing Turnover — mentioned 'critical shortage' in last QBR.",
-                'Integration Delays — current API causes 24hr lag.',
+                "High Nursing Turnover ? mentioned 'critical shortage' in last QBR.",
+                'Integration Delays ? current API causes 24hr lag.',
               ],
               buyingSignals: ['Q1 budget allocated for workflow automation.'],
             };
@@ -143,7 +143,7 @@ export default function JulianWorkspace() {
           setFlaggedItems(prev => [...prev, data.question]);
           addMessage({
             role: 'system',
-            content: `🚩 Escalated to Nova: "${data.question}"`,
+            content: `🚩 Escalated to Luna: "${data.question}"`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           });
         }
@@ -204,8 +204,15 @@ export default function JulianWorkspace() {
 
   // ─── Start Call ──────────────────────────────────────────────────────────
 
+  const callStartedRef = useRef(false);
+  const callEndedRef = useRef(false);
+
   const handleStartCall = async () => {
     if (!selectedAccountId || !assistantId || !briefText) return;
+
+    // Reset guards
+    callStartedRef.current = false;
+    callEndedRef.current = false;
 
     setCallStatus('connecting');
     setSteps(INITIAL_STEPS);
@@ -214,21 +221,26 @@ export default function JulianWorkspace() {
     setMeetingBooked(false);
     setMeetingLink(undefined);
     setCallSummary('');
-    setCallViewOpen(true); // open full-screen call view immediately
+    setRetryCount(0);
+    setCallViewOpen(true);
 
     updateStep('1', 'active');
     addMessage({ role: 'system', content: 'Loading verified call brief...', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
 
-    // Wire up Vapi SDK events
+    // Wire up Vapi SDK events (clear previous first)
     offAll();
 
     onCallStart(() => {
+      // Guard: only fire once
+      if (callStartedRef.current) return;
+      callStartedRef.current = true;
+
       setCallStatus('active');
       updateStep('1', 'completed');
       updateStep('2', 'completed');
       updateStep('3', 'completed');
       updateStep('4', 'active');
-      addMessage({ role: 'system', content: 'WebRTC session established — Julian is live.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      addMessage({ role: 'system', content: 'WebRTC session established ? Armin is live.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
     });
 
     onTranscript((msg) => {
@@ -241,6 +253,10 @@ export default function JulianWorkspace() {
     });
 
     onCallEnd(() => {
+      // Guard: only fire once
+      if (callEndedRef.current) return;
+      callEndedRef.current = true;
+
       setCallStatus('ended');
       updateStep('4', 'completed');
       addMessage({ role: 'system', content: 'Call ended.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
@@ -258,6 +274,7 @@ export default function JulianWorkspace() {
         updateStep('3', 'flagged', `Connection failed: ${(err as any)?.message || 'Unknown error'}`);
         addMessage({ role: 'system', content: `❌ Call failed to connect: ${(err as any)?.message || 'Unknown error'}`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
       }
+      // Don't auto-retry ? just log. Vapi may recover on its own for non-fatal errors.
     });
 
     // Show pipeline loading steps
@@ -266,7 +283,7 @@ export default function JulianWorkspace() {
     updateStep('3', 'active');
 
     try {
-      const callId = await startJulianCall(assistantId, briefText);
+      const callId = await startArminCall(assistantId, briefText);
       if (callId) {
         setCurrentCallId(callId);
         connectWebSocket(callId);
@@ -279,6 +296,9 @@ export default function JulianWorkspace() {
   };
 
   const handleStopCall = () => {
+    if (callEndedRef.current) return;
+    callEndedRef.current = true;
+
     stopCall();
     offAll();
     setCallStatus('ended');
@@ -306,7 +326,7 @@ export default function JulianWorkspace() {
           <div>
             <h1 className="text-[24px] font-bold text-foreground flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[28px]">record_voice_over</span>
-              Julian
+              Armin
             </h1>
             <p className="text-muted-foreground text-[14px]">Voice Outreach Agent · Powered by Vapi + ElevenLabs</p>
           </div>
@@ -358,7 +378,7 @@ export default function JulianWorkspace() {
               className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-xl font-semibold text-[15px] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-[20px]">video_call</span>
-              {assistantId ? `Call ${briefData?.targetPersona?.split(' ')[0] || 'Prospect'}` : 'Loading Julian...'}
+              {assistantId ? `Call ${briefData?.targetPersona?.split(' ')[0] || 'Prospect'}` : 'Loading Armin...'}
             </button>
           ) : (
             <>
@@ -392,7 +412,7 @@ export default function JulianWorkspace() {
         {/* Google Calendar OAuth notice */}
         {!isActive && callStatus === 'idle' && (
           <p className="mt-3 text-[11px] text-muted-foreground text-center">
-            📅 First time? <a href="/api/google/auth" target="_blank" rel="noreferrer" className="underline hover:text-foreground">Connect Google Calendar</a> so Julian can book meetings.
+            📅 First time? <a href="/api/google/auth" target="_blank" rel="noreferrer" className="underline hover:text-foreground">Connect Google Calendar</a> so Armin can book meetings.
           </p>
         )}
       </div>
@@ -425,14 +445,20 @@ export default function JulianWorkspace() {
             <h3 className="text-[14px] font-semibold text-foreground uppercase tracking-wider mb-2">Call Outcomes</h3>
 
             {meetingBooked && (
-              <div className="flex items-start gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg">
-                <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">event_available</span>
-                <div>
-                  <div className="text-[14px] font-semibold text-primary">Meeting Booked</div>
-                  <div className="text-[12px] text-muted-foreground mt-0.5">Via Google Calendar</div>
+              <div className="flex items-start gap-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                <span className="material-symbols-outlined text-emerald-400 text-[22px] mt-0.5">event_available</span>
+                <div className="flex-1">
+                  <div className="text-[14px] font-semibold text-emerald-400">Meeting Booked</div>
+                  <div className="text-[12px] text-muted-foreground mt-0.5">Scheduled via Google Calendar</div>
                   {meetingLink && (
-                    <a href={meetingLink} target="_blank" rel="noreferrer" className="text-[12px] text-indigo-400 underline hover:text-indigo-300 inline-block mt-1">
-                      Open Calendar Link →
+                    <a
+                      href={meetingLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-[12px] font-semibold rounded-lg transition-all active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                      Open in Google Calendar
                     </a>
                   )}
                 </div>
@@ -443,7 +469,7 @@ export default function JulianWorkspace() {
               <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
                 <span className="material-symbols-outlined text-amber-500 text-[20px] mt-0.5">flag</span>
                 <div>
-                  <div className="text-[14px] font-semibold text-amber-500">Flagged to Nova</div>
+                  <div className="text-[14px] font-semibold text-amber-500">Flagged to Luna</div>
                   <div className="text-[12px] text-muted-foreground mt-0.5">Unanswered questions sent for follow-up.</div>
                   <ul className="mt-2 space-y-1">
                     {flaggedItems.map((item, i) => (
@@ -459,7 +485,7 @@ export default function JulianWorkspace() {
         {/* API Status */}
         <div className="p-4 border-t border-border text-[11px] text-muted-foreground font-mono space-y-1">
           <div className="flex justify-between">
-            <span>Julian Assistant</span>
+            <span>Armin Assistant</span>
             <span className={assistantId ? 'text-primary' : 'text-destructive'}>{assistantId ? `✓ ${assistantId.slice(0, 8)}...` : '✗ Not ready'}</span>
           </div>
           <div className="flex justify-between">
