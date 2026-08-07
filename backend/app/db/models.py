@@ -94,6 +94,16 @@ class OutreachCampaign(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
 
+class SearchCampaign(Base):
+    __tablename__ = "search_campaigns"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    query: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="pending")  # pending/running/completed/failed
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    result_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
 async def create_tables(engine) -> None:
     """Create all tables in the database."""
     async with engine.begin() as conn:

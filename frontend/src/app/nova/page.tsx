@@ -12,7 +12,8 @@ import { LunaIntegrations } from '@/components/nova/LunaIntegrations';
 import { LunaComposer } from '@/components/nova/LunaComposer';
 import { LunaSequences } from '@/components/nova/LunaSequences';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Database, TreeStructure } from '@phosphor-icons/react';
+import { Brain, Database, TreeStructure, Globe } from '@phosphor-icons/react';
+import Link from 'next/link';
 
 type Account = {
   id: string;
@@ -242,7 +243,18 @@ export default function LunaWorkspace() {
           </div>
         </div>
         
-        <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] p-2 pl-4 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl w-full sm:w-auto transition-all hover:bg-white/[0.08] group relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <Link href="/nova/search">
+            <motion.button
+              whileHover={{ scale: 1.02, filter: "brightness(1.2)" }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/10 hover:from-emerald-500/30 hover:to-teal-500/20 border border-emerald-500/30 text-emerald-400 px-4 py-2 w-full sm:w-auto rounded-full text-[11px] sm:text-xs font-semibold tracking-wide shadow-[0_0_15px_rgba(16,185,129,0.15)] uppercase"
+            >
+              <Globe weight="duotone" className="w-4 h-4" />
+              Live Web Search
+            </motion.button>
+          </Link>
+          <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] p-2 pl-4 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] backdrop-blur-xl transition-all hover:bg-white/[0.08] group relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out pointer-events-none" />
             <span className="text-[9px] sm:text-[10px] font-medium text-white/50 uppercase tracking-[0.2em] whitespace-nowrap">Target Account</span>
             <select 
@@ -262,6 +274,7 @@ export default function LunaWorkspace() {
                 <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
+        </div>
         </div>
       </motion.div>
 

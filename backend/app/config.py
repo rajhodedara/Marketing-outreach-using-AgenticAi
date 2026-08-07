@@ -44,6 +44,18 @@ class Settings(BaseSettings):
     # Gmail (sending)
     google_gmail_scopes: str = "https://www.googleapis.com/auth/gmail.send"
 
+    # Live Search Config
+    live_research_mode: bool = True
+    tavily_api_key: str = ""
+    apollo_api_key: str = ""
+    serpapi_api_key: str = ""
+    gnews_api_key: str = ""
+    datamagnet_api_key: str = ""
+    max_search_queries: int = 3
+    max_companies: int = 3
+    max_articles_per_company: int = 3
+    max_contacts_per_company: int = 3
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property
