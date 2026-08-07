@@ -554,7 +554,7 @@ export function LiveSearchCampaign() {
           <motion.div
             key="audience_search"
             custom={direction}
-            variants={variants}
+            variants={variants as any}
             initial="initial"
             animate="animate"
             exit="exit"
@@ -644,7 +644,7 @@ export function LiveSearchCampaign() {
           <motion.div
             key="campaign_view"
             custom={direction}
-            variants={variants}
+            variants={variants as any}
             initial="initial"
             animate="animate"
             exit="exit"
