@@ -102,13 +102,18 @@ async def signal_intelligence_node(state: DiscoveryState) -> dict:
     raw_signals = []
     
     if settings.live_research_mode:
-        for comp in raw_companies:
+        async def fetch_signals_safe(comp):
             try:
-                sigs = await fetch_signals(comp["name"])
-                raw_signals.extend(sigs)
+                return await fetch_signals(comp["name"])
             except Exception as e:
                 logger.error(f"Signal API failed for {comp['name']}: {e}")
-                continue
+                return []
+                
+        tasks = [fetch_signals_safe(comp) for comp in raw_companies]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for sigs in results:
+            if isinstance(sigs, list):
+                raw_signals.extend(sigs)
     else:
         raw_signals = load_demo_cache().get("raw_signals", [])
         
@@ -162,13 +167,22 @@ async def contact_enrichment_node(state: DiscoveryState) -> dict:
     
     raw_contacts = []
     if settings.live_research_mode:
+        async def enrich_contacts_safe(comp, persona):
+            try:
+                return await enrich_contacts(comp["name"], persona)
+            except Exception as e:
+                logger.error(f"Contact Enrichment failed for {comp['name']}: {e}")
+                return []
+                
+        tasks = []
         for comp in raw_companies:
             for persona in target_personas[:2]: # Max 2 personas per company to save limits
-                try:
-                    cons = await enrich_contacts(comp["name"], persona)
-                    raw_contacts.extend(cons)
-                except Exception as e:
-                    logger.error(f"Contact Enrichment failed for {comp['name']}: {e}")
+                tasks.append(enrich_contacts_safe(comp, persona))
+                
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for cons in results:
+            if isinstance(cons, list):
+                raw_contacts.extend(cons)
     else:
         raw_contacts = load_demo_cache().get("raw_contacts", [])
         

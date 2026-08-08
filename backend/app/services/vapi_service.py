@@ -83,6 +83,7 @@ async def get_or_create_assistant() -> str:
         payload: dict[str, Any] = {
             "name": "Armin v5",
             "firstMessage": "Hi, this is Armin calling. Am I speaking with the right person?",
+            "firstMessageMode": "assistant-speaks-first",
             
             # ── Transcriber — Deepgram nova-3 for best accuracy ──
             "transcriber": {
@@ -118,7 +119,9 @@ async def get_or_create_assistant() -> str:
                                 "required": ["date_range"]
                             }
                         },
-                        "server": {"url": f"{settings.nova_backend_url}/api/julian/tools"}
+                        "server": {
+                            "url": f"{settings.nova_backend_url}/api/julian/tools"
+                        }
                     },
                     {
                         "type": "function",
@@ -135,7 +138,9 @@ async def get_or_create_assistant() -> str:
                                 "required": ["contact_name", "datetime"]
                             }
                         },
-                        "server": {"url": f"{settings.nova_backend_url}/api/julian/tools"}
+                        "server": {
+                            "url": f"{settings.nova_backend_url}/api/julian/tools"
+                        }
                     },
                     {
                         "type": "function",
@@ -151,7 +156,9 @@ async def get_or_create_assistant() -> str:
                                 "required": ["question"]
                             }
                         },
-                        "server": {"url": f"{settings.nova_backend_url}/api/julian/tools"}
+                        "server": {
+                            "url": f"{settings.nova_backend_url}/api/julian/tools"
+                        }
                     }
                 ]
             },
@@ -160,12 +167,10 @@ async def get_or_create_assistant() -> str:
             "voice": {
                 "provider": "11labs",
                 "voiceId": "onwK4e9ZLuTAKqWW03F9",  # Daniel — professional male voice
+                "model": "eleven_turbo_v2",
                 "stability": 0.7,
                 "similarityBoost": 0.8,
             },
-            
-            # ── Server URL for webhooks ──
-            "serverUrl": f"{settings.nova_backend_url}/api/julian/call-summary",
             
             # ── Silence and end-of-turn settings ──
             "silenceTimeoutSeconds": 15,

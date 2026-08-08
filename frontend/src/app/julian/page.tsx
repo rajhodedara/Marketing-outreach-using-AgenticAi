@@ -48,12 +48,20 @@ export default function ArminWorkspace() {
   const [callSummary, setCallSummary] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
   const [callViewOpen, setCallViewOpen] = useState(false);
+  const [isInsecure, setIsInsecure] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
 
   // ─── Data Fetching ───────────────────────────────────────────────────────
 
   useEffect(() => {
+    setIsInsecure(
+      typeof window !== 'undefined' && 
+      !window.isSecureContext && 
+      window.location.hostname !== 'localhost' && 
+      window.location.hostname !== '127.0.0.1'
+    );
+
     fetch('/api/accounts')
       .then(r => r.json())
       .then(d => setAccounts(d.accounts || []))
@@ -370,6 +378,12 @@ export default function ArminWorkspace() {
         )}
 
         {/* Call Button */}
+        {!isActive && !isConnecting && isInsecure && (
+          <div className="mt-4 p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-[13px]">
+            <strong className="block mb-1">Microphone Blocked (Insecure Context)</strong>
+            Your browser blocks microphone access because you are accessing this app over HTTP instead of HTTPS or localhost. Please access via <code>http://localhost:3000</code> or use a secure tunnel.
+          </div>
+        )}
         <div className="mt-4 flex gap-3">
           {!isActive && !isConnecting ? (
             <button

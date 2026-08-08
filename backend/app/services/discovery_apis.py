@@ -1,6 +1,7 @@
 import os
 import time
 import httpx
+import asyncio
 import logging
 import json
 from urllib.parse import urlparse
@@ -20,10 +21,8 @@ async def discover_companies(queries: list[str]) -> list[dict]:
     queries = list(set(queries))[:settings.max_search_queries]
     
     async with httpx.AsyncClient(timeout=10.0) as client:
-        for query in queries:
-            if len(companies) >= settings.max_companies:
-                break
-            
+        async def fetch_query(query):
+            local_companies = []
             start_time = time.time()
             provider = "Tavily"
             try:
@@ -42,7 +41,7 @@ async def discover_companies(queries: list[str]) -> list[dict]:
                                 domain_name = netloc.split(".")[0].capitalize()
                             except:
                                 pass
-                        companies.append({
+                        local_companies.append({
                             "name": domain_name or r.get("title", ""), # Approximate company name
                             "url": url,
                             "evidence": r.get("content", ""),
@@ -72,7 +71,7 @@ async def discover_companies(queries: list[str]) -> list[dict]:
                                     domain_name = netloc.split(".")[0].capitalize()
                                 except:
                                     pass
-                            companies.append({
+                            local_companies.append({
                                 "name": domain_name or r.get("title", ""),
                                 "url": url,
                                 "evidence": r.get("snippet", ""),
@@ -82,6 +81,18 @@ async def discover_companies(queries: list[str]) -> list[dict]:
                         log_api_usage(provider, "Company Discovery", "Success", time.time() - start_time)
                 except Exception as ex:
                     log_api_usage(provider, "Company Discovery", f"Failed ({str(ex)})", time.time() - start_time)
+            return local_companies
+
+        tasks = [fetch_query(q) for q in queries]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for res in results:
+            if isinstance(res, list):
+                for c in res:
+                    if len(companies) >= settings.max_companies:
+                        break
+                    companies.append(c)
+            if len(companies) >= settings.max_companies:
+                break
     
     if not companies:
         return []
