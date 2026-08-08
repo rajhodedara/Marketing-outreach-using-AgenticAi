@@ -394,7 +394,7 @@ export default function ArminWorkspace() {
         <div className="mt-4 flex gap-3">
           {!isActive && !isConnecting ? (
             <button
-              onClick={handleStartCall}
+              onClick={() => handleStartCall()}
               disabled={!selectedAccountId || !assistantId || !briefText || isConnecting}
               className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-primary text-primary-foreground rounded-xl font-semibold text-[15px] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
