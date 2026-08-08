@@ -50,38 +50,70 @@ async def parse_data_pack(zip_path: Path) -> DataPackContents:
                         contents.crm_data = json.loads(content)
                     except (UnicodeDecodeError, json.JSONDecodeError):
                         pass
+                continue
             
-            elif file_path.suffix.lower() == '.txt':
+            # Extract text content from .txt or .pdf
+            content = None
+            
+            if file_path.suffix.lower() == '.txt':
                 async with aiofiles.open(file_path, mode='r', encoding='utf-8') as f:
                     try:
                         content = await f.read()
                     except UnicodeDecodeError:
                         continue
                 
-                filename_lower = file_path.name.lower()
-                doc_type = None
+            elif file_path.suffix.lower() == '.pdf':
+                try:
+                    def extract_pdf(pdf_path=file_path):
+                        import pypdf
+                        text = ""
+                        with open(pdf_path, "rb") as f:
+                            reader = pypdf.PdfReader(f)
+                            for page in reader.pages:
+                                page_text = page.extract_text()
+                                if page_text:
+                                    text += page_text + "\n"
+                        return text
+                    
+                    content = await asyncio.to_thread(extract_pdf)
+                    if not content or not content.strip():
+                        continue
+                except Exception as e:
+                    print(f"Error reading pdf {file_path}: {e}")
+                    continue
+            else:
+                # Skip unsupported file types
+                continue
+
+            # Classify the extracted text document
+            if content is None:
+                continue
                 
-                if 'transcript' in filename_lower:
-                    doc_type = 'transcript'
-                elif 'email' in filename_lower:
+            filename_lower = file_path.name.lower()
+            doc_type = None
+            
+            if 'transcript' in filename_lower:
+                doc_type = 'transcript'
+            elif 'email' in filename_lower:
+                doc_type = 'email'
+            else:
+                # Heuristics based on content
+                content_lower = content.lower()
+                if 'from:' in content_lower or 'subject:' in content_lower:
                     doc_type = 'email'
                 else:
-                    # Heuristics based on content
-                    content_lower = content.lower()
-                    if 'from:' in content_lower or 'subject:' in content_lower:
-                        doc_type = 'email'
-                    else:
-                        doc_type = 'transcript'
-                
-                doc = TextDocument(
-                    filename=file_path.name,
-                    content=content,
-                    doc_type=doc_type
-                )
-                
-                if doc_type == 'email':
-                    contents.emails.append(doc)
-                else:
-                    contents.transcripts.append(doc)
+                    doc_type = 'transcript'
+            
+            doc = TextDocument(
+                filename=file_path.name,
+                content=content,
+                doc_type=doc_type
+            )
+            
+            if doc_type == 'email':
+                contents.emails.append(doc)
+            else:
+                contents.transcripts.append(doc)
 
     return contents
+

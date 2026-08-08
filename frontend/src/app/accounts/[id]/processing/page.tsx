@@ -169,6 +169,8 @@ export default function AIProcessingView({
 
       const res = await fetch(`/api/accounts/${accountId}/analyze`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
       });
 
       let sessionId = null;
@@ -236,7 +238,16 @@ export default function AIProcessingView({
         clearInterval(pollIntervalRef.current);
       }
       
+      let attempts = 0;
       pollIntervalRef.current = setInterval(async () => {
+        attempts++;
+        if (attempts > 150) {
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+          setFailed(true);
+          toast.error("Analysis Timeout: Server took too long to respond.");
+          return;
+        }
+        
         try {
           if (!sessionId) {
             const res = await fetch(`/api/accounts/${accountId}`);
