@@ -47,6 +47,7 @@ export default function ArminWorkspace() {
   const [meetingLink, setMeetingLink] = useState<string | undefined>(undefined);
   const [callSummary, setCallSummary] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
+  const retryCountRef = useRef(0);
   const [callViewOpen, setCallViewOpen] = useState(false);
   const [isInsecure, setIsInsecure] = useState(false);
 
@@ -95,8 +96,8 @@ export default function ArminWorkspace() {
               companyName: data.company_name || data.domain,
               targetPersona: 'Dana Whitfield (VP Operations)',
               painPoints: [
-                "High Nursing Turnover ? mentioned 'critical shortage' in last QBR.",
-                'Integration Delays ? current API causes 24hr lag.',
+                "High Nursing Turnover — mentioned 'critical shortage' in last QBR.",
+                'Integration Delays — current API causes 24hr lag.',
               ],
               buyingSignals: ['Q1 budget allocated for workflow automation.'],
             };
@@ -215,21 +216,26 @@ export default function ArminWorkspace() {
   const callStartedRef = useRef(false);
   const callEndedRef = useRef(false);
 
-  const handleStartCall = async () => {
+  const handleStartCall = async (isRetry = false) => {
     if (!selectedAccountId || !assistantId || !briefText) return;
 
     // Reset guards
     callStartedRef.current = false;
     callEndedRef.current = false;
+    if (!isRetry) {
+      retryCountRef.current = 0;
+      setRetryCount(0);
+    }
 
     setCallStatus('connecting');
     setSteps(INITIAL_STEPS);
-    setMessages([]);
-    setFlaggedItems([]);
-    setMeetingBooked(false);
-    setMeetingLink(undefined);
-    setCallSummary('');
-    setRetryCount(0);
+    if (!isRetry) {
+      setMessages([]);
+      setFlaggedItems([]);
+      setMeetingBooked(false);
+      setMeetingLink(undefined);
+      setCallSummary('');
+    }
     setCallViewOpen(true);
 
     updateStep('1', 'active');
@@ -248,7 +254,7 @@ export default function ArminWorkspace() {
       updateStep('2', 'completed');
       updateStep('3', 'completed');
       updateStep('4', 'active');
-      addMessage({ role: 'system', content: 'WebRTC session established ? Armin is live.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      addMessage({ role: 'system', content: 'WebRTC session established — Armin is live.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
     });
 
     onTranscript((msg) => {
@@ -273,16 +279,17 @@ export default function ArminWorkspace() {
 
     onError((err) => {
       console.error('[Vapi]', err);
-      if (retryCount < 1) {
-        setRetryCount(r => r + 1);
+      if (retryCountRef.current < 1) {
+        retryCountRef.current += 1;
+        setRetryCount(retryCountRef.current);
         addMessage({ role: 'system', content: 'Connection failed — retrying once...', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-        setTimeout(() => handleStartCall(), 2000);
+        setTimeout(() => handleStartCall(true), 2000);
       } else {
         setCallStatus('error');
         updateStep('3', 'flagged', `Connection failed: ${(err as any)?.message || 'Unknown error'}`);
         addMessage({ role: 'system', content: `❌ Call failed to connect: ${(err as any)?.message || 'Unknown error'}`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
       }
-      // Don't auto-retry ? just log. Vapi may recover on its own for non-fatal errors.
+      // Don't auto-retry — just log. Vapi may recover on its own for non-fatal errors.
     });
 
     // Show pipeline loading steps

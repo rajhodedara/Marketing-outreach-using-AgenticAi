@@ -26,17 +26,16 @@ export interface TranscriptMessage {
   isFinal: boolean;
 }
 
-/**
- * Start a voice call with the Armin assistant.
- * @param assistantId - Vapi assistant ID from backend
- * @param briefText   - The verified brief to inject into Armin's system prompt
- * @returns The call object (contains call.id for WebSocket subscription)
- */
 export async function startArminCall(
   assistantId: string,
   briefText: string
 ): Promise<string> {
   console.log("Starting Armin Call with Assistant ID:", assistantId);
+  
+  if (!PUBLIC_KEY || PUBLIC_KEY === "dummy_key") {
+    throw new Error("VAPI Public Key is missing. Please set NEXT_PUBLIC_VAPI_PUBLIC_KEY in your environment variables.");
+  }
+
   const vapi = getVapi();
   const call = await vapi.start(assistantId, {
     variableValues: {
