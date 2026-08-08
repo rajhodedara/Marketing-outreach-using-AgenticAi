@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 type ScreenType = 'audience_search' | 'campaign_view';
 type TabType = 'audience' | 'research' | 'messaging' | 'settings';
 type TransitionDirection = 'push' | 'push_back' | 'none';
@@ -41,7 +43,7 @@ export function LiveSearchCampaign() {
   const [isRegenerating, setIsRegenerating] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/nova/campaigns')
+    fetch(`${API_URL}/api/nova/campaigns`)
       .then(res => res.json())
       .then(data => {
         if (data.campaigns) setCampaigns(data.campaigns);
@@ -67,7 +69,7 @@ export function LiveSearchCampaign() {
     navigateTo('campaign_view', 'push');
     
     try {
-      const res = await fetch('http://localhost:8000/api/nova/search', {
+      const res = await fetch(`${API_URL}/api/nova/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -77,7 +79,7 @@ export function LiveSearchCampaign() {
       if (data.session_id) {
         setSessionId(data.session_id);
         
-        const eventSource = new EventSource(`http://localhost:8000/api/nova/search/${data.session_id}/stream`);
+        const eventSource = new EventSource(`${API_URL}/api/nova/search/${data.session_id}/stream`);
         
         eventSource.onmessage = (event) => {
           if (event.data === '[DONE]') {
@@ -113,7 +115,7 @@ export function LiveSearchCampaign() {
 
   const fetchFinalResults = async (sid: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/nova/search/${sid}`);
+      const res = await fetch(`${API_URL}/api/nova/search/${sid}`);
       const data = await res.json();
       if (data.result) {
         const resultCompanies = data.result.discovered_companies || data.result.companies;
@@ -141,7 +143,7 @@ export function LiveSearchCampaign() {
       console.error(e);
     } finally {
       setIsSearching(false);
-      fetch('http://localhost:8000/api/nova/campaigns')
+      fetch(`${API_URL}/api/nova/campaigns`)
         .then(res => res.json())
         .then(data => { if (data.campaigns) setCampaigns(data.campaigns); });
     }
@@ -323,7 +325,7 @@ export function LiveSearchCampaign() {
         if (!defaultContact || !sessionId) return;
         setIsRegenerating(true);
         try {
-            const res = await fetch(`http://localhost:8000/api/nova/search/${sessionId}/regenerate-outreach`, {
+            const res = await fetch(`${API_URL}/api/nova/search/${sessionId}/regenerate-outreach`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

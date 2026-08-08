@@ -111,7 +111,7 @@ export default function ArminWorkspace() {
 
   const connectWebSocket = useCallback((callId: string) => {
     if (wsRef.current) wsRef.current.close();
-    const wsUrl = `ws://localhost:8000/ws/transcript/${callId}`;
+    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws/transcript/${callId}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

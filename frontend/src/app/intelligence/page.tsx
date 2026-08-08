@@ -77,6 +77,9 @@ function getSignalStyles(type: string) {
   }
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+
 export default function IntelligenceFeedPage() {
   const [signals, setSignals] = useState<IntentSignal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +90,7 @@ export default function IntelligenceFeedPage() {
   useEffect(() => {
     async function fetchInitial() {
       try {
-        const res = await fetch("http://localhost:8000/api/intelligence/signals?limit=500");
+        const res = await fetch(`${API_URL}/api/intelligence/signals?limit=500`);
         if (res.ok) {
           const data = await res.json();
           setSignals(data.signals || []);
@@ -103,7 +106,7 @@ export default function IntelligenceFeedPage() {
 
   // 2. Connect WebSocket
   useEffect(() => {
-    const wsUrl = "ws://localhost:8000/ws/intelligence";
+    const wsUrl = `${WS_URL}/ws/intelligence`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
