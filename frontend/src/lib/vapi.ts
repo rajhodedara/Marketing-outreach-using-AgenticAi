@@ -31,19 +31,30 @@ export async function startArminCall(
   briefText: string
 ): Promise<string> {
   console.log("Starting Armin Call with Assistant ID:", assistantId);
+  console.log("Using Vapi Public Key starting with:", PUBLIC_KEY ? `${PUBLIC_KEY.substring(0, 8)}...` : "NONE");
   
   if (!PUBLIC_KEY || PUBLIC_KEY === "dummy_key") {
     throw new Error("VAPI Public Key is missing. Please set NEXT_PUBLIC_VAPI_PUBLIC_KEY in your environment variables.");
   }
 
+  // Check if they accidentally put a private key (Vapi private keys often start with different prefixes, though they can vary. Public keys usually don't throw 404 on the web endpoint unless mismatched).
+  if (PUBLIC_KEY.length > 0 && !PUBLIC_KEY.includes('-') && PUBLIC_KEY.length > 40) {
+     console.warn("WARNING: The VAPI key looks like it might be a private key instead of a Public Key. Web SDK requires a Public Key.");
+  }
+
   const vapi = getVapi();
-  const call = await vapi.start(assistantId, {
-    variableValues: {
-      verified_brief: briefText,
-      current_datetime: new Date().toString(),
-    },
-  });
-  return call?.id ?? "";
+  try {
+    const call = await vapi.start(assistantId, {
+      variableValues: {
+        verified_brief: briefText,
+        current_datetime: new Date().toString(),
+      },
+    });
+    return call?.id ?? "";
+  } catch (error: any) {
+    console.error("Vapi start call failed. This is often due to a CORS issue or a 404 if the Assistant ID doesn't exist on the account associated with this Public Key.", error);
+    throw error;
+  }
 }
 
 export function stopCall(): void {
